@@ -7,7 +7,6 @@ public class S_FPSCounter : MonoBehaviour
     public Text fpsText;
     void Start()
     {
-        Application.targetFrameRate = 60;
         InvokeRepeating(nameof(fpsupdate), 1f, HudRefreshRate);
     }
 

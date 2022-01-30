@@ -11,5 +11,6 @@ public class S_CameraResolution : MonoBehaviour
     {
         Screen.SetResolution(x, y, true);
         cam.aspect = 19.5f / 9f;
+        Application.targetFrameRate = 60;
     }
 }
