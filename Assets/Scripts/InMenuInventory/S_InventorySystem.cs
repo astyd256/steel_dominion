@@ -1,12 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class S_InventorySystem : MonoBehaviour
 {
     private Dictionary<S_InventoryItemData, S_InventorySlotItem> itemDictionary;
    
     public List<S_InventorySlotItem> inventory;
+
+    public Text nickText;
+
+    public void SavePlayer()
+    {
+        List<string> itemids;
+        itemids = new List<string>();
+
+        inventory.ForEach(delegate (S_InventorySlotItem slot)
+        {
+            itemids.Add(slot.data.id);
+        });
+
+        S_SavePlayerData.SavePlayer(nickText.text, itemids);
+    }
+
+    public void LoadPlayer()
+    {
+        S_SavePlayerData.LoadPlayer();
+    }
     private void Awake()
     {
         inventory = new List<S_InventorySlotItem>();
