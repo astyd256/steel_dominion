@@ -13,6 +13,8 @@ namespace Mirror
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
 
+        [SerializeField] private GameObject playercamera = null;
+
         [SyncVar(hook = nameof(HandleDisplayPlayerNameChanged))]
         public string DisplayName = "Loading...";
         [SyncVar(hook = nameof(HandlereadyStatusChanged))]
@@ -41,14 +43,18 @@ namespace Mirror
 
         public override void OnStartClient()
         {
-            gameroom.InGamePlayers.Add(this);
-
+            if (hasAuthority)
+            {
+                playercamera.SetActive(true);
+            }
+            GameRoom.InGamePlayers.Add(this);
+            Debug.Log("Client start");
             UpdateDisplay();
         }
 
         public override void OnStopClient() //
         {
-            gameroom.InGamePlayers.Remove(this);
+            GameRoom.InGamePlayers.Remove(this);
 
             UpdateDisplay();
         }

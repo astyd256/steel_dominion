@@ -757,6 +757,7 @@ MonoBehaviour:
   playerReadyTexts:
   - {fileID: 6421998199135241197}
   - {fileID: 8366764494982496456}
+  playercamera: {fileID: 1665407917654150221}
   DisplayName: Loading...
   IsReady: 0
 --- !u!1 &8032355138097418094
