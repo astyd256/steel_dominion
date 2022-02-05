@@ -9,7 +9,7 @@ public class S_CameraResolution : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Screen.SetResolution(x, y, true);
+        Screen.SetResolution(x, y, false);
         cam.aspect = 16f / 9f;
         Application.targetFrameRate = 60;
     }
