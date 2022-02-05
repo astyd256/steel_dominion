@@ -1050,7 +1050,7 @@ namespace Mirror
         // and singleton may not exist yet
         public static void RegisterStartPosition(Transform start)
         {
-            // Debug.Log($"RegisterStartPosition: {start.gameObject.name} {start.position}");
+            //Debug.Log($"RegisterStartPosition: {start.gameObject.name} {start.position}");
             startPositions.Add(start);
 
             // reorder the list so that round-robin spawning uses the start positions
@@ -1085,6 +1085,7 @@ namespace Mirror
             else
             {
                 Transform startPosition = startPositions[startPositionIndex];
+                //Debug.Log($"Set player to position: index =  {startPositionIndex} pos = {startPosition.position}");
                 startPositionIndex = (startPositionIndex + 1) % startPositions.Count;
                 return startPosition;
             }
