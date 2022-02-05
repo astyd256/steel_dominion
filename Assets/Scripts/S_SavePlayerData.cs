@@ -8,7 +8,7 @@ public static class S_SavePlayerData
     public static void SavePlayer (string name, List<string> items)
     {
         BinaryFormatter formatter = new BinaryFormatter();
-        string path = "C:/Users/Nix/Desktop/MyDataSave.boo";
+        string path = "C:/MyDataSave.boo";
         FileStream stream = new FileStream(path, FileMode.Create);
 
         S_PlayerData pdata = new S_PlayerData(name, items);
@@ -19,7 +19,7 @@ public static class S_SavePlayerData
 
     public static S_PlayerData LoadPlayer()
     {
-        string path = "C:/Users/Nix/Desktop/MyDataSave.boo";
+        string path = "C:/MyDataSave.boo";
         
         if(File.Exists(path))
         {
