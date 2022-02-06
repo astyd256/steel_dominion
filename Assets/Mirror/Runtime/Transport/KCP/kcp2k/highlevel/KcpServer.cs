@@ -125,7 +125,6 @@ namespace kcp2k
             {
                 Log.Warning("KCP: server already started!");
             }
-
             // listen
             if (DualMode)
             {
@@ -140,7 +139,6 @@ namespace kcp2k
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 socket.Bind(new IPEndPoint(IPAddress.Any, port));
             }
-
             // configure socket buffer size.
             ConfigureSocketBufferSizes();
         }
