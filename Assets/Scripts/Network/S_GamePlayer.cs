@@ -39,6 +39,8 @@ namespace Mirror
             CmdSetDisplayName(S_SavePlayerData.LoadPlayer().playername);
 
             gameUI.SetActive(true);
+
+            this.CallWithDelay(CmdReadyUp, 3f);
         }
 
         public override void OnStartClient()
@@ -104,7 +106,8 @@ namespace Mirror
         {
             IsReady = true;
 
-            GameRoom.NotifyPlayersofReadyState();
+            GameRoom.StartMatch();
+            //GameRoom.NotifyPlayersofReadyState();
         }
     }
 }

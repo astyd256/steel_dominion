@@ -9,6 +9,10 @@ namespace Mirror
     {
         [SerializeField] private S_NetworkManagerSteel netManager = null;
         [SerializeField] private Button joinBtn = null;
+
+        [Header("Network Info")]
+        [SerializeField]
+        protected Text adressText;
         // Start is called before the first frame update
 
         private void OnEnable()
@@ -25,6 +29,7 @@ namespace Mirror
         public void JoinGame()
         {
             //Debug.Log("Join");
+            netManager.networkAddress = adressText.text;
             netManager.StartClient();
             joinBtn.interactable = false;
         }

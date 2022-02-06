@@ -12,6 +12,8 @@ namespace Mirror
     public class S_NetworkManagerSteel : NetworkManager
     {
 
+        public float GameTimer = 180f;
+
         public static event Action OnClientConnected;
         public static event Action OnClientDisconnected;
 
@@ -19,6 +21,7 @@ namespace Mirror
 
         public override void OnStartServer()
         {
+
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
         }
 
@@ -109,6 +112,14 @@ namespace Mirror
         {
             //Write results of match?
             InGamePlayers.Clear();
+        }
+
+        [Server]
+        public void StartMatch()
+        {
+            if (!IsReadyToStart()) return;
+
+            Debug.Log("Match started!");
         }
         //public Transform leftRacketSpawn;
         //public Transform rightRacketSpawn;
