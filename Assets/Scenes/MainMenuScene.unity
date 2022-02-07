@@ -1312,6 +1312,7 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 1
   spawnPrefabs: []
+  GameTimer: 180
 --- !u!4 &763674083
 Transform:
   m_ObjectHideFlags: 0

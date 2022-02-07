@@ -12,8 +12,10 @@ namespace Mirror
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
+        [SerializeField] private TMP_Text timerText = null;
 
         [SerializeField] private GameObject playercamera = null;
+        
 
         [SyncVar(hook = nameof(HandleDisplayPlayerNameChanged))]
         public string DisplayName = "Loading...";
@@ -27,7 +29,7 @@ namespace Mirror
         {
             get
             {
-                if (gameroom != null) return gameroom;
+                if (gameroom != null) { return gameroom; }
                 return gameroom = NetworkManager.singleton as S_NetworkManagerSteel;
             }
         }
@@ -42,13 +44,22 @@ namespace Mirror
 
             this.CallWithDelay(CmdReadyUp, 3f);
         }
+        public override void OnStartServer()
+        {
+            GameRoom.InGamePlayers.Add(this);
+        }
 
+        public override void OnStopServer()
+        {
+            GameRoom.InGamePlayers.Remove(this);
+        }
         public override void OnStartClient()
         {
             if (hasAuthority)
             {
                 playercamera.SetActive(true);
             }
+
             GameRoom.InGamePlayers.Add(this);
             Debug.Log("Client start");
             UpdateDisplay();
@@ -93,6 +104,11 @@ namespace Mirror
                     "<color=green>Ready</color>" :
                     "<color=red>Not Ready</color>";
             }
+        }
+        [ClientRpc]
+        public void UpdateDisplayTimer()
+        {
+            timerText.text = "Started";
         }
 
         [Command]

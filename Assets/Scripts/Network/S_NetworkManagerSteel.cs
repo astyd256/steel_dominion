@@ -23,13 +23,14 @@ namespace Mirror
         {
 
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
+            Debug.Log("sp = " + spawnPrefabs.Count);
         }
 
         public override void OnStartClient()
         {
             var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs");
-
-            foreach(var prefab in spawnablePrefabs)
+            Debug.Log("sp = " + spawnPrefabs.Count);
+            foreach (var prefab in spawnablePrefabs)
             {
                 NetworkClient.RegisterPrefab(prefab);
             }
@@ -84,10 +85,12 @@ namespace Mirror
         {
             //Check for number of players to be ready
             //and check for every player to be ready for start
+            Debug.Log(InGamePlayers.Count);
             if (numPlayers < 2) return false;
-
-            foreach(var player in InGamePlayers)
+            
+            foreach (var player in InGamePlayers)
             {
+                Debug.Log(player.IsReady);
                 if (!player.IsReady) return false;
             }
 
@@ -114,10 +117,17 @@ namespace Mirror
             InGamePlayers.Clear();
         }
 
-        [Server]
         public void StartMatch()
         {
             if (!IsReadyToStart()) return;
+            Debug.Log("Starting");
+            Debug.Log(numPlayers);
+            Debug.Log(InGamePlayers.Count);
+            foreach (var player in InGamePlayers)
+            {
+                player.UpdateDisplayTimer();
+                Debug.Log("RPC sent!");
+            }
 
             Debug.Log("Match started!");
         }
