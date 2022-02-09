@@ -1188,7 +1188,8 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 1
   spawnPrefabs: []
-  GameTimer: 180
+  GameTime: 180
+  PreMatchPlacementTime: 10
 --- !u!4 &763674083
 Transform:
   m_ObjectHideFlags: 0
@@ -2392,7 +2393,7 @@ MonoBehaviour:
   m_LineType: 0
   m_HideMobileInput: 0
   m_CharacterValidation: 0
-  m_CharacterLimit: 10
+  m_CharacterLimit: 15
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
