@@ -13,9 +13,12 @@ namespace Mirror
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
+        [SerializeField] private Slider timeBar = null;
 
         [SerializeField] private GameObject playercamera = null;
-        
+
+        private bool timerState = false;
+        private float timerRemaining = 0f;
 
         [SyncVar(hook = nameof(HandleDisplayPlayerNameChanged))]
         public string DisplayName = "Loading...";
@@ -105,10 +108,39 @@ namespace Mirror
                     "<color=red>Not Ready</color>";
             }
         }
-        [ClientRpc]
-        public void UpdateDisplayTimer()
+
+        public void UpdateTimer (float timeToDisplay)
         {
-            timerText.text = "Started";
+            timeToDisplay += 1;
+            float minutes = Mathf.FloorToInt(timeToDisplay / 60);
+            float seconds = Mathf.FloorToInt(timeToDisplay % 60);
+            timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        }
+
+        [ClientCallback]
+        void Update()
+        {
+            if(timerState)
+            {
+                if(timerRemaining > 0)
+                {
+                    timerRemaining -= Time.deltaTime;
+                    UpdateTimer(timerRemaining);
+                }
+                else
+                {
+                    //Timer end event
+                    timerRemaining = 0f;
+                    timerState = false;
+                }
+            }
+        }
+
+        [ClientRpc]
+        public void UpdateGameDisplay(float newValue, bool startTimer)
+        {
+            timerRemaining = newValue;
+            timerState = startTimer;
         }
 
         [Command]

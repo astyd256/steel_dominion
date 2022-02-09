@@ -5,9 +5,7 @@ using UnityEngine.UI;
 
 public class S_InventorySystem : MonoBehaviour
 {
-    private Dictionary<S_InventoryItemData, S_InventorySlotItem> itemDictionary;
-   
-    public List<S_InventorySlotItem> inventory;
+    public List<S_InventoryItemData> inventory;
 
     public Text nickText;
 
@@ -16,9 +14,9 @@ public class S_InventorySystem : MonoBehaviour
         List<string> itemids;
         itemids = new List<string>();
 
-        inventory.ForEach(delegate (S_InventorySlotItem slot)
+        inventory.ForEach(delegate (S_InventoryItemData item)
         {
-            itemids.Add(slot.data.id);
+            itemids.Add(item.id);
         });
 
         S_SavePlayerData.SavePlayer(nickText.text, itemids);
@@ -30,43 +28,24 @@ public class S_InventorySystem : MonoBehaviour
     }
     private void Awake()
     {
-        inventory = new List<S_InventorySlotItem>();
-        itemDictionary = new Dictionary<S_InventoryItemData, S_InventorySlotItem>();
+        inventory = new List<S_InventoryItemData>();
     }
 
     public void Add(S_InventoryItemData refData)
     {
-        if (itemDictionary.TryGetValue(refData, out S_InventorySlotItem value))
-        {
-            value.AddToStack();
-        }
-        else
-        {
-            S_InventorySlotItem newItem = new S_InventorySlotItem(refData);
-            inventory.Add(newItem);
-            itemDictionary.Add(refData, newItem);
-        }
+        inventory.Add(refData);
     }
 
-    public void Remove(S_InventoryItemData refData)
+    public void Remove(int removeIndex)
     {
-        if (itemDictionary.TryGetValue(refData, out S_InventorySlotItem value))
-        {
-            value.RemoveFromStack();
-
-            if (value.stackSize == 0)
-            {
-                inventory.Remove(value);
-                itemDictionary.Remove(refData);
-            }
-        }
+        inventory.RemoveAt(removeIndex);
     }
 
-    public S_InventorySlotItem Get(S_InventoryItemData refData)
+    public S_InventoryItemData Get(int getIndex)
     {
-        if (itemDictionary.TryGetValue(refData, out S_InventorySlotItem value))
+        if (inventory.Count >= getIndex)
         {
-            return value;
+            return inventory[getIndex];
         }
         return null;
     }

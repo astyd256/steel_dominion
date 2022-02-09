@@ -12,7 +12,10 @@ namespace Mirror
     public class S_NetworkManagerSteel : NetworkManager
     {
 
-        public float GameTimer = 180f;
+        public float GameTime = 180f;
+        public float PreMatchPlacementTime = 10f;
+        private float RemainingTime = 0f;
+        private bool timerisRunning = false;
 
         public static event Action OnClientConnected;
         public static event Action OnClientDisconnected;
@@ -125,11 +128,32 @@ namespace Mirror
             Debug.Log(InGamePlayers.Count);
             foreach (var player in InGamePlayers)
             {
-                player.UpdateDisplayTimer();
-                Debug.Log("RPC sent!");
+                RemainingTime = PreMatchPlacementTime;
+                player.UpdateGameDisplay(RemainingTime, true);
+                timerisRunning = true;
+                //Debug.Log("RPC sent!");
             }
 
             Debug.Log("Match started!");
+        }
+
+        [ServerCallback]
+        private void Update()
+        {
+            if (timerisRunning)
+            {
+                if (RemainingTime > 0)
+                {
+                    RemainingTime -= Time.deltaTime;
+                }
+                else
+                {
+                    //Timer end event
+                    Debug.Log("Timer ended!");
+                    RemainingTime = 0f;
+                    timerisRunning = false;
+                }
+            }
         }
         //public Transform leftRacketSpawn;
         //public Transform rightRacketSpawn;
