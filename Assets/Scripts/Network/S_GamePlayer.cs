@@ -1,5 +1,5 @@
-//using System.Collections;
-//using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,13 +8,24 @@ namespace Mirror
 {
     public class S_GamePlayer : NetworkBehaviour
     {
+        [Header("Inventory")]
+        [SerializeField]
+        public List<SO_UnitItemData> Units = new List<SO_UnitItemData>();
+        [SerializeField]
+        public Transform ItemContent;
+        [SerializeField]
+        public GameObject InventoryItem;
+        [SerializeField]
+        public SO_UnitsToPlay unitsData;
+
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
         [SerializeField] private Slider timeBar = null;
-
+        // [SerializeField] private Slider timeBar = null;
+        [Header("Scene")]
         [SerializeField] private GameObject playercamera = null;
 
         private bool timerState = false;
@@ -38,15 +49,72 @@ namespace Mirror
         }
         //
 
+        public void AddUnit(SO_UnitItemData unit)
+        {
+            Units.Add(unit);
+        }
+
+        public void RemoveUnit(int index)
+        {
+            Debug.Log("Index to remove = " + index);
+            Units.RemoveAt(index);
+
+            ListUnits();
+           // for(int i = index; i<Units.Count;i++)
+            //{
+                
+           // }
+        }
+
+        public void ListUnits()
+        {
+            foreach(Transform unit in ItemContent)
+            {
+                Destroy(unit.gameObject);
+            }
+
+            int i = 0;
+
+            foreach(var unit in Units)
+            {
+                Debug.Log("Inventory draw - " + unit.id);
+                GameObject obj = Instantiate(InventoryItem, ItemContent);
+                var itemName = obj.transform.Find("TMP_Unit").GetComponent<TMP_Text>();
+                var itemScript = obj.GetComponent<S_UnitButton>();
+                itemName.text = unit.displayName;
+                itemScript.id = i;
+                itemScript.ClientUnitClicked += RemoveUnit;
+                i++;
+            }
+        }
         public override void OnStartAuthority()
         {
             //SendPlayerNameToServer
-            CmdSetDisplayName(S_SavePlayerData.LoadPlayer().playername);
+            S_PlayerData data = S_SavePlayerData.LoadPlayer();
+
+            CmdSetDisplayName(data.playername);
+
+            List<int> unitsIds = new List<int>();
+
+            SO_UnitsToPlay pUnits = Resources.Load<SO_UnitsToPlay>("Scripts/SO/");
+            SO_UnitItemData[] pUnitss = Resources.LoadAll<SO_UnitItemData>("Scripts/SO/");
+
+            Debug.Log("Loading" + pUnitss.Length);
+            foreach (int id in data.unitData)
+            {
+               // Debug.Log("Loaded id = " + id);
+                Units.Add(unitsData.UnitsData[id]);
+            }
+
+            //CmdGetUnits(data.unitData);
 
             gameUI.SetActive(true);
 
+            ListUnits();
+
             this.CallWithDelay(CmdReadyUp, 3f);
         }
+
         public override void OnStartServer()
         {
             GameRoom.InGamePlayers.Add(this);
@@ -156,6 +224,12 @@ namespace Mirror
 
             GameRoom.StartMatch();
             //GameRoom.NotifyPlayersofReadyState();
+        }
+
+        [Command]
+        public void CmdGetUnits(List<int> unitsids)
+        {
+
         }
     }
 }
