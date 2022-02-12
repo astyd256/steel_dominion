@@ -27,6 +27,8 @@ namespace Mirror
         // [SerializeField] private Slider timeBar = null;
         [Header("Scene")]
         [SerializeField] private GameObject playercamera = null;
+        [SerializeField] private GameObject spawnArea = null;
+        
 
         private bool timerState = false;
         private float timerRemaining = 0f;
@@ -77,7 +79,7 @@ namespace Mirror
 
             foreach(var unit in Units)
             {
-                Debug.Log("Inventory draw - " + unit.id);
+                //Debug.Log("Inventory draw - " + unit.id);
                 GameObject obj = Instantiate(InventoryItem, ItemContent);
                 var itemName = obj.transform.Find("TMP_Unit").GetComponent<TMP_Text>();
                 var itemScript = obj.GetComponent<S_UnitButton>();
@@ -105,8 +107,8 @@ namespace Mirror
                // Debug.Log("Loaded id = " + id);
                 Units.Add(unitsData.UnitsData[id]);
             }
-
-            //CmdGetUnits(data.unitData);
+            
+            CmdGetUnits(data.unitData);
 
             gameUI.SetActive(true);
 
@@ -118,6 +120,8 @@ namespace Mirror
         public override void OnStartServer()
         {
             GameRoom.InGamePlayers.Add(this);
+            //Debug.Log("Sent to find area = " + GameRoom.InGamePlayers.Count);
+            //SetupSpawnArea(GameRoom.InGamePlayers.Count);
         }
 
         public override void OnStopServer()
@@ -132,7 +136,7 @@ namespace Mirror
             }
 
             GameRoom.InGamePlayers.Add(this);
-            Debug.Log("Client start");
+           
             UpdateDisplay();
         }
 
@@ -211,6 +215,31 @@ namespace Mirror
             timerState = startTimer;
         }
 
+        [TargetRpc]
+        public void StartPreMatchStep(float newTimerValue, bool startTimer)
+        {
+            timerRemaining = newTimerValue;
+            timerState = startTimer;
+            spawnArea.SetActive(true);
+        }
+
+        [TargetRpc]
+        public void SetupSpawnAreaClientRPC(int areaindex)
+        {
+            Debug.Log("Find area = " + areaindex);
+            if (areaindex == 1)
+            {
+                spawnArea = GameObject.FindWithTag("FirstSpawnArea");
+                Destroy(GameObject.FindWithTag("SecondSpawnArea"));
+            }
+            else
+            {
+                spawnArea = GameObject.FindWithTag("SecondSpawnArea");
+                Destroy(GameObject.FindWithTag("FirstSpawnArea"));
+            }
+            spawnArea.SetActive(false);
+        }
+
         [Command]
         private void CmdSetDisplayName(string displayName)
         {
@@ -229,7 +258,16 @@ namespace Mirror
         [Command]
         public void CmdGetUnits(List<int> unitsids)
         {
-
+            Debug.Log("ConnectionToClient - " + connectionToClient);
+            Debug.Log("ConnectionToClient id - " + connectionToClient.connectionId);
+            //NetworkConnection conn;
+            //Debug.Log("Connection id - " + conn.connectionId);
+            
+            foreach (int id in unitsids)
+            {
+                Debug.Log("Loaded id = " + id);
+               // Units.Add(unitsData.UnitsData[id]);
+            }
         }
     }
 }

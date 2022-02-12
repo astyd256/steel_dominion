@@ -102,7 +102,7 @@ namespace Mirror
 
         public override void OnServerAddPlayer(NetworkConnection conn)
         {
-            Debug.Log("AddPlayer");
+            //Debug.Log("AddPlayer");
             Transform startPos = GetStartPosition();
             GameObject player = startPos != null
                 ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
@@ -112,6 +112,9 @@ namespace Mirror
             // => appending the connectionId is WAY more useful for debugging!
             player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
             NetworkServer.AddPlayerForConnection(conn, player);
+            var playerpref = player.GetComponent<S_GamePlayer>();
+
+            playerpref.SetupSpawnAreaClientRPC(InGamePlayers.Count);
         }
 
         public override void OnStopServer()
@@ -129,7 +132,7 @@ namespace Mirror
             foreach (var player in InGamePlayers)
             {
                 RemainingTime = PreMatchPlacementTime;
-                player.UpdateGameDisplay(RemainingTime, true);
+                player.StartPreMatchStep(RemainingTime, true);
                 timerisRunning = true;
                 //Debug.Log("RPC sent!");
             }
