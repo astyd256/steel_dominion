@@ -18,13 +18,16 @@ namespace Mirror
         [SerializeField]
         public SO_UnitsToPlay unitsData;
 
+        private bool placeState = false;
+        private int idToPlace = -1;
+
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
         [SerializeField] private Slider timeBar = null;
-        // [SerializeField] private Slider timeBar = null;
+ 
         [Header("Scene")]
         [SerializeField] private GameObject playercamera = null;
         [SerializeField] private GameObject spawnArea = null;
@@ -50,18 +53,66 @@ namespace Mirror
             }
         }
         //
+        //Network functions
+
+        public override void OnStartAuthority()
+        {
+            //SendPlayerNameToServer
+            S_PlayerData data = S_SavePlayerData.LoadPlayer();
+
+            CmdSetDisplayName(data.playername);
+            CmdGetUnits(data.unitData);
+
+            gameUI.SetActive(true);
+            ListUnits();
+
+            this.CallWithDelay(CmdReadyUp, 3f);
+        }
+
+        public override void OnStartServer()
+        {
+            GameRoom.InGamePlayers.Add(this);
+        }
+
+        public override void OnStopServer()
+        {
+            GameRoom.InGamePlayers.Remove(this);
+        }
+        public override void OnStartClient()
+        {
+            if (hasAuthority)
+            {
+                playercamera.SetActive(true);
+            }
+
+            GameRoom.InGamePlayers.Add(this);
+
+            UpdateDisplay();
+        }
+
+        public override void OnStopClient()
+        {
+            GameRoom.InGamePlayers.Remove(this);
+
+            UpdateDisplay();
+        }
+
+        //
 
         public void AddUnit(SO_UnitItemData unit)
         {
             Units.Add(unit);
         }
 
-        public void RemoveUnit(int index)
+        public void ToggleToPlaceUnit(int index)
         {
-            Debug.Log("Index to remove = " + index);
-            Units.RemoveAt(index);
+            placeState = !placeState;
+            idToPlace = index;
 
-            ListUnits();
+           // Debug.Log("Index to remove = " + index);
+           //Units.RemoveAt(index);
+
+            //ListUnits();
            // for(int i = index; i<Units.Count;i++)
             //{
                 
@@ -85,67 +136,11 @@ namespace Mirror
                 var itemScript = obj.GetComponent<S_UnitButton>();
                 itemName.text = unit.displayName;
                 itemScript.id = i;
-                itemScript.ClientUnitClicked += RemoveUnit;
+                itemScript.ClientUnitClicked += ToggleToPlaceUnit;
                 i++;
             }
         }
-        public override void OnStartAuthority()
-        {
-            //SendPlayerNameToServer
-            S_PlayerData data = S_SavePlayerData.LoadPlayer();
-
-            CmdSetDisplayName(data.playername);
-
-            List<int> unitsIds = new List<int>();
-
-            SO_UnitsToPlay pUnits = Resources.Load<SO_UnitsToPlay>("Scripts/SO/");
-            SO_UnitItemData[] pUnitss = Resources.LoadAll<SO_UnitItemData>("Scripts/SO/");
-
-            Debug.Log("Loading" + pUnitss.Length);
-            foreach (int id in data.unitData)
-            {
-               // Debug.Log("Loaded id = " + id);
-                Units.Add(unitsData.UnitsData[id]);
-            }
-            
-            CmdGetUnits(data.unitData);
-
-            gameUI.SetActive(true);
-
-            ListUnits();
-
-            this.CallWithDelay(CmdReadyUp, 3f);
-        }
-
-        public override void OnStartServer()
-        {
-            GameRoom.InGamePlayers.Add(this);
-            //Debug.Log("Sent to find area = " + GameRoom.InGamePlayers.Count);
-            //SetupSpawnArea(GameRoom.InGamePlayers.Count);
-        }
-
-        public override void OnStopServer()
-        {
-            GameRoom.InGamePlayers.Remove(this);
-        }
-        public override void OnStartClient()
-        {
-            if (hasAuthority)
-            {
-                playercamera.SetActive(true);
-            }
-
-            GameRoom.InGamePlayers.Add(this);
-           
-            UpdateDisplay();
-        }
-
-        public override void OnStopClient() //
-        {
-            GameRoom.InGamePlayers.Remove(this);
-
-            UpdateDisplay();
-        }
+       
 
         public void HandlereadyStatusChanged(bool oldValue, bool newValue) => UpdateDisplay();
         public void HandleDisplayPlayerNameChanged(string oldValue, string newValue) => UpdateDisplay();
@@ -216,11 +211,18 @@ namespace Mirror
         }
 
         [TargetRpc]
-        public void StartPreMatchStep(float newTimerValue, bool startTimer)
+        public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits)
         {
             timerRemaining = newTimerValue;
             timerState = startTimer;
             spawnArea.SetActive(true);
+
+            foreach (int id in startUnits)
+            {
+                Units.Add(unitsData.UnitsData[id]);
+            }
+
+            ListUnits();
         }
 
         [TargetRpc]
@@ -238,6 +240,17 @@ namespace Mirror
                 Destroy(GameObject.FindWithTag("FirstSpawnArea"));
             }
             spawnArea.SetActive(false);
+        }
+
+        [TargetRpc]
+        public void TargetRpcGetUnitsToHand(List<int> unitsIds)
+        {
+            foreach (int id in unitsIds)
+            {
+                Units.Add(unitsData.UnitsData[id]);
+            }
+
+            ListUnits();
         }
 
         [Command]
@@ -263,11 +276,13 @@ namespace Mirror
             //NetworkConnection conn;
             //Debug.Log("Connection id - " + conn.connectionId);
             
-            foreach (int id in unitsids)
-            {
-                Debug.Log("Loaded id = " + id);
+           // foreach (int id in unitsids)
+           // {
+             //   Debug.Log("Loaded id = " + id);
                // Units.Add(unitsData.UnitsData[id]);
-            }
+            //}
+
+            GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }
     }
 }

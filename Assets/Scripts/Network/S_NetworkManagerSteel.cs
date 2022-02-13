@@ -17,11 +17,27 @@ namespace Mirror
         private float RemainingTime = 0f;
         private bool timerisRunning = false;
 
+        [Header("Game process")]
+        [SerializeField]
+        private SO_UnitsToPlay unitsData;
+        [SerializeField]
+        //private List<SO_UnitItemData> firstPlayerUnits = new List<SO_UnitItemData>();
+        private List<int> firstPlayerUnits = new List<int>();
+        private List<int> firstPlayerHand = new List<int>();
+        private int firstCurrentDeckIndex = 0;
+        [SerializeField]
+        //private List<SO_UnitItemData> SecondPlayerUnits = new List<SO_UnitItemData>();
+        private List<int> SecondPlayerUnits = new List<int>();
+        private List<int> SecondPlayerHand = new List<int>();
+        private int SecondCurrentDeckIndex = 0;
+
+
         public static event Action OnClientConnected;
         public static event Action OnClientDisconnected;
 
         public List<S_GamePlayer> InGamePlayers { get; } = new List<S_GamePlayer>();
 
+        //Server start, stop, add player, connect client, disconnect client
         public override void OnStartServer()
         {
 
@@ -76,6 +92,31 @@ namespace Mirror
             base.OnServerDisconnect(conn);
         }
 
+        public override void OnServerAddPlayer(NetworkConnection conn)
+        {
+            //Debug.Log("AddPlayer");
+            Transform startPos = GetStartPosition();
+            GameObject player = startPos != null
+                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
+                : Instantiate(playerPrefab);
+
+            // instantiating a "Player" prefab gives it the name "Player(clone)"
+            // => appending the connectionId is WAY more useful for debugging!
+            player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
+            NetworkServer.AddPlayerForConnection(conn, player);
+            var playerpref = player.GetComponent<S_GamePlayer>();
+
+            playerpref.SetupSpawnAreaClientRPC(InGamePlayers.Count);
+        }
+
+        public override void OnStopServer()
+        {
+            //Write results of match?
+            InGamePlayers.Clear();
+        }
+        
+        //Lobby functions
+
         public void NotifyPlayersofReadyState()
         {
            // foreach (var player in InGamePlayers)
@@ -100,46 +141,37 @@ namespace Mirror
             return true;
         }
 
-        public override void OnServerAddPlayer(NetworkConnection conn)
-        {
-            //Debug.Log("AddPlayer");
-            Transform startPos = GetStartPosition();
-            GameObject player = startPos != null
-                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                : Instantiate(playerPrefab);
-
-            // instantiating a "Player" prefab gives it the name "Player(clone)"
-            // => appending the connectionId is WAY more useful for debugging!
-            player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
-            NetworkServer.AddPlayerForConnection(conn, player);
-            var playerpref = player.GetComponent<S_GamePlayer>();
-
-            playerpref.SetupSpawnAreaClientRPC(InGamePlayers.Count);
-        }
-
-        public override void OnStopServer()
-        {
-            //Write results of match?
-            InGamePlayers.Clear();
-        }
-
         public void StartMatch()
         {
             if (!IsReadyToStart()) return;
             Debug.Log("Starting");
-            Debug.Log(numPlayers);
-            Debug.Log(InGamePlayers.Count);
-            foreach (var player in InGamePlayers)
-            {
-                RemainingTime = PreMatchPlacementTime;
-                player.StartPreMatchStep(RemainingTime, true);
-                timerisRunning = true;
-                //Debug.Log("RPC sent!");
-            }
+            //Debug.Log(numPlayers);
+            //Debug.Log(InGamePlayers.Count);
+            RemainingTime = PreMatchPlacementTime;
+            timerisRunning = true;
+
+            List<int> unitsToSend = new List<int>();
+
+            unitsToSend.Add(firstPlayerUnits[0]);
+            unitsToSend.Add(firstPlayerUnits[1]);
+            unitsToSend.Add(firstPlayerUnits[2]);
+            firstCurrentDeckIndex = 3;
+            InGamePlayers[0].StartPreMatchStep(RemainingTime, true, unitsToSend);
+            firstPlayerHand = unitsToSend;
+            unitsToSend.Clear();
+
+            unitsToSend.Add(SecondPlayerUnits[0]);
+            unitsToSend.Add(SecondPlayerUnits[1]);
+            unitsToSend.Add(SecondPlayerUnits[2]);
+            SecondCurrentDeckIndex = 3;
+            InGamePlayers[1].StartPreMatchStep(RemainingTime, true, unitsToSend);
+            SecondPlayerHand = unitsToSend;
+            unitsToSend.Clear();
 
             Debug.Log("Match started!");
         }
 
+        //Timer
         [ServerCallback]
         private void Update()
         {
@@ -158,6 +190,38 @@ namespace Mirror
                 }
             }
         }
+
+        //Load player Data functions
+
+        [Server]
+        public void ServerGetPlayerUnits(NetworkConnection conn, List<int> UnitsIds)
+        {
+            if(InGamePlayers[0].connectionToClient == conn)
+            {
+                firstPlayerUnits = UnitsIds;
+                //foreach(int id in UnitsIds)
+                //{
+                //    firstPlayerUnits.Add(unitsData.UnitsData[id]);
+                    //Debug.Log("Loaded first id = " + id);
+                //}  
+            }
+            else if(InGamePlayers[1].connectionToClient == conn)
+            {
+                SecondPlayerUnits = UnitsIds;
+                //foreach (int id in UnitsIds)
+                //{
+                //   SecondPlayerUnits.Add(unitsData.UnitsData[id]);
+                //Debug.Log("Loaded second id = " + id);
+                //}
+            }
+
+            //foreach (int id in data.unitData)
+            // {
+            // Debug.Log("Loaded id = " + id);
+            //   Units.Add(unitsData.UnitsData[id]);
+            // }
+        }
+
         //public Transform leftRacketSpawn;
         //public Transform rightRacketSpawn;
         //GameObject ball;

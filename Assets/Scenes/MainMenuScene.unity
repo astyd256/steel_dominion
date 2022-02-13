@@ -1189,7 +1189,10 @@ MonoBehaviour:
   playerSpawnMethod: 1
   spawnPrefabs: []
   GameTime: 180
-  PreMatchPlacementTime: 10
+  PreMatchPlacementTime: 20
+  unitsData: {fileID: 11400000, guid: 3c31dee464c60a8458e17ead49d350e3, type: 2}
+  firstPlayerUnits: 
+  SecondPlayerUnits: 
 --- !u!4 &763674083
 Transform:
   m_ObjectHideFlags: 0
@@ -1300,8 +1303,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3965b374e9b1aef4cb04f642cd48eed9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  x: 1600
-  y: 900
+  x: 1366
+  y: 768
   cam: {fileID: 963194227}
 --- !u!1 &1004761863
 GameObject:
