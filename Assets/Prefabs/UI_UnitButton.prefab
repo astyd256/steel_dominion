@@ -260,7 +260,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1983222846186266097}
         m_TargetAssemblyTypeName: S_UnitButton, Assembly-CSharp
-        m_MethodName: UseUnit
+        m_MethodName: ClickButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -282,5 +282,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c68b9f88ebd319444b9e72bd92bcdc72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btn: {fileID: 2787974242419011506}
-  id: 0
+  unitListid: 0

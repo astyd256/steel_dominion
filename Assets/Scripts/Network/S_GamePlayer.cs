@@ -18,6 +18,8 @@ namespace Mirror
         [SerializeField]
         public SO_UnitsToPlay unitsData;
 
+        private List<GameObject> unitBtns = new List<GameObject>();
+
         private bool placeState = false;
         private int idToPlace = -1;
 
@@ -29,7 +31,7 @@ namespace Mirror
         [SerializeField] private Slider timeBar = null;
  
         [Header("Scene")]
-        [SerializeField] private GameObject playercamera = null;
+        [SerializeField] private Camera playercamera = null;
         [SerializeField] private GameObject spawnArea = null;
         
 
@@ -61,7 +63,7 @@ namespace Mirror
             S_PlayerData data = S_SavePlayerData.LoadPlayer();
 
             CmdSetDisplayName(data.playername);
-            CmdGetUnits(data.unitData);
+            CmdGetUnits(data.unitData, netId);
 
             gameUI.SetActive(true);
             ListUnits();
@@ -82,7 +84,7 @@ namespace Mirror
         {
             if (hasAuthority)
             {
-                playercamera.SetActive(true);
+                playercamera.gameObject.SetActive(true);
             }
 
             GameRoom.InGamePlayers.Add(this);
@@ -106,6 +108,16 @@ namespace Mirror
 
         public void ToggleToPlaceUnit(int index)
         {
+            if (idToPlace != -1) unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
+
+            if(idToPlace == index)
+            {
+                unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
+                placeState = false;
+                idToPlace = -1;
+                return;
+            }
+
             placeState = !placeState;
             idToPlace = index;
 
@@ -121,6 +133,11 @@ namespace Mirror
 
         public void ListUnits()
         {
+            idToPlace = -1;
+            placeState = false;
+
+            unitBtns.Clear();
+
             foreach(Transform unit in ItemContent)
             {
                 Destroy(unit.gameObject);
@@ -132,10 +149,11 @@ namespace Mirror
             {
                 //Debug.Log("Inventory draw - " + unit.id);
                 GameObject obj = Instantiate(InventoryItem, ItemContent);
+                unitBtns.Add(obj);
                 var itemName = obj.transform.Find("TMP_Unit").GetComponent<TMP_Text>();
                 var itemScript = obj.GetComponent<S_UnitButton>();
                 itemName.text = unit.displayName;
-                itemScript.id = i;
+                itemScript.unitListid = i;
                 itemScript.ClientUnitClicked += ToggleToPlaceUnit;
                 i++;
             }
@@ -201,8 +219,33 @@ namespace Mirror
                     timerState = false;
                 }
             }
+
+            if(Input.GetMouseButtonDown(0) && placeState)
+            {
+                var ray = playercamera.ScreenPointToRay(Input.mousePosition);
+
+                LayerMask mask = LayerMask.GetMask("OnlyRaycast");
+                if(Physics.Raycast(ray, out RaycastHit hit, mask))
+                {
+                    placeState = false;
+                    //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
+                    //unitBtns.RemoveAt(idToPlace);
+                    CmdPlaceUnit(idToPlace, hit.point);
+                    //ListUnits();
+                }
+
+                //Ray ray;
+                //ray.GetType
+                // ray = playercamera.ScreenPointToRay(Input.mousePosition);
+            }
         }
 
+        [TargetRpc]
+        public void TargetRpcRemoveUnitFromHand(int idToRemove)
+        {
+            Units.RemoveAt(idToRemove);
+            ListUnits();
+        }
         [ClientRpc]
         public void UpdateGameDisplay(float newValue, bool startTimer)
         {
@@ -269,20 +312,27 @@ namespace Mirror
         }
 
         [Command]
-        public void CmdGetUnits(List<int> unitsids)
+        public void CmdGetUnits(List<int> unitsids, uint id)
         {
             Debug.Log("ConnectionToClient - " + connectionToClient);
             Debug.Log("ConnectionToClient id - " + connectionToClient.connectionId);
+            Debug.Log("NetId - " + id);
             //NetworkConnection conn;
             //Debug.Log("Connection id - " + conn.connectionId);
-            
-           // foreach (int id in unitsids)
-           // {
-             //   Debug.Log("Loaded id = " + id);
-               // Units.Add(unitsData.UnitsData[id]);
+
+            // foreach (int id in unitsids)
+            // {
+            //   Debug.Log("Loaded id = " + id);
+            // Units.Add(unitsData.UnitsData[id]);
             //}
 
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
+        }
+
+        [Command]
+        public void CmdPlaceUnit(int idToPlace, Vector3 place)
+        {
+            GameRoom.ServerPlaceUnit(connectionToClient, idToPlace, place);
         }
     }
 }

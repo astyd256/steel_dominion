@@ -186,7 +186,7 @@ GameObject:
   - component: {fileID: 225801550}
   - component: {fileID: 225801549}
   - component: {fileID: 225801548}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FirstArea
   m_TagString: FirstSpawnArea
   m_Icon: {fileID: 0}
@@ -609,7 +609,7 @@ GameObject:
   - component: {fileID: 1658443507}
   - component: {fileID: 1658443506}
   - component: {fileID: 1658443505}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SecondArea
   m_TagString: SecondSpawnArea
   m_Icon: {fileID: 0}

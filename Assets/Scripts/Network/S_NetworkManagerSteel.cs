@@ -157,20 +157,47 @@ namespace Mirror
             unitsToSend.Add(firstPlayerUnits[2]);
             firstCurrentDeckIndex = 3;
             InGamePlayers[0].StartPreMatchStep(RemainingTime, true, unitsToSend);
-            firstPlayerHand = unitsToSend;
+            firstPlayerHand = unitsToSend.ToList();
+            Debug.Log("Match 1 start  = " + firstPlayerHand.Count);
             unitsToSend.Clear();
+            Debug.Log("Match 1 start  = " + firstPlayerHand.Count);
 
             unitsToSend.Add(SecondPlayerUnits[0]);
             unitsToSend.Add(SecondPlayerUnits[1]);
             unitsToSend.Add(SecondPlayerUnits[2]);
             SecondCurrentDeckIndex = 3;
             InGamePlayers[1].StartPreMatchStep(RemainingTime, true, unitsToSend);
-            SecondPlayerHand = unitsToSend;
+            SecondPlayerHand = unitsToSend.ToList();
             unitsToSend.Clear();
 
             Debug.Log("Match started!");
         }
+        //Game functions
 
+        [Server]
+        public void ServerPlaceUnit(NetworkConnection conn, int idToPlace, Vector3 placeToSpawn)
+        {
+            Debug.Log("Place id = " + idToPlace + " To vector3 = " + placeToSpawn + " Player = " + conn);
+            //add validation to place and unit type
+            if(InGamePlayers[0].connectionToClient == conn)
+            {
+                int unitid = firstPlayerHand[idToPlace];
+                //Debug.Log("Unit id in hand = " + unitid);
+                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
+                NetworkServer.Spawn(unitObj);
+                InGamePlayers[0].TargetRpcRemoveUnitFromHand(idToPlace);
+            }
+            else if (InGamePlayers[1].connectionToClient == conn)
+            {
+                int unitid = SecondPlayerHand[idToPlace];
+                //Debug.Log("Unit id in hand = " + unitid);
+                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
+                NetworkServer.Spawn(unitObj);
+                InGamePlayers[1].TargetRpcRemoveUnitFromHand(idToPlace);
+            }
+        }
+
+        //
         //Timer
         [ServerCallback]
         private void Update()
