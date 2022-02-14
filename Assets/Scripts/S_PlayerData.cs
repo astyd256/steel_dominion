@@ -6,11 +6,11 @@ using UnityEngine;
 public class S_PlayerData
 {
     public string playername;
-    public List<string> itemids;
+    public List<int> unitData;
 
-    public S_PlayerData(string name, List<string> items)
+    public S_PlayerData(string name, List<int> unitdata)
     {
         playername = name;
-        itemids = items;
+        unitData = unitdata;
     }
 }
