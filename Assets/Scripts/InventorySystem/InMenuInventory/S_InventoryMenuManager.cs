@@ -8,8 +8,6 @@ public class S_InventoryMenuManager : MonoBehaviour
     [SerializeField]
     public List<SO_UnitItemData> Units = new List<SO_UnitItemData>();
 
-    public Text nickText;
-
     public void SavePlayer()
     {
         List<int> unitsIds = new List<int>();
@@ -19,7 +17,7 @@ public class S_InventoryMenuManager : MonoBehaviour
             unitsIds.Add(unit.id);
         }
 
-        S_SavePlayerData.SavePlayer(nickText.text, unitsIds);
+        S_SavePlayerData.SavePlayer("Default", unitsIds);
     }
 
     public void LoadPlayer()
