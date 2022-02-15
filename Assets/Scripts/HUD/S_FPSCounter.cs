@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class S_FPSCounter : MonoBehaviour
 {
     public float HudRefreshRate = 1f;
-    public Text fpsText;
+    public TMP_Text fpsText;
     void Start()
     {
         InvokeRepeating(nameof(fpsupdate), 1f, HudRefreshRate);
