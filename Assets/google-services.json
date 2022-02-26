@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "856566926743",
+    "project_id": "steel-dominion",
+    "storage_bucket": "steel-dominion.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:856566926743:android:aa22a84487ba382bb048d2",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.steeldominion"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "856566926743-du9ukiqdfqid98kul74dhejuqn5omlra.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh9Z7v04akxf1FeVYjO7LAdaJtSMy3ciA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "856566926743-du9ukiqdfqid98kul74dhejuqn5omlra.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
