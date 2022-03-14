@@ -8,10 +8,10 @@ public class S_InventoryMenuManager : MonoBehaviour
 {
     [SerializeField] private List<SO_UnitItemData> Units = new List<SO_UnitItemData>();
     [SerializeField] private List<S_InventoryUnitSlot> unitInventorySlots = new List<S_InventoryUnitSlot>();
-    [SerializeField] private S_InventoryUnitSlot unitInventorySlotPrefab;
-    [SerializeField] private Transform inventoryContainer;
-    [SerializeField] private GameObject inventoryPanel;
-    [SerializeField] private Button inventoryOpenButton;
+    [SerializeField] private S_InventoryUnitSlot unitInventorySlotPrefab; // SLOT PREFAB
+    [SerializeField] private Transform inventoryContainer; // Container for inventory
+    [SerializeField] private GameObject inventoryPanel;    // Inventory panel
+    [SerializeField] private Button inventoryOpenButton;   // Inventory open button
     [SerializeField] private Color ActiveButtonColor;
     [SerializeField] private Color ButtonColor;
     [SerializeField] private bool inventoryActive = false;
@@ -62,15 +62,15 @@ public class S_InventoryMenuManager : MonoBehaviour
         // INITIALIZE INVENTORY EXISTING BUTTONS
         foreach (SO_UnitItemData unit in Units)
         {
-            CreateSlot(unit, unit.GetWeight(), unit.GetName());
+            CreateSlot(unit);
         }
     }
 
     //Sending unit's data to slot visualizer to create a proper slot image
-    public void CreateSlot(SO_UnitItemData unit, int unitWeight, string unitName)
+    public void CreateSlot(SO_UnitItemData unit)
     {
         S_InventoryUnitSlot slot = Instantiate(unitInventorySlotPrefab, inventoryContainer);
-        slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName());
+        slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite());
         unitInventorySlots.Add(slot);
         
     }
