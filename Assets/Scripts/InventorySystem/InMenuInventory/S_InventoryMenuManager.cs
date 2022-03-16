@@ -98,8 +98,7 @@ public class S_InventoryMenuManager : MonoBehaviour
         else
         {
             inventoryOpenButton.GetComponent<Image>().color = ButtonColor;
-            unitInventorySlots.Clear();
-            //Clear(inventoryContainer);
+            //unitInventorySlots.Clear();
         }
         inventoryPanel.SetActive(!inventoryPanel.activeSelf);
         inventoryActive = !inventoryActive;

@@ -16,7 +16,7 @@ public class S_DragController : MonoBehaviour
 
     private S_Draggable _currentDragged;
 
-    [SerializeField] private Transform mainMenu;
+    [SerializeField] private Transform unitCopyParent;
     [SerializeField] private Color normalColor;
     [SerializeField] private Color dragColor;
 
@@ -57,17 +57,21 @@ public class S_DragController : MonoBehaviour
         {
             
             RaycastHit2D hit = Physics2D.Raycast(_initialPosition, Vector2.zero);
-            if (hit.collider != null && ((_screenPosition.x >= _initialPosition.x + 50) || 
+            if (hit.collider != null && hit.collider.tag != "ValidDrop" && ((_screenPosition.x >= _initialPosition.x + 50) || 
                 (_screenPosition.x <= _initialPosition.x - 50) || (_screenPosition.y >= _initialPosition.y + 50) ||
                 (_screenPosition.y <= _initialPosition.y - 50)))
             {
                 // Only works with collider
                 // Need to create a copy of this object
-                S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), mainMenu);
+                S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
+                // Width and Height setting:
+                RectTransform rt = draggable.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(155, 155);
+
                 if (draggable != null)
                 {
-                    _currentDragged = draggable;
-                    _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>();
+                    _currentDragged = draggable; // Copy
+                    _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
                     initDrag();
                 }
             }
@@ -89,7 +93,14 @@ public class S_DragController : MonoBehaviour
     {
         _isDragActive = false;
         _lastDragged.GetComponent<Image>().color = normalColor;
+
+        if (_currentDragged.GetDraggableType() == "InventoryUnitSlot")
+        {
+            
+        }
+
         Destroy(_currentDragged.gameObject);
+
     }
 
 }
