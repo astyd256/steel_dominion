@@ -92,6 +92,10 @@ public class S_InventoryMenuManager : MonoBehaviour
         inventoryActive = !inventoryActive;
     }
 
+
+
+
+
     public void Start()
     {
         InitInventory();
