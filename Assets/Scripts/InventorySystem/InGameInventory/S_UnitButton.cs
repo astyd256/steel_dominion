@@ -9,6 +9,7 @@ public class S_UnitButton : MonoBehaviour
     private Button btn;
 
     public int unitListid = 0;
+    public int unitWeight = 0;
     //Recolor button on toggle and save button id to gameplayer
 
     private void Awake()

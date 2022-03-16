@@ -406,7 +406,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   netManager: {fileID: 763674082}
   joinBtn: {fileID: 61035587}
-  adressText: {fileID: 0}
+  adressText: {fileID: 495013905}
 --- !u!1 &113067031
 GameObject:
   m_ObjectHideFlags: 0
