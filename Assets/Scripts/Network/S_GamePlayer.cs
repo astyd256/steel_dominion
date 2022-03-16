@@ -33,7 +33,6 @@ namespace Mirror
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
-        [SerializeField] private Slider timeBar = null;
         [SerializeField] private GameObject unitsInventory = null;
         [SerializeField] private Button passButton = null;
 
@@ -272,7 +271,9 @@ namespace Mirror
             timerState = startTimer;
 
             unitsInventory.SetActive(showInventoryUI);
-            passButton.gameObject.SetActive(showInventoryUI);
+
+            if(currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
+            else passButton.gameObject.SetActive(false);
         }
 
         [TargetRpc]
@@ -289,7 +290,9 @@ namespace Mirror
             {
                 spawnArea.SetActive(true);
                 unitsInventory.SetActive(true);
-                passButton.gameObject.SetActive(true);
+
+                if (currentWeight > 0) passButton.gameObject.SetActive(true);
+                else passButton.gameObject.SetActive(false);
             }
             else
             {
@@ -334,6 +337,20 @@ namespace Mirror
             }
 
             ListUnits();
+        }
+
+        public void btnPass()
+        {
+            spawnArea.SetActive(false);
+            unitsInventory.SetActive(false);
+            passButton.gameObject.SetActive(false);
+            passTurns();
+        }
+
+        [Command]
+        private void passTurns()
+        {
+            GameRoom.passTurnPlayer(connectionToClient);
         }
 
         [Command]
