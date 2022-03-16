@@ -17,6 +17,11 @@ namespace Mirror
         public GameObject InventoryItem;
         [SerializeField]
         public SO_UnitsToPlay unitsData;
+        [SerializeField]
+        private TMP_Text weightText = null;
+
+        public int maxWeight = 0;
+        public int currentWeight = 0;
 
         private List<GameObject> unitBtns = new List<GameObject>();
 
@@ -28,8 +33,9 @@ namespace Mirror
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
-        [SerializeField] private Slider timeBar = null;
- 
+        [SerializeField] private GameObject unitsInventory = null;
+        [SerializeField] private Button passButton = null;
+
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
         [SerializeField] private GameObject spawnArea = null;
@@ -154,8 +160,15 @@ namespace Mirror
                 var itemScript = obj.GetComponent<S_UnitButton>();
                 itemName.text = unit.displayName;
                 itemScript.unitListid = i;
+                itemScript.unitWeight = unit.GetWeight();
                 itemScript.ClientUnitClicked += ToggleToPlaceUnit;
                 i++;
+
+                if (currentWeight + unit.GetWeight() > maxWeight)
+                {
+                    Debug.Log("Button disable = " + unit.GetWeight());
+                    obj.GetComponent<Button>().interactable = false;
+                }
             }
         }
        
@@ -228,9 +241,10 @@ namespace Mirror
                 if(Physics.Raycast(ray, out RaycastHit hit, mask))
                 {
                     placeState = false;
+
+                    if(currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
                     //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
                     //unitBtns.RemoveAt(idToPlace);
-                    CmdPlaceUnit(idToPlace, hit.point);
                     //ListUnits();
                 }
 
@@ -243,22 +257,51 @@ namespace Mirror
         [TargetRpc]
         public void TargetRpcRemoveUnitFromHand(int idToRemove)
         {
+            currentWeight += Units[idToRemove].GetWeight();
+
+            weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
+
             Units.RemoveAt(idToRemove);
             ListUnits();
         }
-        [ClientRpc]
-        public void UpdateGameDisplay(float newValue, bool startTimer)
+        [TargetRpc]
+        public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI)
         {
             timerRemaining = newValue;
             timerState = startTimer;
+
+            unitsInventory.SetActive(showInventoryUI);
+
+            if(currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
+            else passButton.gameObject.SetActive(false);
         }
 
         [TargetRpc]
-        public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits)
+        public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits, bool CanPlace, int maxWeightToPlace, bool resetWeight)
         {
             timerRemaining = newTimerValue;
             timerState = startTimer;
-            spawnArea.SetActive(true);
+
+            maxWeight = maxWeightToPlace;
+
+            if (resetWeight) currentWeight = 0;
+
+            if (CanPlace)
+            {
+                spawnArea.SetActive(true);
+                unitsInventory.SetActive(true);
+
+                if (currentWeight > 0) passButton.gameObject.SetActive(true);
+                else passButton.gameObject.SetActive(false);
+            }
+            else
+            {
+                spawnArea.SetActive(false);
+                unitsInventory.SetActive(false);
+                passButton.gameObject.SetActive(false);
+            }
+
+            Units.Clear();
 
             foreach (int id in startUnits)
             {
@@ -294,6 +337,20 @@ namespace Mirror
             }
 
             ListUnits();
+        }
+
+        public void btnPass()
+        {
+            spawnArea.SetActive(false);
+            unitsInventory.SetActive(false);
+            passButton.gameObject.SetActive(false);
+            passTurns();
+        }
+
+        [Command]
+        private void passTurns()
+        {
+            GameRoom.passTurnPlayer(connectionToClient);
         }
 
         [Command]
