@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FirstSpawnArea
   - SecondSpawnArea
+  - ValidDrop
   layers:
   - Default
   - TransparentFX
