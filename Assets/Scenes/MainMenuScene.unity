@@ -2282,8 +2282,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainMenu: {fileID: 1055076860}
-  normalMaterial: {fileID: 2100000, guid: e48060a5dd6351c4daad5f55d454eb51, type: 2}
-  dragMaterial: {fileID: 2100000, guid: 5550ba7a820fca84b9448437f635ee54, type: 2}
+  normalColor: {r: 0.15686275, g: 0.1254902, b: 0.27450982, a: 1}
+  dragColor: {r: 0.5568628, g: 0.3309793, b: 0.16470589, a: 1}
 --- !u!4 &727056372
 Transform:
   m_ObjectHideFlags: 0
@@ -5698,10 +5698,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3

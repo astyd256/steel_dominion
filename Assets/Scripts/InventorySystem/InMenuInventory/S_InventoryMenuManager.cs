@@ -18,7 +18,8 @@ public class S_InventoryMenuManager : MonoBehaviour
 
 
     [SerializeField] private Dictionary<SO_UnitItemData, S_InventoryUnitSlot> UnitToSlotMap = new Dictionary<SO_UnitItemData, S_InventoryUnitSlot>();
-
+    
+    private bool itemMenuOpened = false;
 
     public static Transform Clear(Transform transform)
     {
@@ -71,8 +72,20 @@ public class S_InventoryMenuManager : MonoBehaviour
     {
         S_InventoryUnitSlot slot = Instantiate(unitInventorySlotPrefab, inventoryContainer);
         slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite());
+        slot.AssignSlotButtonCallback(() => OpenItemMenu(slot));
         unitInventorySlots.Add(slot);
         
+    }
+
+    public void OpenItemMenu(S_InventoryUnitSlot slot)
+    {
+        if (itemMenuOpened == false)
+        {
+            slot.GetComponent<Image>().color = ActiveButtonColor;
+        }
+        else
+        {
+        }
     }
 
     //Panel response on inventory button press

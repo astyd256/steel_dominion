@@ -10,6 +10,7 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     [SerializeField] private TextMeshProUGUI unitNameTMP;
     [SerializeField] private TextMeshProUGUI unitWeightTMP;
     [SerializeField] private Image unitSpriteGUI;
+    [SerializeField] private Button slotButton;
     //[SerializeField] private Button slotButton;
 
     // SET DISPLAYED VALUES
@@ -24,6 +25,6 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     // ON PRESS
     public void AssignSlotButtonCallback(System.Action onClickCallback)
     {
-        //slotButton.onClick.AddListener(() => onClickCallback());
+        slotButton.onClick.AddListener(() => onClickCallback());
     }
 }

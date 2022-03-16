@@ -10,23 +10,29 @@ public class S_DragController : MonoBehaviour
 
     private Vector2 _screenPosition;
 
-    //private Vector3 _worldPosition;
+    private Vector2 _initialPosition;
 
     private S_Draggable _lastDragged;
 
     private S_Draggable _currentDragged;
 
     [SerializeField] private Transform mainMenu;
-    [SerializeField] private Material normalMaterial;
-    [SerializeField] private Material dragMaterial;
+    [SerializeField] private Color normalColor;
+    [SerializeField] private Color dragColor;
 
     void Update()
     {
         // Drop on mouseUp or touch.end
-        if (_isDragActive && (Input.GetMouseButtonDown(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
+        if (_isDragActive && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
         {
             Drop();
             return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 mousePos = Input.mousePosition;
+            _initialPosition = new Vector2(mousePos.x, mousePos.y);
         }
 
         if (Input.GetMouseButton(0))
@@ -43,20 +49,20 @@ public class S_DragController : MonoBehaviour
             return;
         }
 
-        //_worldPosition = Camera.main.ScreenToWorldPoint(_screenPosition);
-
         if (_isDragActive)
         {
             Drag(); 
         }
         else
         {
-            RaycastHit2D hit = Physics2D.Raycast(_screenPosition, Vector2.zero);
-            if (hit.collider != null)
+            
+            RaycastHit2D hit = Physics2D.Raycast(_initialPosition, Vector2.zero);
+            if (hit.collider != null && ((_screenPosition.x >= _initialPosition.x + 50) || 
+                (_screenPosition.x <= _initialPosition.x - 50) || (_screenPosition.y >= _initialPosition.y + 50) ||
+                (_screenPosition.y <= _initialPosition.y - 50)))
             {
                 // Only works with collider
                 // Need to create a copy of this object
-                //S_Draggable draggable = hit.transform.gameObject.GetComponent<S_Draggable>();
                 S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), mainMenu);
                 if (draggable != null)
                 {
@@ -71,7 +77,7 @@ public class S_DragController : MonoBehaviour
     void initDrag()
     {
         _isDragActive = true;
-        _lastDragged.GetComponent<Image>().material = dragMaterial;
+        _lastDragged.GetComponent<Image>().color = dragColor;
     }
 
     void Drag()
@@ -82,7 +88,8 @@ public class S_DragController : MonoBehaviour
     void Drop()
     {
         _isDragActive = false;
-        _lastDragged.GetComponent<Image>().material = normalMaterial;
+        _lastDragged.GetComponent<Image>().color = normalColor;
+        Destroy(_currentDragged.gameObject);
     }
 
 }
