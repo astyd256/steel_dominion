@@ -16,9 +16,14 @@ public class S_DragController : MonoBehaviour
 
     private S_Draggable _currentDragged;
 
+    private RaycastHit2D hit;
+
+    private string dragSource;
+
     [SerializeField] private Transform unitCopyParent;
     [SerializeField] private Color normalColor;
     [SerializeField] private Color dragColor;
+    [SerializeField] private Color holdColor;
 
     void Update()
     {
@@ -29,10 +34,21 @@ public class S_DragController : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)) // Initial position take
         {
             Vector3 mousePos = Input.mousePosition;
             _initialPosition = new Vector2(mousePos.x, mousePos.y);
+            hit = Physics2D.Raycast(_initialPosition, Vector2.zero); // taken
+            if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
+            {
+                _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
+                _lastDragged.GetComponent<Image>().color = holdColor;
+               
+            }
+        }
+        if (Input.GetMouseButtonUp(0)) // Clickhold highlight end
+        {
+            //_lastDragged.GetComponent<Image>().color = normalColor;
         }
 
         if (Input.GetMouseButton(0))
@@ -53,11 +69,10 @@ public class S_DragController : MonoBehaviour
         {
             Drag(); 
         }
-        else
+        else // Try drag start
         {
-            
-            RaycastHit2D hit = Physics2D.Raycast(_initialPosition, Vector2.zero);
-            if (hit.collider != null && hit.collider.tag != "ValidDrop" && ((_screenPosition.x >= _initialPosition.x + 50) || 
+            // Here was raycast before
+            if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + 50) || 
                 (_screenPosition.x <= _initialPosition.x - 50) || (_screenPosition.y >= _initialPosition.y + 50) ||
                 (_screenPosition.y <= _initialPosition.y - 50)))
             {
@@ -65,13 +80,21 @@ public class S_DragController : MonoBehaviour
                 // Need to create a copy of this object
                 S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
                 // Width and Height setting:
+
+                // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
+
                 RectTransform rt = draggable.GetComponent<RectTransform>();
                 rt.sizeDelta = new Vector2(155, 155);
+
+                ///////////////////////////////////////////////////////////////
+
+                // Need to add rigid body for interaction:
+                draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
 
                 if (draggable != null)
                 {
                     _currentDragged = draggable; // Copy
-                    _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
+                    _currentDragged.GetComponent<Image>().color = normalColor;
                     initDrag();
                 }
             }
@@ -94,9 +117,12 @@ public class S_DragController : MonoBehaviour
         _isDragActive = false;
         _lastDragged.GetComponent<Image>().color = normalColor;
 
-        if (_currentDragged.GetDraggableType() == "InventoryUnitSlot")
+        if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits")
         {
+            // Code for adding unit to panel
+
             
+
         }
 
         Destroy(_currentDragged.gameObject);

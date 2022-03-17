@@ -13,6 +13,31 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     [SerializeField] private Button slotButton;
     //[SerializeField] private Button slotButton;
 
+    private bool belongsToUnitsPanel = false;
+
+    private void Start()
+    {
+        // Initialize BELONG variables
+        if (this.transform.parent.CompareTag("InventoryUnits"))
+        {
+
+        }
+        else if (this.transform.parent.CompareTag("UnitPanel"))
+        {
+            belongsToUnitsPanel = true;
+        }
+    }
+
+    public void SetBelongsToUnitsPanelToTrue()
+    {
+        belongsToUnitsPanel = true;
+    }
+
+    public bool GetBelongsToUnitsPanel()
+    {
+        return belongsToUnitsPanel;
+    }
+
     // SET DISPLAYED VALUES
     public void InitSlotVisualisation(int unitWeight, string unitName, Sprite unitSprite)
     {
