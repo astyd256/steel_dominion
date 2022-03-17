@@ -79,7 +79,7 @@ namespace Mirror
 
         public override void OnServerConnect(NetworkConnection conn)
         {
-            Debug.Log("ServerConnect");
+            
         }
 
         public override void OnServerDisconnect(NetworkConnection conn)
@@ -135,14 +135,12 @@ namespace Mirror
         {
             //Check for number of players to be ready
             //and check for every player to be ready for start
-            Debug.Log(InGamePlayers.Count);
+
             if (numPlayers < 2) return false;
             
             foreach (var player in InGamePlayers)
-            {
-                Debug.Log(player.IsReady);
                 if (!player.IsReady) return false;
-            }
+            
 
             return true;
         }
@@ -187,8 +185,8 @@ namespace Mirror
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
 
-                unitObj.GetComponent<S_Unit>().SetTeam(0);
-
+               // unitObj.GetComponent<S_Unit>().SetTeam(0, unitsData.UnitsData[unitid]. );
+                unitObj.name = "FirstPlayerUnit"+firstPlayerBattleUnits.Count;
                 InGamePlayers[0].TargetRpcRemoveUnitFromHand(idToPlace);
                 firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
                 firstPlayerUnits.RemoveAt(idToPlace);
@@ -203,8 +201,8 @@ namespace Mirror
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
 
-                unitObj.GetComponent<S_Unit>().SetTeam(1);
-
+                //unitObj.GetComponent<S_Unit>().SetTeam(1);
+                unitObj.name = "SecondPlayerUnit" + secondPlayerBattleUnits.Count;
                 InGamePlayers[1].TargetRpcRemoveUnitFromHand(idToPlace);
                 SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
                 SecondPlayerUnits.RemoveAt(idToPlace);

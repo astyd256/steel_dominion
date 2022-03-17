@@ -160,10 +160,8 @@ namespace Mirror
                 i++;
 
                 if (currentWeight + unit.GetWeight() > maxWeight)
-                {
-                    Debug.Log("Button disable = " + unit.GetWeight());
                     obj.GetComponent<Button>().interactable = false;
-                }
+                
             }
         }
        
@@ -310,7 +308,6 @@ namespace Mirror
         [TargetRpc]
         public void SetupSpawnAreaClientRPC(int areaindex)
         {
-            Debug.Log("Find area = " + areaindex);
             if (areaindex == 1)
             {
                 spawnArea = GameObject.FindWithTag("FirstSpawnArea");
@@ -367,9 +364,7 @@ namespace Mirror
         [Command]
         public void CmdGetUnits(List<int> unitsids, uint id)
         {
-            Debug.Log("ConnectionToClient - " + connectionToClient);
-            Debug.Log("ConnectionToClient id - " + connectionToClient.connectionId);
-            Debug.Log("NetId - " + id);
+            //Debug.Log("NetId - " + id);
 
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }

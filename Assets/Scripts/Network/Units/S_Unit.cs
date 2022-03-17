@@ -16,6 +16,14 @@ namespace Mirror
         private Slider healthBar = null;
         [SerializeField]
         private NavMeshAgent agent = null;
+        [SerializeField]
+        private Transform AttackSpherePoint = null;
+
+        private float maxHealth = 0f;
+        private float health = 0f;
+
+
+        private float distTotarget;
 
         private enum State
         {
@@ -43,8 +51,10 @@ namespace Mirror
         }
 
         [Server]
-        public void SetTeam(int teamid)
+        public void SetData(int teamid, int maxhealth)
         {
+            maxHealth = maxhealth;
+            health = maxHealth;
             Teamid = teamid;
         }
 
@@ -57,14 +67,60 @@ namespace Mirror
             //this.transform.LookAt(target.transform.position);
             //this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
-            chase = (target != null);
+            if(target != null) unitState = State.Chase;
         }
 
         [ServerCallback]
 
         private void Update()
         {
-            if (chase) agent.SetDestination(target.transform.position);
+            if (unitState == State.Idle) return;
+
+            if (target != null)
+            {
+                if (unitState == State.Attack) return;
+
+                if (distTotarget < 1.5f && unitState != State.Attack)
+                {
+
+                    this.transform.LookAt(target.transform.position);
+                    this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+
+                    agent.isStopped = true;
+                    unitState = State.Attack;
+
+                    Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
+
+                    foreach (var hitCollider in colliders)
+                    {
+                        if(hitCollider.gameObject == target)
+                        {
+                            Debug.Log("Damage to " + target.name);
+                            break;
+                        }
+                    }
+                    unitState = State.Idle;
+                    this.CallWithDelay(ResetState, 2f);
+                    // this.CallWithDelay(CmdReadyUp, 3f);
+                    return;
+                }
+                else if (unitState == State.Chase)
+                {
+                    
+                    agent.SetDestination(target.transform.position);
+                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+                    return;
+                }
+            }
+        }
+
+        [Server]
+        public void ResetState()
+        {
+            Debug.Log("Reseting");
+            CalcDistances();
+
+            if (target != null) unitState = State.Chase;
         }
 
         [ClientRpc]
@@ -75,6 +131,9 @@ namespace Mirror
 
         public void CalcDistances()
         {
+            Debug.Log("Calc distance");
+
+            target = null;
             float minDistance = 1000000;
             List<GameObject> unitlists = new List<GameObject>();
 
@@ -87,9 +146,11 @@ namespace Mirror
                 if (dist < minDistance)
                 {
                     minDistance = dist;
+                    distTotarget = minDistance;
                     target = unit;
                 }
             }
+            
         }
     }
 }
