@@ -22,6 +22,10 @@ namespace Mirror
         [Header("Game process")]
         [SerializeField]
         private SO_UnitsToPlay unitsData;
+
+        private List<GameObject> firstPlayerBattleUnits = new List<GameObject>();
+        private List<GameObject> secondPlayerBattleUnits = new List<GameObject>();
+
         [SerializeField]
         //private List<SO_UnitItemData> firstPlayerUnits = new List<SO_UnitItemData>();
         private List<int> firstPlayerUnits = new List<int>();
@@ -48,17 +52,13 @@ namespace Mirror
         {
 
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
-            Debug.Log("sp = " + spawnPrefabs.Count);
         }
 
         public override void OnStartClient()
         {
             var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs");
-            Debug.Log("sp = " + spawnPrefabs.Count);
             foreach (var prefab in spawnablePrefabs)
-            {
                 NetworkClient.RegisterPrefab(prefab);
-            }
         }
 
         public override void OnClientConnect()//OnClientConnect(NetworkClient.)
@@ -158,6 +158,9 @@ namespace Mirror
             firstCanPlace = true;
             secondCanPlace = true;
 
+            firstPlayerBattleUnits.Clear();
+            secondPlayerBattleUnits.Clear();
+
             List<int> unitsToSend = new List<int>();
             unitsToSend = firstPlayerUnits.ToList();
             InGamePlayers[0].StartPreMatchStep(RemainingTime, true, unitsToSend, true, InGameWeightMax, true);
@@ -180,23 +183,33 @@ namespace Mirror
             {
                 int unitid = firstPlayerUnits[idToPlace];
                 if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-                //Debug.Log("Unit id in hand = " + unitid);
+
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
+
+                unitObj.GetComponent<S_Unit>().SetTeam(0);
+
                 InGamePlayers[0].TargetRpcRemoveUnitFromHand(idToPlace);
                 firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
                 firstPlayerUnits.RemoveAt(idToPlace);
+
+                firstPlayerBattleUnits.Add(unitObj);
             }
             else if (InGamePlayers[1].connectionToClient == conn)
             {
                 int unitid = SecondPlayerUnits[idToPlace];
                 if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-                //Debug.Log("Unit id in hand = " + unitid);
+
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
+
+                unitObj.GetComponent<S_Unit>().SetTeam(1);
+
                 InGamePlayers[1].TargetRpcRemoveUnitFromHand(idToPlace);
                 SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
                 SecondPlayerUnits.RemoveAt(idToPlace);
+
+                secondPlayerBattleUnits.Add(unitObj);
             }
 
             CalcTurnOrder();
@@ -285,6 +298,9 @@ namespace Mirror
 
                             RemainingTime = GameTime;
                             timerisRunning = true;
+
+                            foreach(GameObject unit in firstPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
+                            foreach (GameObject unit in secondPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
                         }
                     }
                 }
@@ -297,31 +313,9 @@ namespace Mirror
         public void ServerGetPlayerUnits(NetworkConnection conn, List<int> UnitsIds)
         {
             if(InGamePlayers[0].connectionToClient == conn)
-            {
                 firstPlayerUnits = UnitsIds;
-                //foreach(int id in UnitsIds)
-                //{
-                //    firstPlayerUnits.Add(unitsData.UnitsData[id]);
-                    //Debug.Log("Loaded first id = " + id);
-                //}  
-            }
             else if(InGamePlayers[1].connectionToClient == conn)
-            {
                 SecondPlayerUnits = UnitsIds;
-                //foreach (int id in UnitsIds)
-                //{
-                //   SecondPlayerUnits.Add(unitsData.UnitsData[id]);
-                //Debug.Log("Loaded second id = " + id);
-                //}
-            }
-
-            
-
-            //foreach (int id in data.unitData)
-            // {
-            // Debug.Log("Loaded id = " + id);
-            //   Units.Add(unitsData.UnitsData[id]);
-            // }
         }
 
         [Server]
@@ -381,6 +375,11 @@ namespace Mirror
                 InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false);
                 InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false);
             }
+        }
+
+        public List<GameObject> GetBattlePlayerUnits(int playerid)
+        {
+            return (playerid == 0) ? firstPlayerBattleUnits : secondPlayerBattleUnits;
         }
 
         //public Transform leftRacketSpawn;

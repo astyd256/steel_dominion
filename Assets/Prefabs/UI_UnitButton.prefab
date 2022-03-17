@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6223418059063972671}
   - component: {fileID: 8181536064789305380}
   - component: {fileID: 3281256041535583520}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: TMP_Unit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 3800265915990838023}
   - component: {fileID: 2787974242419011506}
   - component: {fileID: 1983222846186266097}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: UI_UnitButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -283,3 +283,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitListid: 0
+  unitWeight: 0

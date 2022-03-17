@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 namespace Mirror
@@ -66,12 +67,14 @@ namespace Mirror
         public override void OnStartAuthority()
         {
             //SendPlayerNameToServer
+            
+            gameUI.SetActive(true);
+
             S_PlayerData data = S_SavePlayerData.LoadPlayer();
 
             CmdSetDisplayName(data.playername);
             CmdGetUnits(data.unitData, netId);
-
-            gameUI.SetActive(true);
+  
             ListUnits();
 
             this.CallWithDelay(CmdReadyUp, 3f);
@@ -121,20 +124,12 @@ namespace Mirror
                 unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
                 placeState = false;
                 idToPlace = -1;
+                placeState = !placeState;
                 return;
             }
 
-            placeState = !placeState;
+            placeState = true;
             idToPlace = index;
-
-           // Debug.Log("Index to remove = " + index);
-           //Units.RemoveAt(index);
-
-            //ListUnits();
-           // for(int i = index; i<Units.Count;i++)
-            //{
-                
-           // }
         }
 
         public void ListUnits()
@@ -219,7 +214,6 @@ namespace Mirror
         void Update()
         {
             if(timerState)
-            {
                 if(timerRemaining > 0)
                 {
                     timerRemaining -= Time.deltaTime;
@@ -231,10 +225,11 @@ namespace Mirror
                     timerRemaining = 0f;
                     timerState = false;
                 }
-            }
 
             if(Input.GetMouseButtonDown(0) && placeState)
             {
+                if (EventSystem.current.IsPointerOverGameObject()) return;
+                
                 var ray = playercamera.ScreenPointToRay(Input.mousePosition);
 
                 LayerMask mask = LayerMask.GetMask("OnlyRaycast");
@@ -262,6 +257,7 @@ namespace Mirror
             weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
 
             Units.RemoveAt(idToRemove);
+
             ListUnits();
         }
         [TargetRpc]
@@ -374,14 +370,6 @@ namespace Mirror
             Debug.Log("ConnectionToClient - " + connectionToClient);
             Debug.Log("ConnectionToClient id - " + connectionToClient.connectionId);
             Debug.Log("NetId - " + id);
-            //NetworkConnection conn;
-            //Debug.Log("Connection id - " + conn.connectionId);
-
-            // foreach (int id in unitsids)
-            // {
-            //   Debug.Log("Loaded id = " + id);
-            // Units.Add(unitsData.UnitsData[id]);
-            //}
 
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }

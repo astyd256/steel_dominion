@@ -1091,7 +1091,6 @@ namespace Mirror
             else
             {
                 Transform startPosition = startPositions[startPositionIndex];
-                Debug.Log($"Set player to position: index =  {startPositionIndex} pos = {startPosition.position}");
                 startPositionIndex = (startPositionIndex + 1) % startPositions.Count;
                 return startPosition;
             }

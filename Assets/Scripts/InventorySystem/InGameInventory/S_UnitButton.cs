@@ -18,8 +18,9 @@ public class S_UnitButton : MonoBehaviour
     }
     public void ClickButton()
     {
-        ClientUnitClicked?.Invoke(unitListid);
         ToggleButtonLight(true);
+        ClientUnitClicked?.Invoke(unitListid);
+        
         //Destroy(gameObject);
     }
 
