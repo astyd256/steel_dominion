@@ -19,7 +19,7 @@ TagManager:
   - OnlyRaycast
   - Units
   - AttackCollider
-  - 
+  - UIPanel
   - 
   - 
   - 

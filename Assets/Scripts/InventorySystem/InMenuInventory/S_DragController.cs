@@ -40,7 +40,8 @@ public class S_DragController : MonoBehaviour
         {
             Vector3 mousePos = Input.mousePosition;
             _initialPosition = new Vector2(mousePos.x, mousePos.y);
-            hit = Physics2D.Raycast(_initialPosition, Vector2.zero); // taken
+            int layermask = 1 << 5;
+            hit = Physics2D.Raycast(_initialPosition, Vector2.zero, 1000f, layermask); // taken
             if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
             {
                 _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
@@ -83,9 +84,9 @@ public class S_DragController : MonoBehaviour
         else // Try drag start
         {
             // Here was raycast before
-            if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + 50) || 
-                (_screenPosition.x <= _initialPosition.x - 50) || (_screenPosition.y >= _initialPosition.y + 50) ||
-                (_screenPosition.y <= _initialPosition.y - 50)))
+            if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + 30) || 
+                (_screenPosition.x <= _initialPosition.x - 30) || (_screenPosition.y >= _initialPosition.y + 30) ||
+                (_screenPosition.y <= _initialPosition.y - 30)))
             {
                 if (hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
                 {
@@ -133,14 +134,23 @@ public class S_DragController : MonoBehaviour
         _lastDragged.GetComponent<Image>().color = normalColor;
 
         if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"
-            )
+            && currentUnitsPanel.previewActive == true)
         {
-            // if && currentUnitsPanel.previewActive == true
+            //
             // Code for adding unit to panel
             // ADD ORIGINAL
+            //currentUnitsPanel.AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
             currentUnitsPanel.AddUnitSLot(_lastDragged.GetComponent<S_InventoryUnitSlot>()); 
             _lastDragged.GetComponent<Image>().color = addedColor;
 
+            _currentDragged.SetPlace("UnitPanel");
+
+        }
+        else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady())
+        {
+            // If from unitpanel and left boundaries (collision box) then remove
+            _currentDragged.SetPlace("InventoryUnits");
+            currentUnitsPanel.RemoveUnitFromPanel(_lastDragged.GetComponent<S_InventoryUnitSlot>());
         }
 
         Destroy(_currentDragged.gameObject);

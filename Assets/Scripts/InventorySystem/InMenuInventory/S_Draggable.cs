@@ -8,6 +8,8 @@ public class S_Draggable : MonoBehaviour
     [SerializeField] private string type;
     [SerializeField] private string place;
 
+    [SerializeField] private bool panelRemoveReady;
+
     private Collider2D _collider;
 
     private Color _color;
@@ -35,6 +37,7 @@ public class S_Draggable : MonoBehaviour
 
     private void Start()
     {
+        panelRemoveReady = true;
         // Initialize PLACE variable
         _color = this.GetComponent<Image>().color;
         _collider = GetComponent<Collider2D>();
@@ -60,7 +63,11 @@ public class S_Draggable : MonoBehaviour
 
             // Code for preview of putting unit on panel:
             other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
-
+        }
+        else if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
+            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
+        {
+            panelRemoveReady = false;
         }
     }
 
@@ -74,10 +81,22 @@ public class S_Draggable : MonoBehaviour
             // Preview end call:
             other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
         }
-        else if (this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
+        else if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" 
+            && this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
         {
             // Remove Unit
+            panelRemoveReady = true;
         }
+    }
+
+    public void SetPanelRemoveReady(bool b)
+    {
+        panelRemoveReady = b;
+    }
+
+    public bool GetPanelRemoveReady()
+    {
+        return panelRemoveReady;
     }
 
 }
