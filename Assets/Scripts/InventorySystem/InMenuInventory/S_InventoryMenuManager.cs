@@ -16,6 +16,8 @@ public class S_InventoryMenuManager : MonoBehaviour
     [SerializeField] private Color ButtonColor;
     [SerializeField] private bool inventoryActive = false;
 
+    [SerializeField] private Vector2 slotSize;
+
 
     [SerializeField] private Dictionary<SO_UnitItemData, S_InventoryUnitSlot> UnitToSlotMap = new Dictionary<SO_UnitItemData, S_InventoryUnitSlot>();
     
@@ -30,22 +32,6 @@ public class S_InventoryMenuManager : MonoBehaviour
         return transform;
     }
 
-    public void SavePlayer()
-    {
-        List<int> unitsIds = new List<int>();
-
-        foreach(var unit in Units)
-        {
-            unitsIds.Add(unit.id);
-        }
-
-        S_SavePlayerData.SavePlayer("Default", unitsIds);
-    }
-
-    public void LoadPlayer()
-    {
-       // S_SavePlayerData.LoadPlayer();
-    }
 
     // INVENTORY
     public void AddUnitsToPanel()
@@ -60,6 +46,7 @@ public class S_InventoryMenuManager : MonoBehaviour
     // On open inventory
     public void InitInventory()
     {
+        slotSize = GetComponent<GridLayoutGroup>().cellSize;
         // INITIALIZE INVENTORY EXISTING BUTTONS
         foreach (SO_UnitItemData unit in Units)
         {
@@ -77,11 +64,12 @@ public class S_InventoryMenuManager : MonoBehaviour
         
     }
 
+    // Method for items
     public void OpenItemMenu(S_InventoryUnitSlot slot)
     {
         if (itemMenuOpened == false)
         {
-            slot.GetComponent<Image>().color = ActiveButtonColor;
+            //slot.GetComponent<Image>().color = ActiveButtonColor;
         }
         else
         {
@@ -104,9 +92,15 @@ public class S_InventoryMenuManager : MonoBehaviour
         inventoryActive = !inventoryActive;
     }
 
+    public Vector2 GetSlotSize()
+    {
+        return slotSize;
+    }
 
-
-
+    public List<SO_UnitItemData> GetUnits()
+    {
+        return Units;
+    }
 
     public void Start()
     {

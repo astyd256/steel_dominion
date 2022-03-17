@@ -252,8 +252,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5134630462308171411}
-  - component: {fileID: 2348104314880097376}
-  - component: {fileID: 6090634361379478144}
+  - component: {fileID: 2333236054583380170}
+  - component: {fileID: 1240474559673399686}
   m_Layer: 0
   m_Name: Tank(Rogue)
   m_TagString: Untagged
@@ -278,7 +278,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2348104314880097376
+--- !u!114 &2333236054583380170
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -295,7 +295,7 @@ MonoBehaviour:
   visible: 0
   m_AssetId: b35278509bfa6f349be8a64e515b8d9a
   hasSpawned: 0
---- !u!114 &6090634361379478144
+--- !u!114 &1240474559673399686
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

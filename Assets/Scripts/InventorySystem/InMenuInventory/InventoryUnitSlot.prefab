@@ -284,7 +284,7 @@ GameObject:
   - component: {fileID: 6681143179106474748}
   m_Layer: 5
   m_Name: InventoryUnitSlot
-  m_TagString: Untagged
+  m_TagString: UnitSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -405,6 +405,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: InventoryUnitSlot
+  place: 
 --- !u!1 &7727604935716733436
 GameObject:
   m_ObjectHideFlags: 0

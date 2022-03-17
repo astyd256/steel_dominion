@@ -6,7 +6,9 @@ TagManager:
   tags:
   - FirstSpawnArea
   - SecondSpawnArea
-  - ValidDrop
+  - UnitPanel
+  - InventoryUnits
+  - UnitSlot
   layers:
   - Default
   - TransparentFX
