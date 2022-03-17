@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id">
+  <string name="firebase_database_url" translatable="false">null</string>
+  <string name="gcm_defaultSenderId" translatable="false">856566926743</string>
+  <string name="google_storage_bucket" translatable="false">steel-dominion.appspot.com</string>
+  <string name="project_id" translatable="false">steel-dominion</string>
+  <string name="google_api_key" translatable="false">AIzaSyBh9Z7v04akxf1FeVYjO7LAdaJtSMy3ciA</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBh9Z7v04akxf1FeVYjO7LAdaJtSMy3ciA</string>
+  <string name="google_app_id" translatable="false">1:856566926743:android:aa22a84487ba382bb048d2</string>
+  <string name="default_web_client_id" translatable="false">856566926743-du9ukiqdfqid98kul74dhejuqn5omlra.apps.googleusercontent.com</string>
+</resources>
