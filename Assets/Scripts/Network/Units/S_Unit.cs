@@ -22,6 +22,9 @@ namespace Mirror
         private float maxHealth = 0f;
         private float health = 0f;
 
+        private int maxDamage = 2;
+        private int minDamage = 1;
+
 
         private float distTotarget;
 
@@ -51,11 +54,14 @@ namespace Mirror
         }
 
         [Server]
-        public void SetData(int teamid, int maxhealth)
+        public void SetData(int teamid, int maxhealth, int miDamage, int maDamage)
         {
             maxHealth = maxhealth;
             health = maxHealth;
             Teamid = teamid;
+
+            minDamage = miDamage;
+            maxDamage = maDamage;
         }
 
         [Server]
@@ -80,9 +86,9 @@ namespace Mirror
             {
                 if (unitState == State.Attack) return;
 
-                if (distTotarget < 1.5f && unitState != State.Attack)
+                if (distTotarget < 2f && unitState != State.Attack)
                 {
-
+                    Debug.Log("Trying to attack!");
                     this.transform.LookAt(target.transform.position);
                     this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
@@ -96,12 +102,18 @@ namespace Mirror
                         if(hitCollider.gameObject == target)
                         {
                             Debug.Log("Damage to " + target.name);
+
+                            System.Random rand = new System.Random();
+
+                            int dmg = rand.Next(minDamage ,maxDamage);
+
+                            target.GetComponent<S_Unit>().CalcDamage(dmg);
                             break;
                         }
                     }
                     unitState = State.Idle;
                     this.CallWithDelay(ResetState, 2f);
-                    // this.CallWithDelay(CmdReadyUp, 3f);
+
                     return;
                 }
                 else if (unitState == State.Chase)
@@ -129,6 +141,7 @@ namespace Mirror
             canvasUI.gameObject.SetActive(true);
         }
 
+        [Server]
         public void CalcDistances()
         {
             Debug.Log("Calc distance");
@@ -142,15 +155,38 @@ namespace Mirror
 
             foreach (GameObject unit in unitlists)
             {
+                Debug.Log("checking unit");
                 float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
                 if (dist < minDistance)
                 {
+                    Debug.Log("checking unit = new target");
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;
                 }
             }
-            
+        }
+
+        [Server]
+        public void CalcDamage(float dmg)
+        {
+            health = health - dmg;
+            if (health < 0) health = 0;
+
+            //Dead
+            if (health <= 0)
+            {
+                GameRoom.RemoveBattleUnit(Teamid, this.gameObject);
+                Destroy(this.gameObject);
+            }
+
+            SetHealthBarValue(health / maxHealth);
+        }
+
+        [ClientRpc]
+        public void SetHealthBarValue(float newVal)
+        {
+            healthBar.value = newVal;
         }
     }
 }

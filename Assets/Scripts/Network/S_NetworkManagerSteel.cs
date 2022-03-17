@@ -173,43 +173,51 @@ namespace Mirror
         }
         //Game functions
 
+        public void PlaceUnit(int playerid,int Unitid, Vector3 spawnplace)
+        {
+            if (playerid == 0)
+            {
+                int unitid = firstPlayerUnits[Unitid];
+                if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
+
+                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, Quaternion.identity);
+                NetworkServer.Spawn(unitObj);
+
+                unitObj.GetComponent<S_Unit>().SetData(0, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
+                unitObj.name = "FirstPlayerUnit" + firstPlayerBattleUnits.Count;
+                InGamePlayers[0].TargetRpcRemoveUnitFromHand(Unitid);
+                firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
+                firstPlayerUnits.RemoveAt(Unitid);
+
+                firstPlayerBattleUnits.Add(unitObj);
+            }
+            else if (playerid == 1)
+            {
+                int unitid = SecondPlayerUnits[Unitid];
+                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
+
+                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, Quaternion.identity);
+                NetworkServer.Spawn(unitObj);
+
+                unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
+                unitObj.name = "SecondPlayerUnit" + secondPlayerBattleUnits.Count;
+                InGamePlayers[1].TargetRpcRemoveUnitFromHand(Unitid);
+                SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
+                SecondPlayerUnits.RemoveAt(Unitid);
+
+                secondPlayerBattleUnits.Add(unitObj);
+            }
+        }
+
         [Server]
         public void ServerPlaceUnit(NetworkConnection conn, int idToPlace, Vector3 placeToSpawn)
         {
             //add validation to place and unit type
             if(InGamePlayers[0].connectionToClient == conn)
-            {
-                int unitid = firstPlayerUnits[idToPlace];
-                if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-
-                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
-                NetworkServer.Spawn(unitObj);
-
-               // unitObj.GetComponent<S_Unit>().SetTeam(0, unitsData.UnitsData[unitid]. );
-                unitObj.name = "FirstPlayerUnit"+firstPlayerBattleUnits.Count;
-                InGamePlayers[0].TargetRpcRemoveUnitFromHand(idToPlace);
-                firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
-                firstPlayerUnits.RemoveAt(idToPlace);
-
-                firstPlayerBattleUnits.Add(unitObj);
-            }
+                PlaceUnit(0, idToPlace, placeToSpawn);
             else if (InGamePlayers[1].connectionToClient == conn)
-            {
-                int unitid = SecondPlayerUnits[idToPlace];
-                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-
-                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, placeToSpawn, Quaternion.identity);
-                NetworkServer.Spawn(unitObj);
-
-                //unitObj.GetComponent<S_Unit>().SetTeam(1);
-                unitObj.name = "SecondPlayerUnit" + secondPlayerBattleUnits.Count;
-                InGamePlayers[1].TargetRpcRemoveUnitFromHand(idToPlace);
-                SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
-                SecondPlayerUnits.RemoveAt(idToPlace);
-
-                secondPlayerBattleUnits.Add(unitObj);
-            }
-
+                PlaceUnit(1, idToPlace, placeToSpawn);
+              
             CalcTurnOrder();
         }
 
@@ -225,28 +233,14 @@ namespace Mirror
                 randId = rand.Next(0,firstPlayerUnits.Count);
                 spawnPlace.z = rand.Next(0, 4) - 20;
 
-                int unitid = firstPlayerUnits[randId];
-                if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-                //Debug.Log("Unit id in hand = " + unitid);
-                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnPlace, Quaternion.identity);
-                NetworkServer.Spawn(unitObj);
-                InGamePlayers[0].TargetRpcRemoveUnitFromHand(randId);
-                firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
-                firstPlayerUnits.RemoveAt(randId);
+                PlaceUnit(0, randId, spawnPlace);
             }
             else if (playerid == 1)
             {
                 randId = rand.Next(0, SecondPlayerUnits.Count);
                 spawnPlace.z = rand.Next(16, 20);
 
-                int unitid = SecondPlayerUnits[randId];
-                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-                //Debug.Log("Unit id in hand = " + unitid);
-                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnPlace, Quaternion.identity);
-                NetworkServer.Spawn(unitObj);
-                InGamePlayers[1].TargetRpcRemoveUnitFromHand(randId);
-                SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
-                SecondPlayerUnits.RemoveAt(randId);
+                PlaceUnit(1, randId, spawnPlace);      
             }
 
             CalcTurnOrder();
@@ -378,6 +372,15 @@ namespace Mirror
         public List<GameObject> GetBattlePlayerUnits(int playerid)
         {
             return (playerid == 0) ? firstPlayerBattleUnits : secondPlayerBattleUnits;
+        }
+
+        [Server]
+        public void RemoveBattleUnit(int teamId, GameObject unit)
+        {
+            if(teamId == 0) firstPlayerBattleUnits.Remove(unit);
+            else if(teamId == 1) secondPlayerBattleUnits.Remove(unit);
+
+            //Check for round ending
         }
 
         //public Transform leftRacketSpawn;
