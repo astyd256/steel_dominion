@@ -53,7 +53,8 @@ public class S_Draggable : MonoBehaviour
     // IT DRAGS ONLY COPY OF AN OBJECT
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot")
+        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" && 
+            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false)
         {
             this.GetComponent<Image>().color = Color.black;
 
@@ -65,12 +66,17 @@ public class S_Draggable : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot")
+        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
+            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false)
         {
             this.GetComponent<Image>().color = _color;
 
             // Preview end call:
             other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
+        }
+        else if (this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
+        {
+            // Remove Unit
         }
     }
 

@@ -13,7 +13,8 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     private Vector2 slotSize;
     [SerializeField]
     public GridLayoutGroup glg = null;
-
+    public bool previewActive = false;
+    public Color defaultColor;
 
 
     private void Awake() // In future it needs to be loaded with saved units on panel
@@ -41,6 +42,8 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         slotSize.x = (panelWidth / slots.Count);
         slotSize.y = panelHeight;
         glg.cellSize = slotSize;
+
+        previewActive = true;
     }
 
     public void AddingSlotPreviewEnd(S_InventoryUnitSlot addingSlot)
@@ -54,12 +57,16 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             slotSize.y = panelHeight;
             glg.cellSize = slotSize;
         }
+        previewActive = false;
     }
 
     public void AddUnitSLot(S_InventoryUnitSlot addedSlot)
     {
         slots.Add(addedSlot);
+        addedSlot.SetBelongsToUnitsPanelToTrue();
         S_InventoryUnitSlot slot = Instantiate(addedSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
+        slot.GetComponent<Image>().color = defaultColor;
+        addedSlot.SetCanDragFalse();
         // Size set:
         slotSize.x = (panelWidth / slots.Count);
         slotSize.y = panelHeight;

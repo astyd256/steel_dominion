@@ -20,10 +20,12 @@ public class S_DragController : MonoBehaviour
 
     private string dragSource;
 
+    [SerializeField] private S_CurrentUnitsPanel currentUnitsPanel = null;
     [SerializeField] private Transform unitCopyParent;
     [SerializeField] private Color normalColor;
     [SerializeField] private Color dragColor;
     [SerializeField] private Color holdColor;
+    [SerializeField] private Color addedColor;
 
     void Update()
     {
@@ -43,12 +45,21 @@ public class S_DragController : MonoBehaviour
             {
                 _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
                 _lastDragged.GetComponent<Image>().color = holdColor;
-               
             }
         }
         if (Input.GetMouseButtonUp(0)) // Clickhold highlight end
         {
-            //_lastDragged.GetComponent<Image>().color = normalColor;
+            if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
+            {
+                if (_lastDragged.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
+                {
+                    _lastDragged.GetComponent<Image>().color = normalColor;
+                }
+                else if (_lastDragged.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == false)
+                {
+                    _lastDragged.GetComponent<Image>().color = addedColor;
+                }
+            }
         }
 
         if (Input.GetMouseButton(0))
@@ -76,26 +87,30 @@ public class S_DragController : MonoBehaviour
                 (_screenPosition.x <= _initialPosition.x - 50) || (_screenPosition.y >= _initialPosition.y + 50) ||
                 (_screenPosition.y <= _initialPosition.y - 50)))
             {
-                // Only works with collider
-                // Need to create a copy of this object
-                S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
-                // Width and Height setting:
-
-                // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
-
-                RectTransform rt = draggable.GetComponent<RectTransform>();
-                rt.sizeDelta = new Vector2(155, 155);
-
-                ///////////////////////////////////////////////////////////////
-
-                // Need to add rigid body for interaction:
-                draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-
-                if (draggable != null)
+                if (hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
                 {
-                    _currentDragged = draggable; // Copy
-                    _currentDragged.GetComponent<Image>().color = normalColor;
-                    initDrag();
+
+                    // Only works with collider
+                    // Need to create a copy of this object
+                    S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
+                    // Width and Height setting:
+
+                    // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
+
+                    RectTransform rt = draggable.GetComponent<RectTransform>();
+                    rt.sizeDelta = new Vector2(155, 155);
+
+                    ///////////////////////////////////////////////////////////////
+
+                    // Need to add rigid body for interaction:
+                    draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+
+                    if (draggable != null)
+                    {
+                        _currentDragged = draggable; // Copy
+                        _currentDragged.GetComponent<Image>().color = normalColor;
+                        initDrag();
+                    }
                 }
             }
         }
@@ -117,11 +132,14 @@ public class S_DragController : MonoBehaviour
         _isDragActive = false;
         _lastDragged.GetComponent<Image>().color = normalColor;
 
-        if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits")
+        if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"
+            )
         {
+            // if && currentUnitsPanel.previewActive == true
             // Code for adding unit to panel
-
-            
+            // ADD ORIGINAL
+            currentUnitsPanel.AddUnitSLot(_lastDragged.GetComponent<S_InventoryUnitSlot>()); 
+            _lastDragged.GetComponent<Image>().color = addedColor;
 
         }
 

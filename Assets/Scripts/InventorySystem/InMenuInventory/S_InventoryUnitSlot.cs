@@ -13,7 +13,8 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     [SerializeField] private Button slotButton;
     //[SerializeField] private Button slotButton;
 
-    private bool belongsToUnitsPanel = false;
+    [SerializeField] private bool belongsToUnitsPanel = false;
+    [SerializeField] private bool canDrag = true;
 
     private void Start()
     {
@@ -51,5 +52,20 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     public void AssignSlotButtonCallback(System.Action onClickCallback)
     {
         slotButton.onClick.AddListener(() => onClickCallback());
+    }
+
+    public bool GetCanDrag()
+    {
+        return canDrag;
+    }
+
+    public void SetCanDragTrue()
+    {
+        canDrag = true;
+    }
+
+    public void SetCanDragFalse()
+    {
+        canDrag = false;
     }
 }
