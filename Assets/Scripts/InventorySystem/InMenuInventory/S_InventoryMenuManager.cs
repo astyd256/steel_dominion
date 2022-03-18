@@ -14,8 +14,8 @@ public class S_InventoryMenuManager : MonoBehaviour
     [SerializeField] private Transform inventoryContainer; // Container for inventory
     [SerializeField] private GameObject inventoryPanel;    // Inventory panel
     [SerializeField] private Button inventoryOpenButton;   // Inventory open button
-    [SerializeField] private Color ActiveButtonColor;
-    [SerializeField] private Color ButtonColor;
+    [SerializeField] public Color ActiveButtonColor;
+    [SerializeField] public Color ButtonColor;
     [SerializeField] private bool inventoryActive = false;
 
     [SerializeField] private Vector2 slotSize;

@@ -13,12 +13,21 @@ public class S_CurrentUnitsPanel : MonoBehaviour
 
     private int slotscount = 0;
 
-    private Vector2 slotSize;
     [SerializeField]
     public GridLayoutGroup glg = null;
     public bool previewActive = false;
     public Color defaultColor;
 
+    public bool placingSlot = false;
+    public bool shuffleReady = true;
+    private int indexForShuffle = 0;
+
+    [SerializeField] private S_InventoryUnitSlot slotInstance; // Blank
+
+    public int GetSlotsCount()
+    {
+        return slotscount;
+    }
 
     private void Awake() // In future it needs to be loaded with saved units on panel
     {
@@ -36,26 +45,28 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             slot.GetComponent<BoxCollider2D>().size = slotSize;
         }
         */
+        placingSlot = false;
     }
 
     private void UpdateColliderSize()
     {
         foreach (Transform childSlot in transform)
         {
-            childSlot.GetComponent<BoxCollider2D>().size = new Vector2(slotSize.x, slotSize.y);
+            childSlot.GetComponent<BoxCollider2D>().size = glg.cellSize;
         }
     }
 
     public void AddingSlotPreviewStart(S_InventoryUnitSlot addingSlot)
     {
         slotscount++;
-        S_InventoryUnitSlot slot = Instantiate(addingSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
-        Destroy(slot.GetComponent<Rigidbody2D>()); // MUSTHAVE
+        slotInstance = Instantiate(addingSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
+        Destroy(slotInstance.GetComponent<Rigidbody2D>()); // MUSTHAVE
 
-        slot.name = (slotscount-1).ToString(); // Name = ID in panel;
-        slotSize.x = (panelWidth / slotscount);
-        slotSize.y = panelHeight;
-        glg.cellSize = slotSize;
+        slotInstance.name = (slotscount-1).ToString(); // Name = ID in panel;
+
+        GetComponent<S_CurrentUnitsPanel>().transform.GetChild(slotscount - 1).SetSiblingIndex(indexForShuffle);
+
+        SetLayoutGroupSize((panelWidth / slotscount), panelHeight);
 
 
         UpdateColliderSize();
@@ -68,15 +79,14 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         if (previewActive == true) {
             // Destroy Preview
             slotscount--;
-            Destroy(transform.GetChild(slotscount).gameObject);
+            Destroy(transform.GetChild(indexForShuffle).gameObject);
             //
             if (slotscount > 0)
             {
-                slotSize.x = (panelWidth / slotscount);
-                slotSize.y = panelHeight;
-                glg.cellSize = slotSize;
+                SetLayoutGroupSize((panelWidth / slotscount), panelHeight);
             }
             previewActive = false;
+            shuffleReady = true;
 
             UpdateColliderSize();
 
@@ -85,9 +95,9 @@ public class S_CurrentUnitsPanel : MonoBehaviour
 
     public void AddUnitSLot(S_InventoryUnitSlot addedSlot) //_LastDragged
     {
-        // Destroy Preview ---- NOT NEEDED ANYMORE
+        if (slots.Count == 0) indexForShuffle = 0;
 
-        GetComponent<S_CurrentUnitsPanel>().transform.GetChild(transform.childCount - 1).GetComponent<Image>().color = defaultColor;
+        GetComponent<S_CurrentUnitsPanel>().transform.GetChild(indexForShuffle).GetComponent<Image>().color = defaultColor;
 
         //S_InventoryUnitSlot newslot = Instantiate(addedSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
  
@@ -96,11 +106,50 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         addedSlot.SetCanDrag(false);
 
         // Size set:
-        slotSize.x = (panelWidth / slotscount);
-        slotSize.y = panelHeight;
-        glg.cellSize = slotSize;
+        SetLayoutGroupSize((panelWidth / slotscount), panelHeight);
 
         previewActive = false;
+        shuffleReady = true;
+    }
+
+    public void ChangePlace(S_InventoryUnitSlot slotOriginal) // _lastDragged
+    {
+    }
+    public void AddingSlotPreviewShuffle() // OnTriggerEnter2D
+    {
+        //Debug.Log(shuffleReady);
+        if (shuffleReady == true)
+        {
+            // Change preview hierarchy place
+            if (transform.childCount > 0)
+            {
+                //int indexMax = transform.childCount - 1;
+                //System.Random random = new System.Random();
+                //indexForShuffle = random.Next(indexMax+2);
+                indexForShuffle = transform.childCount;
+
+                /*
+                for (int i = 0; i < indexMax; i++)
+                {
+                    GetComponent<S_CurrentUnitsPanel>().transform.GetChild(i).name = GetComponent<S_CurrentUnitsPanel>().transform.GetChild(i).GetSiblingIndex().ToString();
+                }
+                */
+            }
+
+            shuffleReady = false;
+        }
+    }
+
+    public void ShuffleFromWithinPreviewStart(S_InventoryUnitSlot shuffleSLot)
+    {
+        // For but deletion
+        shuffleReady = true;
+    }
+
+    public void ShuffleFromWithinPreviewEnd(S_InventoryUnitSlot shuffleSlot)
+    {
+
+        shuffleReady = true;
     }
 
     public void RemoveUnitFromPanel(S_InventoryUnitSlot slotToRemove)
@@ -119,9 +168,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
 
         if (slotscount > 0)
         {
-            slotSize.x = (panelWidth / slotscount);
-            slotSize.y = panelHeight;
-            glg.cellSize = slotSize;
+            SetLayoutGroupSize((panelWidth / slotscount), panelHeight);
         }
 
         toRemove = 0;
@@ -138,8 +185,28 @@ public class S_CurrentUnitsPanel : MonoBehaviour
 
     }
 
-    public Vector2 GetSize()
+    public void SetLayoutGroupSize(int x, int y)
     {
-        return slotSize;
+        glg.cellSize = new Vector2(x, y);
+    }
+
+
+    public bool GetPlacingSlotBool()
+    {
+        return placingSlot;
+    }
+
+    public void SetPlacingSlotBool(bool b)
+    {
+        placingSlot = b;
+    }
+    public void SetShuffleReady(bool b)
+    {
+        shuffleReady = b;
+    }
+
+    public bool GetShuffleReady()
+    {
+        return shuffleReady;
     }
 }

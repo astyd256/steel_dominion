@@ -92,34 +92,46 @@ public class S_DragController : MonoBehaviour
                 {
 
                     // Only works with collider
-                    // Need to create a copy of this object
-                    S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
-                    // Width and Height setting:
-
-                    RectTransform rt = draggable.GetComponent<RectTransform>();
-
                     // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
-                    if (draggable.GetDraggableType() == "InventoryUnitSlot" && draggable.GetPlace() == "InventoryUnits")
-                    {
-                        // Draggable size and collider size:
-                        rt.sizeDelta = new Vector2(155, 155);
-                        draggable.GetComponent<BoxCollider2D>().size = new Vector2(155, 155);
-                    }
-                    else if (draggable.GetDraggableType() == "InventoryUnitSlot" && draggable.GetPlace() == "UnitPanel")
-                    {
-                        rt.sizeDelta = draggable.GetComponent<BoxCollider2D>().size;
-                        draggable.GetComponent<BoxCollider2D>().size = new Vector2(rt.sizeDelta.x / 2, rt.sizeDelta.y / 2);
-                    }
-                    ///////////////////////////////////////////////////////////////
+                    
+                    if (hit.transform.gameObject.GetComponent<S_Draggable>().GetDraggableType() == "InventoryUnitSlot")
+                    {   // FROM INVENTORY
+                        if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "InventoryUnits")
+                        {
+                            // Need to create a copy of this object
+                            S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
+                            // Width and Height setting:
+                            RectTransform rt = draggable.GetComponent<RectTransform>();
+                            // Rigid body for interaction
+                            draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic; 
+                            // Draggable size and collider size:
+                            rt.sizeDelta = new Vector2(155, 155);
+                            draggable.GetComponent<BoxCollider2D>().size = new Vector2(155, 155);
 
-                    // Need to add rigid body for interaction:
-                    draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                            if (draggable != null)
+                            {
+                                _currentDragged = draggable; // Copy
+                                _currentDragged.GetComponent<Image>().color = normalColor;
+                                initDrag();
+                            }
 
-                    if (draggable != null)
-                    {
-                        _currentDragged = draggable; // Copy
-                        _currentDragged.GetComponent<Image>().color = normalColor;
-                        initDrag();
+                        } // FROM PANEL
+                        if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "UnitPanel")
+                        {
+                            //Collider size
+                            hit.transform.gameObject.GetComponent<BoxCollider2D>().size = new Vector2(155, 155);
+                            hit.transform.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                            hit.transform.gameObject.GetComponent<S_Draggable>().transform.SetParent(GameObject.Find("DragController").transform);
+                            hit.transform.gameObject.GetComponent<Image>().color = normalColor;
+                            //Size of remaining elements change
+                            if (currentUnitsPanel.GetSlotsCount() > 0)
+                            {
+                                currentUnitsPanel.SetLayoutGroupSize(1050 / currentUnitsPanel.GetSlotsCount(), 155);
+                            }
+
+                            _currentDragged = hit.transform.gameObject.GetComponent<S_Draggable>();
+                            initDrag();
+                        }
                     }
                 }
             }
@@ -145,24 +157,44 @@ public class S_DragController : MonoBehaviour
         if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"
             && currentUnitsPanel.previewActive == true)
         {
-            //
-            // Code for adding unit to panel
+            // Took from Inventory, drop on Panel
             // ADD ORIGINAL
             //currentUnitsPanel.AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
             currentUnitsPanel.AddUnitSLot(_lastDragged.GetComponent<S_InventoryUnitSlot>()); 
             _lastDragged.GetComponent<Image>().color = addedColor;
 
             _currentDragged.SetPlace("UnitPanel");
-
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady())
         {
+            // Took from Panel, drop off
             // If from unitpanel and left boundaries (collision box) then remove
             _currentDragged.SetPlace("InventoryUnits");
             currentUnitsPanel.RemoveUnitFromPanel(_lastDragged.GetComponent<S_InventoryUnitSlot>());
+            currentUnitsPanel.ChangePlace(_lastDragged.GetComponent<S_InventoryUnitSlot>());
+        }
+        else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady() == false)
+        {
+            // Took from panel, drop on panel
+            Destroy(_currentDragged.GetComponent<Rigidbody2D>()); // MUSTHAVE
+            _currentDragged.GetComponent<S_Draggable>().transform.SetParent(currentUnitsPanel.transform);
+            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(false);
+            // Size adjust on panel
+            if (currentUnitsPanel.GetSlotsCount() > 0)
+            {
+                currentUnitsPanel.SetLayoutGroupSize(1050 / currentUnitsPanel.GetSlotsCount(), 155);
+            }
+            hit.transform.gameObject.GetComponent<BoxCollider2D>().size = currentUnitsPanel.GetComponent<GridLayoutGroup>().cellSize;
         }
 
-        Destroy(_currentDragged.gameObject);
+
+        if ((_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady())
+            || (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"))
+        {
+            // Took from Panel, drop off
+            // Took from Inventory, drop on
+            Destroy(_currentDragged.gameObject);
+        }
 
     }
 

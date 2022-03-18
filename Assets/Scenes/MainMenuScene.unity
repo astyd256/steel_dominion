@@ -851,7 +851,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 130, y: 155}
+  m_CellSize: {x: 1050, y: 155}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 2
   m_ConstraintCount: 1
@@ -900,6 +900,10 @@ MonoBehaviour:
   glg: {fileID: 401420905}
   previewActive: 0
   defaultColor: {r: 0.15686275, g: 0.1254902, b: 0.27450982, a: 1}
+  placingSlot: 0
+  shuffleReady: 1
+  slotInstance: {fileID: 4109699729706030860, guid: 25eb588d186069a4aa44e2a331dbc554,
+    type: 3}
 --- !u!1 &415447607
 GameObject:
   m_ObjectHideFlags: 0
@@ -6011,7 +6015,7 @@ MonoBehaviour:
   inventoryPanel: {fileID: 1111222473}
   inventoryOpenButton: {fileID: 654717978}
   ActiveButtonColor: {r: 0, g: 0.27450982, b: 0.48627454, a: 1}
-  ButtonColor: {r: 0.20784315, g: 0.18823531, b: 0.29803923, a: 1}
+  ButtonColor: {r: 0.15686275, g: 0.1254902, b: 0.27450982, a: 1}
   inventoryActive: 0
   slotSize: {x: 0, y: 0}
 --- !u!1 &1982448914
