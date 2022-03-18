@@ -392,6 +392,8 @@ MonoBehaviour:
   unitWeightTMP: {fileID: 6019597731559826316}
   unitSpriteGUI: {fileID: 3889764401250990529}
   slotButton: {fileID: 8490851016773247860}
+  belongsToUnitsPanel: 0
+  canDrag: 1
 --- !u!114 &6681143179106474748
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,6 +408,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: InventoryUnitSlot
   place: 
+  panelRemoveReady: 0
 --- !u!1 &7727604935716733436
 GameObject:
   m_ObjectHideFlags: 0

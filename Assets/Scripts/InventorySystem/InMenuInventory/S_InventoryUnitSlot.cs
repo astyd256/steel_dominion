@@ -29,9 +29,9 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
         }
     }
 
-    public void SetBelongsToUnitsPanelToTrue()
+    public void SetBelongsToUnitsPanel(bool b)
     {
-        belongsToUnitsPanel = true;
+        belongsToUnitsPanel = b;
     }
 
     public bool GetBelongsToUnitsPanel()
@@ -59,13 +59,8 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
         return canDrag;
     }
 
-    public void SetCanDragTrue()
+    public void SetCanDrag(bool b)
     {
-        canDrag = true;
-    }
-
-    public void SetCanDragFalse()
-    {
-        canDrag = false;
+        canDrag = b;
     }
 }
