@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class S_CurrentUnitsPanel : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] private GameObject panelParent;
 
     [SerializeField] private List<S_InventoryUnitSlot> slots = new List<S_InventoryUnitSlot>();
+    [SerializeField] private int RosterWeight = 0;
+    [SerializeField] private int MaxRosterWeight = 30;
+    [SerializeField] private bool OverWeight = false;
 
     private int slotscount = 0;
 
@@ -17,6 +21,8 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     public GridLayoutGroup glg = null;
     public bool previewActive = false;
     public Color defaultColor;
+    public Color WeightUnderColor;
+    public Color WeightOverColor;
 
     public bool placingSlot = false;
     public bool shuffleReady = true;
@@ -24,6 +30,21 @@ public class S_CurrentUnitsPanel : MonoBehaviour
 
     [SerializeField] private S_InventoryUnitSlot slotInstance; // Blank
 
+
+    public void UpdateRosterWeight()
+    {
+        GameObject.Find("TextRosterSize").GetComponent<TextMeshProUGUI>().text = RosterWeight.ToString() + "/30";  
+        if (RosterWeight <= MaxRosterWeight)
+        {
+            GameObject.Find("TextRosterSize").GetComponent<TextMeshProUGUI>().color = WeightUnderColor;
+            OverWeight = false;
+        }
+        else
+        {
+            GameObject.Find("TextRosterSize").GetComponent<TextMeshProUGUI>().color = WeightOverColor;
+            OverWeight = true;
+        }
+    }
     public int GetSlotsCount()
     {
         return slotscount;
@@ -46,6 +67,11 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         }
         */
         placingSlot = false;
+        foreach(S_InventoryUnitSlot slot in slots)
+        {
+            RosterWeight += slot.GetUnitWeight();
+        }
+        UpdateRosterWeight();
     }
 
     private void UpdateColliderSize()
@@ -61,6 +87,10 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         slotscount++;
         slotInstance = Instantiate(addingSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
         Destroy(slotInstance.GetComponent<Rigidbody2D>()); // MUSTHAVE
+
+        //Roster Weight Control:
+        RosterWeight += addingSlot.GetUnitWeight();
+        UpdateRosterWeight();
 
         slotInstance.name = (slotscount-1).ToString(); // Name = ID in panel;
 
@@ -80,6 +110,9 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             // Destroy Preview
             slotscount--;
             Destroy(transform.GetChild(indexForShuffle).gameObject);
+            // Roster Weight control
+            RosterWeight -= addingSlot.GetUnitWeight();
+            UpdateRosterWeight();
             //
             if (slotscount > 0)
             {
@@ -208,5 +241,19 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     public bool GetShuffleReady()
     {
         return shuffleReady;
+    }
+
+    public void SetRosterWeight(int weight)
+    {
+        RosterWeight = weight;
+    }
+    public int GetRosterWeight()
+    {
+        return RosterWeight;
+    }
+
+    public bool GetOverWeightBool()
+    {
+        return OverWeight;
     }
 }

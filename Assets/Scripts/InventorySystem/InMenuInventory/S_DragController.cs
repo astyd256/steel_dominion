@@ -157,13 +157,17 @@ public class S_DragController : MonoBehaviour
         if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"
             && currentUnitsPanel.previewActive == true)
         {
-            // Took from Inventory, drop on Panel
-            // ADD ORIGINAL
-            //currentUnitsPanel.AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
-            currentUnitsPanel.AddUnitSLot(_lastDragged.GetComponent<S_InventoryUnitSlot>()); 
-            _lastDragged.GetComponent<Image>().color = addedColor;
+            if (currentUnitsPanel.GetOverWeightBool() == false) // If not overweight
+            {
+                // Took from Inventory, drop on Panel
+                // ADD ORIGINAL
+                //currentUnitsPanel.AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
+                currentUnitsPanel.AddUnitSLot(_lastDragged.GetComponent<S_InventoryUnitSlot>());
+                _lastDragged.GetComponent<Image>().color = addedColor;
 
-            _currentDragged.SetPlace("UnitPanel");
+                _currentDragged.SetPlace("UnitPanel");
+            }
+
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady())
         {
@@ -171,7 +175,11 @@ public class S_DragController : MonoBehaviour
             // If from unitpanel and left boundaries (collision box) then remove
             _currentDragged.SetPlace("InventoryUnits");
             currentUnitsPanel.RemoveUnitFromPanel(_lastDragged.GetComponent<S_InventoryUnitSlot>());
+            // Roster weight change
             currentUnitsPanel.ChangePlace(_lastDragged.GetComponent<S_InventoryUnitSlot>());
+            // RosterWeightChange
+            currentUnitsPanel.SetRosterWeight(currentUnitsPanel.GetRosterWeight() - _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
+            currentUnitsPanel.UpdateRosterWeight();
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady() == false)
         {
