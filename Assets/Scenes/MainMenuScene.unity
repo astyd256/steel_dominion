@@ -1033,6 +1033,7 @@ MonoBehaviour:
   slots: []
   RosterWeight: 0
   MaxRosterWeight: 30
+  OverWeight: 0
   glg: {fileID: 401420905}
   previewActive: 0
   defaultColor: {r: 0.15686275, g: 0.1254902, b: 0.27450982, a: 1}
@@ -1220,6 +1221,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryMenuManager: {fileID: 1980655378}
   currentUnitsPanel: {fileID: 401420907}
+  ActiveButtonColor: {r: 0, g: 0.27450982, b: 0.48627454, a: 1}
+  ButtonColor: {r: 0.15686275, g: 0.1254902, b: 0.27450982, a: 1}
 --- !u!1 &495013903
 GameObject:
   m_ObjectHideFlags: 0

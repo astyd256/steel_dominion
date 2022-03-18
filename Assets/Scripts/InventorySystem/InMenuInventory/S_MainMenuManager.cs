@@ -6,6 +6,8 @@ public class S_MainMenuManager : MonoBehaviour
 {
     [SerializeField] private S_InventoryMenuManager inventoryMenuManager = null;
     [SerializeField] private S_CurrentUnitsPanel currentUnitsPanel = null;
+    [SerializeField] public Color ActiveButtonColor;
+    [SerializeField] public Color ButtonColor;
 
     public void SavePlayer()
     {
