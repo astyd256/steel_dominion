@@ -60,7 +60,7 @@ public class S_InventoryMenuManager : MonoBehaviour
     public void CreateSlot(SO_UnitItemData unit)
     {
         S_InventoryUnitSlot slot = Instantiate(unitInventorySlotPrefab, inventoryContainer);
-        slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite());
+        slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite(), unit);
         slot.AssignSlotButtonCallback(() => OpenItemMenu(slot));
         unitInventorySlots.Add(slot);
         

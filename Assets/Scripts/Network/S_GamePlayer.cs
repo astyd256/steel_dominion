@@ -364,8 +364,6 @@ namespace Mirror
         [Command]
         public void CmdGetUnits(List<int> unitsids, uint id)
         {
-            //Debug.Log("NetId - " + id);
-
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }
 

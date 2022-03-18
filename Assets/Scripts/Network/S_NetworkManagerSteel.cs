@@ -305,9 +305,9 @@ namespace Mirror
         public void ServerGetPlayerUnits(NetworkConnection conn, List<int> UnitsIds)
         {
             if(InGamePlayers[0].connectionToClient == conn)
-                firstPlayerUnits = UnitsIds;
+                firstPlayerUnits = UnitsIds.ToList();
             else if(InGamePlayers[1].connectionToClient == conn)
-                SecondPlayerUnits = UnitsIds;
+                SecondPlayerUnits = UnitsIds.ToList();
         }
 
         [Server]

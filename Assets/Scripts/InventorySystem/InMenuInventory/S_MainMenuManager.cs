@@ -11,10 +11,17 @@ public class S_MainMenuManager : MonoBehaviour
     {
         List<int> unitsIds = new List<int>();
 
-        foreach (var unit in inventoryMenuManager.GetUnits())
+        foreach(Transform unit in currentUnitsPanel.transform)
         {
-            unitsIds.Add(unit.id);
+            int id = unit.gameObject.GetComponent<S_InventoryUnitSlot>().GetUnitData().GetId();
+            unitsIds.Add(id);
+
         }
+
+       // foreach (var unit in inventoryMenuManager.GetUnits())
+       // {
+       //     unitsIds.Add(unit.id);
+       // }
 
         S_SavePlayerData.SavePlayer("Default", unitsIds);
     }
