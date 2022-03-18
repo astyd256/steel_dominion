@@ -2669,8 +2669,9 @@ GameObject:
   m_Component:
   - component: {fileID: 782800577}
   - component: {fileID: 782800576}
+  - component: {fileID: 782800578}
   m_Layer: 0
-  m_Name: LoginManager
+  m_Name: FirebaseManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2705,6 +2706,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &782800578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782800575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c451eda9cf194a4438d1b7741e17529b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  level: 0
 --- !u!1 &828680676
 GameObject:
   m_ObjectHideFlags: 0
@@ -4355,6 +4369,7 @@ MonoBehaviour:
   Menu: {fileID: 1055076859}
   Email: {fileID: 1460894260}
   Password: {fileID: 2026106077}
+  usernamePanel: {fileID: 1915967918}
 --- !u!4 &1333359399
 Transform:
   m_ObjectHideFlags: 0
