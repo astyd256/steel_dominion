@@ -361,7 +361,7 @@ GameObject:
   - component: {fileID: 1621854251882792973}
   - component: {fileID: 1786154194135735892}
   - component: {fileID: 9072911403067549064}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SquareEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -433,7 +433,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 1
-  m_BaseOffset: 0
+  m_BaseOffset: 0.75
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &1621854251882792973

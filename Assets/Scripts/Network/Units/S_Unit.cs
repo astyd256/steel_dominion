@@ -31,19 +31,21 @@ namespace Mirror
         {
             Chase,
             Attack,
-            Idle
+            Idle,
+            AttackAfterPause,
+            TargetLooking
         }
 
         protected State unitState = State.Idle;
 
-        private int Teamid = 0;
+        protected int Teamid = 0;
         protected GameObject target = null;
 
         private bool chase = false;
 
         private S_NetworkManagerSteel gameroom;
 
-        private S_NetworkManagerSteel GameRoom
+        protected S_NetworkManagerSteel GameRoom
         {
             get
             {
@@ -126,7 +128,7 @@ namespace Mirror
         }
 
         [Server]
-        public void ResetState()
+        public virtual void ResetState()
         {
             Debug.Log("Reseting");
             CalcDistances();
@@ -141,7 +143,7 @@ namespace Mirror
         }
 
         [Server]
-        public void CalcDistances()
+        public virtual void CalcDistances()
         {
             Debug.Log("Calc distance");
 
@@ -154,7 +156,6 @@ namespace Mirror
 
             foreach (GameObject unit in unitlists)
             {
-                Debug.Log("checking unit");
                 float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
                 if (dist < minDistance)
                 {
