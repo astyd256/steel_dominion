@@ -1,10 +1,14 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.AI;
 
 namespace Mirror
 {
-    public class S_MeleeUnits : S_Unit
+    public class S_RangeTank : S_Unit
     {
-       
         [ServerCallback]
 
         private void Update()
@@ -54,5 +58,6 @@ namespace Mirror
                 }
             }
         }
+
     }
 }

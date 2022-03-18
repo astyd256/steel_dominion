@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
-using TMPro;
 
 namespace Mirror
 {
@@ -15,30 +14,30 @@ namespace Mirror
         [SerializeField]
         private Slider healthBar = null;
         [SerializeField]
-        private NavMeshAgent agent = null;
+        protected NavMeshAgent agent = null;
         [SerializeField]
-        private Transform AttackSpherePoint = null;
+        protected Transform AttackSpherePoint = null;
 
         private float maxHealth = 0f;
         private float health = 0f;
 
-        private int maxDamage = 2;
-        private int minDamage = 1;
+        protected int maxDamage = 2;
+        protected int minDamage = 1;
 
 
-        private float distTotarget;
+        protected float distTotarget;
 
-        private enum State
+        protected enum State
         {
             Chase,
             Attack,
             Idle
         }
 
-        State unitState = State.Idle;
+        protected State unitState = State.Idle;
 
         private int Teamid = 0;
-        private GameObject target = null;
+        protected GameObject target = null;
 
         private bool chase = false;
 
@@ -80,50 +79,50 @@ namespace Mirror
 
         private void Update()
         {
-            if (unitState == State.Idle) return;
+            //if (unitState == State.Idle) return;
 
-            if (target != null)
-            {
-                if (unitState == State.Attack) return;
+            //if (target != null)
+            //{
+            //    if (unitState == State.Attack) return;
 
-                if (distTotarget < 2f && unitState != State.Attack)
-                {
-                    Debug.Log("Trying to attack!");
-                    this.transform.LookAt(target.transform.position);
-                    this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+            //    if (distTotarget < 2f && unitState != State.Attack)
+            //    {
+            //        Debug.Log("Trying to attack!");
+            //        this.transform.LookAt(target.transform.position);
+            //        this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
-                    agent.isStopped = true;
-                    unitState = State.Attack;
+            //        agent.isStopped = true;
+            //        unitState = State.Attack;
 
-                    Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
+            //        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
 
-                    foreach (var hitCollider in colliders)
-                    {
-                        if(hitCollider.gameObject == target)
-                        {
-                            Debug.Log("Damage to " + target.name);
+            //        foreach (var hitCollider in colliders)
+            //        {
+            //            if(hitCollider.gameObject == target)
+            //            {
+            //                Debug.Log("Damage to " + target.name);
 
-                            System.Random rand = new System.Random();
+            //                System.Random rand = new System.Random();
 
-                            int dmg = rand.Next(minDamage ,maxDamage);
+            //                int dmg = rand.Next(minDamage ,maxDamage);
 
-                            target.GetComponent<S_Unit>().CalcDamage(dmg);
-                            break;
-                        }
-                    }
-                    unitState = State.Idle;
-                    this.CallWithDelay(ResetState, 2f);
+            //                target.GetComponent<S_Unit>().CalcDamage(dmg);
+            //                break;
+            //            }
+            //        }
+            //        unitState = State.Idle;
+            //        this.CallWithDelay(ResetState, 2f);
 
-                    return;
-                }
-                else if (unitState == State.Chase)
-                {
+            //        return;
+            //    }
+            //    else if (unitState == State.Chase)
+            //    {
                     
-                    agent.SetDestination(target.transform.position);
-                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-                    return;
-                }
-            }
+            //        agent.SetDestination(target.transform.position);
+            //        distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+            //        return;
+            //    }
+            //}
         }
 
         [Server]
