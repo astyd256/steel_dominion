@@ -6,7 +6,9 @@ using TMPro;
 
 public class S_InventoryMenuManager : MonoBehaviour
 {
-    [SerializeField] private List<SO_UnitItemData> Units = new List<SO_UnitItemData>();
+    // All units player has in inventory
+    [SerializeField] private List<SO_UnitItemData> InventoryUnits = new List<SO_UnitItemData>();
+
     [SerializeField] private List<S_InventoryUnitSlot> unitInventorySlots = new List<S_InventoryUnitSlot>();
     [SerializeField] private S_InventoryUnitSlot unitInventorySlotPrefab; // SLOT PREFAB
     [SerializeField] private Transform inventoryContainer; // Container for inventory
@@ -48,7 +50,7 @@ public class S_InventoryMenuManager : MonoBehaviour
     {
         slotSize = GetComponent<GridLayoutGroup>().cellSize;
         // INITIALIZE INVENTORY EXISTING BUTTONS
-        foreach (SO_UnitItemData unit in Units)
+        foreach (SO_UnitItemData unit in InventoryUnits)
         {
             CreateSlot(unit);
         }
@@ -99,7 +101,7 @@ public class S_InventoryMenuManager : MonoBehaviour
 
     public List<SO_UnitItemData> GetUnits()
     {
-        return Units;
+        return InventoryUnits;
     }
 
     public void Start()

@@ -68,6 +68,7 @@ public class S_Draggable : MonoBehaviour
             this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
         {
             panelRemoveReady = false;
+            this.GetComponent<Image>().color = _color;
         }
     }
 
@@ -86,6 +87,7 @@ public class S_Draggable : MonoBehaviour
         {
             // Remove Unit
             panelRemoveReady = true;
+            this.GetComponent<Image>().color = Color.black;
         }
     }
 

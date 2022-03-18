@@ -96,11 +96,20 @@ public class S_DragController : MonoBehaviour
                     S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
                     // Width and Height setting:
 
-                    // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
-
                     RectTransform rt = draggable.GetComponent<RectTransform>();
-                    rt.sizeDelta = new Vector2(155, 155);
 
+                    // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
+                    if (draggable.GetDraggableType() == "InventoryUnitSlot" && draggable.GetPlace() == "InventoryUnits")
+                    {
+                        // Draggable size and collider size:
+                        rt.sizeDelta = new Vector2(155, 155);
+                        draggable.GetComponent<BoxCollider2D>().size = new Vector2(155, 155);
+                    }
+                    else if (draggable.GetDraggableType() == "InventoryUnitSlot" && draggable.GetPlace() == "UnitPanel")
+                    {
+                        rt.sizeDelta = draggable.GetComponent<BoxCollider2D>().size;
+                        draggable.GetComponent<BoxCollider2D>().size = new Vector2(rt.sizeDelta.x / 2, rt.sizeDelta.y / 2);
+                    }
                     ///////////////////////////////////////////////////////////////
 
                     // Need to add rigid body for interaction:

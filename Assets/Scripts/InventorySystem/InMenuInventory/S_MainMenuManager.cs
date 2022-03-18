@@ -5,6 +5,7 @@ using UnityEngine;
 public class S_MainMenuManager : MonoBehaviour
 {
     [SerializeField] private S_InventoryMenuManager inventoryMenuManager = null;
+    [SerializeField] private S_CurrentUnitsPanel currentUnitsPanel = null;
 
     public void SavePlayer()
     {

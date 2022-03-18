@@ -1077,6 +1077,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventoryMenuManager: {fileID: 1980655378}
+  currentUnitsPanel: {fileID: 401420907}
 --- !u!1 &495013903
 GameObject:
   m_ObjectHideFlags: 0
@@ -5992,13 +5993,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da2e42fb747554b4c9b223c15ed4472a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Units:
-  - {fileID: 11400000, guid: 43c4f61ad04861447a09732a0f088546, type: 2}
-  - {fileID: 11400000, guid: 43c4f61ad04861447a09732a0f088546, type: 2}
-  - {fileID: 11400000, guid: 20b6f66e542ddbb44bf73523cf756b12, type: 2}
-  - {fileID: 11400000, guid: 20b6f66e542ddbb44bf73523cf756b12, type: 2}
-  - {fileID: 11400000, guid: ee6bdf47735f5f54eaab8beaba5256b7, type: 2}
-  - {fileID: 11400000, guid: ee6bdf47735f5f54eaab8beaba5256b7, type: 2}
+  InventoryUnits: []
   unitInventorySlots: []
   unitInventorySlotPrefab: {fileID: 4109699729706030860, guid: 25eb588d186069a4aa44e2a331dbc554,
     type: 3}
