@@ -159,10 +159,12 @@ namespace Mirror
                 float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
                 if (dist < minDistance)
                 {
-                    Debug.Log("checking unit = new target");
+                    
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;
+                    Debug.Log("checking unit = new " + target.name + " Dis = " + distTotarget);
+                    agent.isStopped = false;
                 }
             }
         }
@@ -176,6 +178,7 @@ namespace Mirror
             //Dead
             if (health <= 0)
             {
+                Debug.Log("Died");
                 GameRoom.RemoveBattleUnit(Teamid, this.gameObject);
                 Destroy(this.gameObject);
             }
