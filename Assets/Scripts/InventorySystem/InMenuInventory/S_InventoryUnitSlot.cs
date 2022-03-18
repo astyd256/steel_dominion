@@ -18,6 +18,11 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
 
     [SerializeField] private SO_UnitItemData unitData;
 
+    public int GetUnitWeight()
+    {
+        return unitData.UnitWeight;
+    }
+
     private void Start()
     {
         // Initialize BELONG variables

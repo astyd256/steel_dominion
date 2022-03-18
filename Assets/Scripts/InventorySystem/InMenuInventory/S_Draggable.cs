@@ -49,26 +49,48 @@ public class S_Draggable : MonoBehaviour
         else if (this.transform.parent.CompareTag("UnitPanel"))
         {
             this.place = "UnitPanel";
-            _size = this.GetComponentInParent<S_CurrentUnitsPanel>().GetSize();
+            _size = this.GetComponentInParent<S_CurrentUnitsPanel>().GetComponent<GridLayoutGroup>().cellSize;
         }
     }
 
     // IT DRAGS ONLY COPY OF AN OBJECT
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" && 
-            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false)
+        
+    }
+
+    // Shuffle
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
+            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false && GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().GetPlacingSlotBool() == false)
         {
+            // From inventory slot drag over panel
             this.GetComponent<Image>().color = Color.black;
 
-            // Code for preview of putting unit on panel:
+            // Shuffle from outside of panel preview start:
+            other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewShuffle();
+
             other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
+            // Placing = potential placement (preview active)
+            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
         }
         else if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
-            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
+            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true && GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().GetPlacingSlotBool() == false)
         {
+            // From Panel Slot drag over panel
             panelRemoveReady = false;
-            this.GetComponent<Image>().color = _color;
+            this.GetComponent<Image>().color = GameObject.Find("InventoryUnitsParent").gameObject.GetComponent<S_InventoryMenuManager>().ButtonColor;
+            // Logic For shuffle change
+            // Shuffle change means new position for preview
+            // FOR FUTURE
+
+            //Shuffle within panel:
+            other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewShuffle();
+            other.GetComponent<S_CurrentUnitsPanel>().ShuffleFromWithinPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
+
+            // Preview active == true
+            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
         }
     }
 
@@ -77,17 +99,24 @@ public class S_Draggable : MonoBehaviour
         if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
             this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false)
         {
+            // From Inventory exit panel
+            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(false);
             this.GetComponent<Image>().color = _color;
 
-            // Preview end call:
+            // Shuffle outside panel preview end:
             other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
         }
         else if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" 
             && this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
         {
+            // From Panel exit panel
+            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(false);
             // Remove Unit
             panelRemoveReady = true;
             this.GetComponent<Image>().color = Color.black;
+
+            // Shuffle within panel preview end:
+            other.GetComponent<S_CurrentUnitsPanel>().ShuffleFromWithinPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
         }
     }
 
