@@ -8,10 +8,9 @@ public class SO_UnitItemData : ScriptableObject
     public GameObject prefab;
     public int UnitWeight = 1;
     public Sprite unitSprite;
-    //TODO написать сохранение на ид и в геймплеере написать поиск по ассету SO
-
-
-
+    public int maxHealth = 1;
+    public int minDamage = 1;
+    public int maxDamage = 2;
 
     // INVENTORY ITEM
     public string GetName()
@@ -37,6 +36,21 @@ public class SO_UnitItemData : ScriptableObject
     public GameObject GetPrefab()
     {
         return prefab;
+    }
+
+    public int GetMinDamage()
+    {
+        return minDamage;
+    }
+
+    public int GetMaxDamage()
+    {
+        return maxDamage;
+    }
+
+    public int GetMaxHealth()
+    {
+        return maxHealth;
     }
     //////////////////
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Mirror
 {
@@ -12,7 +13,7 @@ namespace Mirror
 
         [Header("Network Info")]
         [SerializeField]
-        protected Text adressText;
+        protected TMP_InputField adressText;
         // Start is called before the first frame update
 
         private void OnEnable()

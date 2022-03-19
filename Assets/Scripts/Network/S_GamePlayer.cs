@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 namespace Mirror
@@ -17,6 +18,11 @@ namespace Mirror
         public GameObject InventoryItem;
         [SerializeField]
         public SO_UnitsToPlay unitsData;
+        [SerializeField]
+        private TMP_Text weightText = null;
+
+        public int maxWeight = 0;
+        public int currentWeight = 0;
 
         private List<GameObject> unitBtns = new List<GameObject>();
 
@@ -28,8 +34,9 @@ namespace Mirror
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
-        [SerializeField] private Slider timeBar = null;
- 
+        [SerializeField] private GameObject unitsInventory = null;
+        [SerializeField] private Button passButton = null;
+
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
         [SerializeField] private GameObject spawnArea = null;
@@ -60,12 +67,14 @@ namespace Mirror
         public override void OnStartAuthority()
         {
             //SendPlayerNameToServer
+            
+            gameUI.SetActive(true);
+
             S_PlayerData data = S_SavePlayerData.LoadPlayer();
 
             CmdSetDisplayName(data.playername);
             CmdGetUnits(data.unitData, netId);
-
-            gameUI.SetActive(true);
+  
             ListUnits();
 
             this.CallWithDelay(CmdReadyUp, 3f);
@@ -115,20 +124,12 @@ namespace Mirror
                 unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
                 placeState = false;
                 idToPlace = -1;
+                placeState = !placeState;
                 return;
             }
 
-            placeState = !placeState;
+            placeState = true;
             idToPlace = index;
-
-           // Debug.Log("Index to remove = " + index);
-           //Units.RemoveAt(index);
-
-            //ListUnits();
-           // for(int i = index; i<Units.Count;i++)
-            //{
-                
-           // }
         }
 
         public void ListUnits()
@@ -154,8 +155,13 @@ namespace Mirror
                 var itemScript = obj.GetComponent<S_UnitButton>();
                 itemName.text = unit.displayName;
                 itemScript.unitListid = i;
+                itemScript.unitWeight = unit.GetWeight();
                 itemScript.ClientUnitClicked += ToggleToPlaceUnit;
                 i++;
+
+                if (currentWeight + unit.GetWeight() > maxWeight)
+                    obj.GetComponent<Button>().interactable = false;
+                
             }
         }
        
@@ -206,7 +212,6 @@ namespace Mirror
         void Update()
         {
             if(timerState)
-            {
                 if(timerRemaining > 0)
                 {
                     timerRemaining -= Time.deltaTime;
@@ -218,19 +223,21 @@ namespace Mirror
                     timerRemaining = 0f;
                     timerState = false;
                 }
-            }
 
             if(Input.GetMouseButtonDown(0) && placeState)
             {
+                if (EventSystem.current.IsPointerOverGameObject()) return;
+                
                 var ray = playercamera.ScreenPointToRay(Input.mousePosition);
 
                 LayerMask mask = LayerMask.GetMask("OnlyRaycast");
                 if(Physics.Raycast(ray, out RaycastHit hit, mask))
                 {
                     placeState = false;
+
+                    if(currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
                     //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
                     //unitBtns.RemoveAt(idToPlace);
-                    CmdPlaceUnit(idToPlace, hit.point);
                     //ListUnits();
                 }
 
@@ -243,22 +250,52 @@ namespace Mirror
         [TargetRpc]
         public void TargetRpcRemoveUnitFromHand(int idToRemove)
         {
+            currentWeight += Units[idToRemove].GetWeight();
+
+            weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
+
             Units.RemoveAt(idToRemove);
+
             ListUnits();
         }
-        [ClientRpc]
-        public void UpdateGameDisplay(float newValue, bool startTimer)
+        [TargetRpc]
+        public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI)
         {
             timerRemaining = newValue;
             timerState = startTimer;
+
+            unitsInventory.SetActive(showInventoryUI);
+
+            if(currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
+            else passButton.gameObject.SetActive(false);
         }
 
         [TargetRpc]
-        public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits)
+        public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits, bool CanPlace, int maxWeightToPlace, bool resetWeight)
         {
             timerRemaining = newTimerValue;
             timerState = startTimer;
-            spawnArea.SetActive(true);
+
+            maxWeight = maxWeightToPlace;
+
+            if (resetWeight) currentWeight = 0;
+
+            if (CanPlace)
+            {
+                spawnArea.SetActive(true);
+                unitsInventory.SetActive(true);
+
+                if (currentWeight > 0) passButton.gameObject.SetActive(true);
+                else passButton.gameObject.SetActive(false);
+            }
+            else
+            {
+                spawnArea.SetActive(false);
+                unitsInventory.SetActive(false);
+                passButton.gameObject.SetActive(false);
+            }
+
+            Units.Clear();
 
             foreach (int id in startUnits)
             {
@@ -271,7 +308,6 @@ namespace Mirror
         [TargetRpc]
         public void SetupSpawnAreaClientRPC(int areaindex)
         {
-            Debug.Log("Find area = " + areaindex);
             if (areaindex == 1)
             {
                 spawnArea = GameObject.FindWithTag("FirstSpawnArea");
@@ -296,6 +332,20 @@ namespace Mirror
             ListUnits();
         }
 
+        public void btnPass()
+        {
+            spawnArea.SetActive(false);
+            unitsInventory.SetActive(false);
+            passButton.gameObject.SetActive(false);
+            passTurns();
+        }
+
+        [Command]
+        private void passTurns()
+        {
+            GameRoom.passTurnPlayer(connectionToClient);
+        }
+
         [Command]
         private void CmdSetDisplayName(string displayName)
         {
@@ -314,17 +364,7 @@ namespace Mirror
         [Command]
         public void CmdGetUnits(List<int> unitsids, uint id)
         {
-            Debug.Log("ConnectionToClient - " + connectionToClient);
-            Debug.Log("ConnectionToClient id - " + connectionToClient.connectionId);
-            Debug.Log("NetId - " + id);
-            //NetworkConnection conn;
-            //Debug.Log("Connection id - " + conn.connectionId);
-
-            // foreach (int id in unitsids)
-            // {
-            //   Debug.Log("Loaded id = " + id);
-            // Units.Add(unitsData.UnitsData[id]);
-            //}
+            //Debug.Log("NetId - " + id);
 
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }
