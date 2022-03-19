@@ -41,8 +41,6 @@ namespace Mirror
         protected int Teamid = 0;
         protected GameObject target = null;
 
-        private bool chase = false;
-
         private S_NetworkManagerSteel gameroom;
 
         protected S_NetworkManagerSteel GameRoom
@@ -187,7 +185,7 @@ namespace Mirror
             {
                 Debug.Log("Died");
                 GameRoom.RemoveBattleUnit(Teamid, this.gameObject);
-                Destroy(this.gameObject);
+                //Destroy(this.gameObject);
             }
 
             SetHealthBarValue(health / maxHealth);
