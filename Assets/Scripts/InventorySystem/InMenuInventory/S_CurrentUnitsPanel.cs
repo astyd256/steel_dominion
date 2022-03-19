@@ -6,8 +6,8 @@ using TMPro;
 
 public class S_CurrentUnitsPanel : MonoBehaviour
 {
-    [SerializeField] int panelWidth;
-    [SerializeField] int panelHeight;
+    [SerializeField] public int panelWidth;
+    [SerializeField] public int panelHeight;
     [SerializeField] private GameObject panelParent;
 
     [SerializeField] private List<S_InventoryUnitSlot> slots = new List<S_InventoryUnitSlot>();
@@ -66,12 +66,15 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             slot.GetComponent<BoxCollider2D>().size = slotSize;
         }
         */
+        panelHeight = Mathf.FloorToInt(GetComponent<RectTransform>().rect.height);
+        panelWidth = Mathf.FloorToInt(GetComponent<RectTransform>().rect.width);
         placingSlot = false;
         foreach(S_InventoryUnitSlot slot in slots)
         {
             RosterWeight += slot.GetUnitWeight();
         }
         UpdateRosterWeight();
+
     }
 
     private void UpdateColliderSize()

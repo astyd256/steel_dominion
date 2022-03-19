@@ -128,7 +128,7 @@ public class S_DragController : MonoBehaviour
                             {
                                 if (currentUnitsPanel.GetSlotsCount() - 1 > 0)
                                 {
-                                    currentUnitsPanel.SetLayoutGroupSize(1050 / (currentUnitsPanel.GetSlotsCount()-1), 155);
+                                    currentUnitsPanel.SetLayoutGroupSize(currentUnitsPanel.panelWidth / (currentUnitsPanel.GetSlotsCount()-1), currentUnitsPanel.panelHeight);
                                 }
                                 currentUnitsPanel.RosterWeight = (currentUnitsPanel.RosterWeight - hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
 
@@ -196,7 +196,7 @@ public class S_DragController : MonoBehaviour
             // Size adjust on panel
             if (currentUnitsPanel.GetSlotsCount() > 0)
             {
-                currentUnitsPanel.SetLayoutGroupSize(1050 / currentUnitsPanel.GetSlotsCount(), 155);
+                currentUnitsPanel.SetLayoutGroupSize(currentUnitsPanel.panelWidth / currentUnitsPanel.GetSlotsCount(), currentUnitsPanel.panelHeight);
             }
             hit.transform.gameObject.GetComponent<BoxCollider2D>().size = currentUnitsPanel.GetComponent<GridLayoutGroup>().cellSize;
         }
