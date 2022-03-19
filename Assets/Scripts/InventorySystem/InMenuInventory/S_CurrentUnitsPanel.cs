@@ -6,14 +6,14 @@ using TMPro;
 
 public class S_CurrentUnitsPanel : MonoBehaviour
 {
-    [SerializeField] int panelWidth;
-    [SerializeField] int panelHeight;
+    [SerializeField] public int panelWidth;
+    [SerializeField] public int panelHeight;
     [SerializeField] private GameObject panelParent;
 
     [SerializeField] private List<S_InventoryUnitSlot> slots = new List<S_InventoryUnitSlot>();
-    [SerializeField] private int RosterWeight = 0;
-    [SerializeField] private int MaxRosterWeight = 30;
-    [SerializeField] private bool OverWeight = false;
+    [SerializeField] public int RosterWeight = 0;
+    [SerializeField] public int MaxRosterWeight = 30;
+    [SerializeField] public bool OverWeight = false;
 
     private int slotscount = 0;
 
@@ -66,12 +66,15 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             slot.GetComponent<BoxCollider2D>().size = slotSize;
         }
         */
+        panelHeight = Mathf.FloorToInt(GetComponent<RectTransform>().rect.height);
+        panelWidth = Mathf.FloorToInt(GetComponent<RectTransform>().rect.width);
         placingSlot = false;
         foreach(S_InventoryUnitSlot slot in slots)
         {
             RosterWeight += slot.GetUnitWeight();
         }
         UpdateRosterWeight();
+
     }
 
     private void UpdateColliderSize()
@@ -88,9 +91,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         slotInstance = Instantiate(addingSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
         Destroy(slotInstance.GetComponent<Rigidbody2D>()); // MUSTHAVE
 
-        //Roster Weight Control:
-        RosterWeight += addingSlot.GetUnitWeight();
-        UpdateRosterWeight();
+        //Roster Weight Control at Draggable OnTriggerEnter2D
 
         slotInstance.name = (slotscount-1).ToString(); // Name = ID in panel;
 
@@ -109,10 +110,8 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         if (previewActive == true) {
             // Destroy Preview
             slotscount--;
-            Destroy(transform.GetChild(indexForShuffle).gameObject);
-            // Roster Weight control
-            RosterWeight -= addingSlot.GetUnitWeight();
-            UpdateRosterWeight();
+            Destroy(transform.GetChild(indexForShuffle).gameObject); // Bug here on inventory close
+            // Roster Weight control is at TriggerEnter2D
             //
             if (slotscount > 0)
             {
@@ -241,19 +240,5 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     public bool GetShuffleReady()
     {
         return shuffleReady;
-    }
-
-    public void SetRosterWeight(int weight)
-    {
-        RosterWeight = weight;
-    }
-    public int GetRosterWeight()
-    {
-        return RosterWeight;
-    }
-
-    public bool GetOverWeightBool()
-    {
-        return OverWeight;
     }
 }
