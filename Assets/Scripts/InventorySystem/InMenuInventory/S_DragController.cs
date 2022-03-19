@@ -18,8 +18,6 @@ public class S_DragController : MonoBehaviour
 
     private RaycastHit2D hit;
 
-    private string dragSource;
-
     [SerializeField] private S_CurrentUnitsPanel currentUnitsPanel = null;
     [SerializeField] private Transform unitCopyParent;
     [SerializeField] private Color normalColor;
@@ -157,7 +155,7 @@ public class S_DragController : MonoBehaviour
         if (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"
             && currentUnitsPanel.previewActive == true)
         {
-            if (currentUnitsPanel.GetOverWeightBool() == false) // If not overweight
+            if (currentUnitsPanel.OverWeight == false) // If not overweight
             {
                 // Took from Inventory, drop on Panel
                 // ADD ORIGINAL
@@ -165,7 +163,7 @@ public class S_DragController : MonoBehaviour
                 currentUnitsPanel.AddUnitSLot(_lastDragged.GetComponent<S_InventoryUnitSlot>());
                 _lastDragged.GetComponent<Image>().color = addedColor;
 
-                _currentDragged.SetPlace("UnitPanel");
+                _currentDragged.SetPlaceUnitPanel();
             }
 
         }
@@ -173,12 +171,12 @@ public class S_DragController : MonoBehaviour
         {
             // Took from Panel, drop off
             // If from unitpanel and left boundaries (collision box) then remove
-            _currentDragged.SetPlace("InventoryUnits");
+            _currentDragged.SetPlaceInventoryUnits();
             currentUnitsPanel.RemoveUnitFromPanel(_lastDragged.GetComponent<S_InventoryUnitSlot>());
             // Roster weight change
             currentUnitsPanel.ChangePlace(_lastDragged.GetComponent<S_InventoryUnitSlot>());
             // RosterWeightChange
-            currentUnitsPanel.SetRosterWeight(currentUnitsPanel.GetRosterWeight() - _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
+            currentUnitsPanel.RosterWeight = (currentUnitsPanel.RosterWeight - _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
             currentUnitsPanel.UpdateRosterWeight();
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady() == false)

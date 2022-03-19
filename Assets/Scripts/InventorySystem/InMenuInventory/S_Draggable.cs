@@ -22,17 +22,24 @@ public class S_Draggable : MonoBehaviour
         _size = new Vector2(x, y);
     }
 
-    public void SetPlace(string place)
-    {
-       this.place = place;
-    }
-    public string GetPlace()
-    {
-        return place;
-    }
     public string GetDraggableType()
     {
         return type;
+    }
+    public void SetPlaceUnitPanel()
+    {
+        this.place = "UnitPanel";
+    }
+
+    public void SetPlaceInventoryUnits()
+    {
+        this.place = "InventoryUnits";
+    }
+
+
+    public string GetPlace()
+    {
+        return place;
     }
 
     private void Start()

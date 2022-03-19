@@ -11,9 +11,9 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] private GameObject panelParent;
 
     [SerializeField] private List<S_InventoryUnitSlot> slots = new List<S_InventoryUnitSlot>();
-    [SerializeField] private int RosterWeight = 0;
-    [SerializeField] private int MaxRosterWeight = 30;
-    [SerializeField] private bool OverWeight = false;
+    [SerializeField] public int RosterWeight = 0;
+    [SerializeField] public int MaxRosterWeight = 30;
+    [SerializeField] public bool OverWeight = false;
 
     private int slotscount = 0;
 
@@ -109,7 +109,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         if (previewActive == true) {
             // Destroy Preview
             slotscount--;
-            Destroy(transform.GetChild(indexForShuffle).gameObject);
+            Destroy(transform.GetChild(indexForShuffle).gameObject); // Bug here on inventory close
             // Roster Weight control
             RosterWeight -= addingSlot.GetUnitWeight();
             UpdateRosterWeight();
@@ -241,19 +241,5 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     public bool GetShuffleReady()
     {
         return shuffleReady;
-    }
-
-    public void SetRosterWeight(int weight)
-    {
-        RosterWeight = weight;
-    }
-    public int GetRosterWeight()
-    {
-        return RosterWeight;
-    }
-
-    public bool GetOverWeightBool()
-    {
-        return OverWeight;
     }
 }

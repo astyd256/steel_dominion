@@ -48,7 +48,6 @@ public class S_InventoryMenuManager : MonoBehaviour
     // On open inventory
     public void InitInventory()
     {
-        slotSize = GetComponent<GridLayoutGroup>().cellSize;
         // INITIALIZE INVENTORY EXISTING BUTTONS
         foreach (SO_UnitItemData unit in InventoryUnits)
         {
@@ -60,7 +59,7 @@ public class S_InventoryMenuManager : MonoBehaviour
     public void CreateSlot(SO_UnitItemData unit)
     {
         S_InventoryUnitSlot slot = Instantiate(unitInventorySlotPrefab, inventoryContainer);
-        slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite(), unit);
+        slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite(), unit, slotSize);
         slot.AssignSlotButtonCallback(() => OpenItemMenu(slot));
         unitInventorySlots.Add(slot);
         
@@ -92,6 +91,12 @@ public class S_InventoryMenuManager : MonoBehaviour
         }
         inventoryPanel.SetActive(!inventoryPanel.activeSelf);
         inventoryActive = !inventoryActive;
+
+        // SlotSize refresh
+        if (inventoryActive)
+        {
+            GameObject.Find("InventoryUnitsParent").GetComponent<GridLayoutGroup>().cellSize = slotSize;
+        }
     }
 
     public Vector2 GetSlotSize()

@@ -52,12 +52,13 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     }
 
     // SET DISPLAYED VALUES
-    public void InitSlotVisualisation(int unitWeight, string unitName, Sprite unitSprite, SO_UnitItemData newData)
+    public void InitSlotVisualisation(int unitWeight, string unitName, Sprite unitSprite, SO_UnitItemData newData, Vector2 slotSize)
     {
         unitNameTMP.text = unitName;
         unitWeightTMP.text = unitWeight.ToString();
         unitSpriteGUI.sprite = unitSprite;
         unitData = newData;
+        GetComponent<BoxCollider2D>().size = slotSize;
         
     }
 
