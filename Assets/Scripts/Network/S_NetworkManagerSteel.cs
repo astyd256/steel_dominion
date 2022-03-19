@@ -18,7 +18,6 @@ namespace Mirror
         private float RemainingTime = 0f;
         private bool timerisRunning = false;
         
-
         [Header("Game process")]
         [SerializeField]
         private SO_UnitsToPlay unitsData;
@@ -279,7 +278,7 @@ namespace Mirror
                 {
                     RemainingTime -= Time.deltaTime;
                 }
-                else
+                else if(RemainingTime <= 0)
                 {
                     //Timer end event
                     Debug.Log("Timer ended!");
@@ -456,13 +455,39 @@ namespace Mirror
                 }
                 else
                 {
-                    Debug.Log("Units clearing!");
-                    matchState = MatchState.BattleEndingState;
-                    timerisRunning = true;
-                    RemainingTime = 3f;
-                    InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
-                    InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
-                    this.CallWithDelay(DestroyAllUnits, 2.5f);
+                    if(firstPlayerUnits.Count == 0 || SecondPlayerUnits.Count == 0)
+                    {
+                        timerisRunning = true;
+                        RemainingTime = 30f;
+                        matchState = MatchState.AfterMatchState;
+                        this.CallWithDelay(DestroyAllUnits, 2.5f);
+
+                        if(firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count == 0)
+                        {
+                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
+                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
+                        }
+                        else if (firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count > 0)
+                        {
+                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
+                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
+                        }
+                        else if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count == 0)
+                        {
+                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
+                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("Units clearing!");
+                        matchState = MatchState.BattleEndingState;
+                        timerisRunning = true;
+                        RemainingTime = 3f;
+                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                        this.CallWithDelay(DestroyAllUnits, 2.5f);
+                    }                  
                 }
                 return;
             }     

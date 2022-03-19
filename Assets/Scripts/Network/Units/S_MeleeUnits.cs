@@ -25,6 +25,7 @@ namespace Mirror
 
             if (target != null)
             {
+               // Debug.Log("Update = " + unitState + " Dis = " + distTotarget);
                 if (unitState == State.Attack) return;
 
                 if ((distTotarget < 1.5f && unitState != State.Attack) || ShouldAttack)
@@ -65,15 +66,17 @@ namespace Mirror
 
                     ShouldAttack = false;
 
-                    if (distTotarget < 5.5f)
+                    if (distTotarget < 6f)
                     {
-                        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 1.5f);
+                        // Debug.Log("Check Should attack!");
+                        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 1f);
 
                         foreach (var hitCollider in colliders)
                         {
-                            if (hitCollider.gameObject.name == target.name)
+                            //  Debug.Log("Check  =  "+ hitCollider.name);
+                            if (hitCollider.gameObject == target)
                             {
-
+                                //Debug.Log("Should attack!");
                                 //Debug.Log("In range for attack = " + unitState);
                                 ShouldAttack = true;
                                 //break;
@@ -82,11 +85,11 @@ namespace Mirror
                     }
                     return;
                 }
-                else if(distTotarget > 1.5f)
-                {
-                    agent.SetDestination(target.transform.position);
-                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-                }
+                //else if(distTotarget > 2f && unitState != State.Attack)
+                //{
+                //    agent.SetDestination(target.transform.position);
+                //    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+                //}
             }
         }
     }

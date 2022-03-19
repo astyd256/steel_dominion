@@ -61,6 +61,18 @@ namespace Mirror
 
             minDamage = miDamage;
             maxDamage = maDamage;
+            ClientSetData(teamid);
+        }
+
+        public int GetTeam()
+        {
+            return Teamid;
+        }
+
+        [ClientRpc]
+        public void ClientSetData(int teamid)
+        {
+            Teamid = teamid;
         }
 
         [Server]
@@ -128,7 +140,7 @@ namespace Mirror
         [Server]
         public virtual void ResetState()
         {
-            Debug.Log("Reseting");
+         //   Debug.Log("Reseting");
             CalcDistances();
 
             if (target != null) unitState = State.Chase;
@@ -151,7 +163,7 @@ namespace Mirror
         [Server]
         public virtual void CalcDistances()
         {
-            Debug.Log("Calc distance");
+            //Debug.Log("Calc distance");
 
             target = null;
             float minDistance = 1000000;
@@ -168,13 +180,13 @@ namespace Mirror
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;
-                    Debug.Log("checking unit = new " + target.name + " Dis = " + distTotarget);
+                 //   Debug.Log("checking unit = new " + target.name + " Dis = " + distTotarget);
                     agent.isStopped = false;
                 }
             }
         }
 
-        [Server]
+        [ServerCallback]
         public void CalcDamage(float dmg)
         {
             health = health - dmg;
@@ -183,7 +195,7 @@ namespace Mirror
             //Dead
             if (health <= 0)
             {
-                Debug.Log("Died");
+               // Debug.Log("Died");
                 GameRoom.RemoveBattleUnit(Teamid, this.gameObject);
                 //Destroy(this.gameObject);
             }
