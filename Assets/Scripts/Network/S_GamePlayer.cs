@@ -72,6 +72,8 @@ namespace Mirror
 
             S_PlayerData data = S_SavePlayerData.LoadPlayer();
 
+            transform.parent = GameObject.Find("CameraRotator").transform;
+
             CmdSetDisplayName(data.playername);
             CmdGetUnits(data.unitData, netId);
   
@@ -244,6 +246,10 @@ namespace Mirror
                 //Ray ray;
                 //ray.GetType
                 // ray = playercamera.ScreenPointToRay(Input.mousePosition);
+            }
+            else if(Input.GetMouseButton(0) && !placeState)
+            {
+                GameObject.Find("CameraRotator").transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
             }
         }
 
