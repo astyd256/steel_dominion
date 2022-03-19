@@ -1973,7 +1973,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &687878977
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2773,7 +2773,6 @@ GameObject:
   m_Component:
   - component: {fileID: 782800577}
   - component: {fileID: 782800576}
-  - component: {fileID: 782800578}
   m_Layer: 0
   m_Name: FirebaseManager
   m_TagString: Untagged
@@ -2793,9 +2792,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 740527eae6069a4419169b6522465335, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Email: {fileID: 1460894260}
-  Password: {fileID: 2026106077}
-  Log: {fileID: 2095974515}
+  emailField: {fileID: 1460894260}
+  passwordField: {fileID: 2026106077}
+  logField: {fileID: 2095974515}
 --- !u!4 &782800577
 Transform:
   m_ObjectHideFlags: 0
@@ -2810,19 +2809,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &782800578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 782800575}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c451eda9cf194a4438d1b7741e17529b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  level: 0
 --- !u!1 &828680676
 GameObject:
   m_ObjectHideFlags: 0
@@ -3757,7 +3743,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1055076860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4474,7 +4460,7 @@ MonoBehaviour:
   Menu: {fileID: 1055076859}
   Email: {fileID: 1460894260}
   Password: {fileID: 2026106077}
-  usernamePanel: {fileID: 1915967918}
+  userPanel: {fileID: 1915967918}
 --- !u!4 &1333359399
 Transform:
   m_ObjectHideFlags: 0
@@ -6053,7 +6039,6 @@ GameObject:
   - component: {fileID: 1915967916}
   - component: {fileID: 1915967919}
   - component: {fileID: 1915967918}
-  - component: {fileID: 1915967917}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -6080,18 +6065,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 320, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1915967917
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915967915}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6829598625abaa447a140bd87724ce09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1915967918
 MonoBehaviour:
   m_ObjectHideFlags: 0

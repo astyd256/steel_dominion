@@ -21,7 +21,7 @@ public class LoginInterfaceManager : MonoBehaviour
     [SerializeField]
     private TMP_InputField Password;
     [SerializeField]
-    private TMP_Text usernamePanel;
+    private TMP_Text userPanel;
 
 
     public static LoginInterfaceManager instance;
@@ -50,7 +50,7 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
-        DBManager.instance.updateUserLevel();
+        userPanel.text = $"name {FirebaseManager.instance.GetUserName()}\n xp {FirebaseManager.instance.GetUserXp()}";
     }
     public void toRegisterMenu()
     {
@@ -68,10 +68,4 @@ public class LoginInterfaceManager : MonoBehaviour
     {
         RegisterButton.interactable = (Email.text.Length >= 8 && Password.text.Length >= 8);
     }
-
-    public void updateUsernamePanel()
-    {
-        usernamePanel.text = $"Level {DBManager.instance.level}";
-    } 
-
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ using TMPro;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
+using Firebase.Extensions;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -13,14 +15,14 @@ public class FirebaseManager : MonoBehaviour
 
     public FirebaseAuth auth;
     public FirebaseUser user;
-    public DatabaseReference DBReference;
-    //[Header("LoginEventHandler")]
+    public DatabaseReference dbReference;
+    private int xp = 0;
     [SerializeField]
-    private TMP_InputField Email;
+    private TMP_InputField emailField;
     [SerializeField]
-    private TMP_InputField Password;
+    private TMP_InputField passwordField;
     [SerializeField]
-    private TMP_Text Log;
+    private TMP_Text logField;
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -35,7 +37,6 @@ public class FirebaseManager : MonoBehaviour
         }
         StartCoroutine(CheckAndFixDependencies());
     }
-
     private IEnumerator CheckAndFixDependencies()
     {
         var checkAndFixDependenciesTask = FirebaseApp.CheckAndFixDependenciesAsync();
@@ -50,13 +51,13 @@ public class FirebaseManager : MonoBehaviour
         }
         else
         {
-            Log.text = $"Could not resolve all Firebase depedencies: {dependencyResult}";
+            logField.text = $"Could not resolve all Firebase depedencies: {dependencyResult}";
         }
     }
     private void InitializeFirebase() // TODO: Really should consider moving AutoLogin couroutine from InitializeFirebase()
     {
         auth = FirebaseAuth.DefaultInstance;
-        DBReference = FirebaseDatabase.DefaultInstance.RootReference;
+        dbReference = FirebaseDatabase.DefaultInstance.RootReference;
 
         StartCoroutine(CheckAutoLogin());
 
@@ -85,7 +86,8 @@ public class FirebaseManager : MonoBehaviour
     {
         if(user != null)
         {
-            Log.text = $"Successfuy Autologin as {user.UserId}";
+            logField.text = $"Successfuy Autologin as {user.UserId}";
+ 
             //TODO: Email Verification
             LoginInterfaceManager.instance.toMainMenu();
         }
@@ -96,52 +98,8 @@ public class FirebaseManager : MonoBehaviour
     }
     public void Registeration()
     {   
-        StartCoroutine(RegisterLogic(Email.text, Password.text));
-    }
-    public void LoginAnonymous() //TODO: Rewrite code
-    {
-        //succeeded = true;
-        auth.SignInAnonymouslyAsync().ContinueWith(task => {
-            if (task.IsCanceled) {
-                //succeeded = false;
-                Log.text = "SignInAnonymously canceled.";
-                return;
-            }
-            if (task.IsFaulted) {
-                //succeeded = false;
-                Log.text = "SignInAnonymously encounterd an error: " + task.Exception;
-                return;
-            }
-
-            user = task.Result;
-            LoginInterfaceManager.instance.toMainMenu();
-            return;        
-        });
-
-        //if (succeeded) LoginInterfaceManager.instance.toMainMenu(); //TODO: Add some interface for user to know that the action failed
-    }    
-    public void Login()
-    {
-        StartCoroutine(LoginLogic(Email.text, Password.text));
-    } 
-    private void AuthStateChanged(object sender, System.EventArgs e)
-    {
-        bool signedIn = user == auth.CurrentUser && auth.CurrentUser != null;
-        if (!signedIn && user != null)
-        {
-            //toLobby();
-            Log.text = "Signed Out";
-            user = null;
-        }
-
-        user = auth.CurrentUser;
-        
-        if (signedIn) //TODO: Add display name to users
-        {
-            if (user.DisplayName == null)
-            Log.text = $"Signed in as {user.UserId}";
-        }
-    }
+        StartCoroutine(RegisterLogic(emailField.text, passwordField.text));
+    }   
     private IEnumerator RegisterLogic(string _email, string _password)
     {
         var registerTask = auth.CreateUserWithEmailAndPasswordAsync(_email, _password);
@@ -176,12 +134,12 @@ public class FirebaseManager : MonoBehaviour
                     output = "Session Expired";
                     break;
             }
-            Log.text = output;
+            logField.text = output;
             yield break;
         }
         else
         {
-            Log.text = $"Signed in as {user.UserId}";
+            logField.text = $"Signed in as {user.UserId}"; //TODO: add base level
             if (user.IsEmailVerified) // TODO: Add email verification
             {
                 LoginInterfaceManager.instance.toMainMenu();
@@ -194,6 +152,10 @@ public class FirebaseManager : MonoBehaviour
         }
 
     }
+    public void Login()
+    {
+        StartCoroutine(LoginLogic(emailField.text, passwordField.text));
+    } 
     private IEnumerator LoginLogic(string _email, string _password)
     {
 
@@ -206,7 +168,7 @@ public class FirebaseManager : MonoBehaviour
             FirebaseException firebaseException = (FirebaseException)loginTask.Exception.GetBaseException();
             AuthError authError = (AuthError)firebaseException.ErrorCode;
 
-            Log.text = authError.ToString();
+            logField.text = authError.ToString();
             string output = "Unknown error, please try again.";
             switch (authError)
             {
@@ -229,12 +191,12 @@ public class FirebaseManager : MonoBehaviour
                     output = "No internet connection";
                     break;
             }
-            Log.text = authError + '\n' + output;
+            logField.text = authError + '\n' + output;
             yield break;
         }
         else
         {
-            Log.text = $"Signed in as {user.UserId}";
+            logField.text = $"Signed in as {user.UserId}";
             if (user.IsEmailVerified) // TODO: Add email verification
             {
                 LoginInterfaceManager.instance.toMainMenu();
@@ -245,12 +207,104 @@ public class FirebaseManager : MonoBehaviour
             }
         }   
     }
+    public void LoginAnonymous()
+        {
+            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task => {
+                if (task.IsCanceled) {
+                    logField.text = "Sign as Guest canceled.";
+                    return;
+                }
+                if (task.IsFaulted) {
+                    logField.text = "Sign as Guest encounterd an error: " + task.Exception;
+                    return;
+                }
+
+                user = task.Result;
+                logField.text = $"Loged as {user.UserId}"; //TODO: Clear Debug
+                LoginInterfaceManager.instance.toMainMenu();
+            });
+        } 
+    private void AuthStateChanged(object sender, System.EventArgs e)
+    {
+        bool signedIn = user == auth.CurrentUser && auth.CurrentUser != null;
+        if (!signedIn && user != null)
+        {
+            //toLobby();
+            logField.text = "Signed Out";
+            user = null;
+        }
+
+        user = auth.CurrentUser;
+        
+        if (signedIn) //TODO: Add display name to users
+        {
+            if (user.DisplayName == null)
+            logField.text = $"Signed in as {user.UserId}";
+        }
+    }
     public void LogOut() 
     {
         if (auth.CurrentUser != null) {
             auth.SignOut();
+            xp = 0;
         }
-        else Log.text = "User not logged";
+        else logField.text = "User not logged";
         LoginInterfaceManager.instance.toLobby();
+    }
+    public void updateUserXp()
+	{   
+		StartCoroutine(retriveUserData());
+	} 
+	private IEnumerator retriveUserData() //TODO: Rewrite this code maybe sometime
+	{
+		var retriveDataTask = dbReference.Child(FirebaseManager.instance.user.UserId).GetValueAsync();
+
+		yield return new  WaitUntil(predicate: () => retriveDataTask.IsCompleted);
+		if (retriveDataTask.Exception != null)
+		{
+			Debug.LogWarning(message: $"Failed to register task with {retriveDataTask.Exception}");
+		}
+		else if (retriveDataTask.Result == null)
+		{
+			//No data exists yet
+			Debug.LogWarning(message: $"No data found with given critteria");  
+		}
+		else
+		{
+			//Data has been retrieved
+			xp = Convert.ToInt32(retriveDataTask.Result.Child("xp").Value.ToString());
+        }
+    }
+    public void ChangeUsername (string newUsername) //TODO: Add something when change Username is failed
+    {
+        user = auth.CurrentUser;
+        if (user != null) {
+        Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
+            DisplayName = newUsername
+        };
+        user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
+            if (task.IsCanceled) {
+            Debug.LogError("UpdateUserProfileAsync was canceled.");
+            return;
+            }
+            if (task.IsFaulted) {
+            Debug.LogError("UpdateUserProfileAsync encountered an error: " + task.Exception);
+            return;
+            }
+            Debug.Log("User profile updated successfully.");
+        });
+        }
+    }
+    public int GetUserXp(){
+        if (user == null) logField.text = "Error! User is null!";
+        return xp;
+    }
+    public string GetUserName(){
+        if (user == null) 
+        {
+            logField.text = "Error fetching name! User is null!";
+            return "";    
+        }
+        else return user.DisplayName;
     }
 }
