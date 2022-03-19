@@ -70,7 +70,7 @@ namespace Mirror
         {
             CalcDistances();
 
-            ShowHealth();
+            ShowHealth(Teamid);
             //this.transform.LookAt(target.transform.position);
             //this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
@@ -137,9 +137,17 @@ namespace Mirror
         }
 
         [ClientRpc]
-        public void ShowHealth()
+        public void ShowHealth(int teamId)
         {
             canvasUI.gameObject.SetActive(true);
+
+            GameObject[] findedPlayers;
+
+            findedPlayers =  GameObject.FindGameObjectsWithTag("Player");
+
+            foreach(GameObject player in findedPlayers)
+                if((teamId == player.GetComponent<S_GamePlayer>().netId - 1) && !player.GetComponent<S_GamePlayer>().hasAuthority)
+                    healthBar.fillRect.GetComponent<Image>().color = Color.red;
         }
 
         [Server]
@@ -159,7 +167,6 @@ namespace Mirror
                 float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
                 if (dist < minDistance)
                 {
-                    
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;

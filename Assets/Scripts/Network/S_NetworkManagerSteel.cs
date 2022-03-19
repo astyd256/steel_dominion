@@ -380,6 +380,8 @@ namespace Mirror
             if(teamId == 0) firstPlayerBattleUnits.Remove(unit);
             else if(teamId == 1) secondPlayerBattleUnits.Remove(unit);
 
+
+
             //Check for round ending
         }
 
