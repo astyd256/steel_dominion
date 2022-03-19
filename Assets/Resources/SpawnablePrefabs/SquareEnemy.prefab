@@ -505,6 +505,7 @@ MonoBehaviour:
   healthBar: {fileID: 8172639642115374631}
   agent: {fileID: 3021362168342929516}
   AttackSpherePoint: {fileID: 963112985762517476}
+  AttackCooldown: 2
 --- !u!1 &6607846496114406535
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,7 +601,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7358559788693792098}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.7500001, z: -0}
+  m_LocalPosition: {x: 0, y: -0, z: 0.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6169720695860966583}

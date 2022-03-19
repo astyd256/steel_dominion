@@ -594,7 +594,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5134630461791880894}
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 1.25, z: 0}
+  m_LocalPosition: {x: 0, y: 1.3, z: -1.733}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5134630461234329488}
@@ -660,8 +660,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5134630462308171411}
   - component: {fileID: 7352811909031706578}
-  - component: {fileID: 7638070524411057444}
   - component: {fileID: 8055061654728428621}
+  - component: {fileID: 999274859735282440}
+  - component: {fileID: 9198749888288028835}
   - component: {fileID: 2333236054583380170}
   - component: {fileID: 1240474559673399686}
   - component: {fileID: 3606507606733234580}
@@ -705,20 +706,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!136 &7638070524411057444
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5134630462308171412}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 2.5
-  m_Height: 12
-  m_Direction: 2
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!195 &8055061654728428621
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -741,6 +728,32 @@ NavMeshAgent:
   m_BaseOffset: 1.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!65 &999274859735282440
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5134630462308171412}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6, y: 5, z: 10}
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!65 &9198749888288028835
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5134630462308171412}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 5, y: 1, z: 3}
+  m_Center: {x: 0, y: 0, z: 5}
 --- !u!114 &2333236054583380170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -811,8 +824,14 @@ MonoBehaviour:
   agent: {fileID: 8055061654728428621}
   AttackSpherePoint: {fileID: 9168584934556794804}
   towerRotateObject: {fileID: 5134630461791880893}
-  fireRate: 1
-  turningRate: 30
+  barrelRotateObject: {fileID: 5134630461234329488}
+  projectilePrefab: {fileID: 1721495210498149149, guid: 0792e03750c21064d895b85364c47b74,
+    type: 3}
+  fireRate: 0.5
+  pauseBetweenAttack: 5
+  shotsAmount: 5
+  barrelRotateRate: 540
+  turningRate: 15
 --- !u!1 &7800094441553012254
 GameObject:
   m_ObjectHideFlags: 0
