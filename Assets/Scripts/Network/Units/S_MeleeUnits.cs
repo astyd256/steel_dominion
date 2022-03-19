@@ -1,70 +1,88 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using TMPro;
 
 namespace Mirror
 {
-    public class S_MeleeUnits : NetworkBehaviour
+    public class S_MeleeUnits : S_Unit
     {
-        public Canvas canvasUI = null;
-        public TMP_Text testText = null;
 
-        private int Teamid = 0;
-        private GameObject target = null;
-
-        private S_NetworkManagerSteel gameroom;
-
-        private S_NetworkManagerSteel GameRoom
-        {
-            get
-            {
-                if (gameroom != null) { return gameroom; }
-                return gameroom = NetworkManager.singleton as S_NetworkManagerSteel;
-            }
-        }
+        private bool ShouldAttack = false;
 
         [Server]
-        public void SetTeam(int teamid)
+        public override void ResetState()
         {
-            Teamid = teamid;
-        }
-
-        [Server]
-        public void StartBehaviour()
-        {
+           // Debug.Log("Reseting");
+            ShouldAttack = false;
             CalcDistances();
-            ChangeText(target.name);
-            this.transform.LookAt(target.transform.position);
-            this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+
+            if (target != null) unitState = State.Chase;
         }
 
-        [Client]
-        public void ChangeText(string newText)
+        [ServerCallback]
+
+        private void Update()
         {
-            canvasUI.gameObject.SetActive(true);
-            testText.text = newText;
-        }
+            if (unitState == State.Idle) return;
 
-        public void CalcDistances()
-        {
-            float minDistance = 1000000;
-            List<GameObject> unitlists = new List<GameObject>();
-
-            if (Teamid == 0) unitlists = GameRoom.GetBattlePlayerUnits(1).ToList();
-            else unitlists = GameRoom.GetBattlePlayerUnits(0).ToList();
-
-            foreach (GameObject unit in unitlists)
+            if (target != null)
             {
-                float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
-                if (dist < minDistance)
+                if (unitState == State.Attack) return;
+
+                if ((distTotarget < 1.5f && unitState != State.Attack) || ShouldAttack)
                 {
-                    minDistance = dist;
-                    target = unit;
+                    // Debug.Log("Trying to attack!");
+                    this.transform.LookAt(target.transform.position);
+                    this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+
+                    agent.isStopped = true;
+                    unitState = State.Attack;
+
+                    Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 2f);
+                   // Debug.Log("Trying to attack!");
+                    foreach (var hitCollider in colliders)
+                    {
+                        if (hitCollider.gameObject.name == target.name)
+                        {
+                            // Debug.Log("Damage to " + target.name);
+                           // Debug.Log("enemy hit");
+                            System.Random rand = new System.Random();
+
+                            int dmg = rand.Next(minDamage, maxDamage);
+
+                            target.GetComponent<S_Unit>().CalcDamage(dmg);
+                            break;
+                        }
+                    }
+                    unitState = State.Idle;
+                    this.CallWithDelay(ResetState, 2f);
+
+                    return;
+                }
+                else if (unitState == State.Chase)
+                {
+
+                    agent.SetDestination(target.transform.position);
+                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+
+                    ShouldAttack = false;
+
+                    if (distTotarget < 5.5f)
+                    {
+                        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 1.5f);
+
+                        foreach (var hitCollider in colliders)
+                        {
+                            if (hitCollider.gameObject.name == target.name)
+                            {
+
+                                //Debug.Log("In range for attack = " + unitState);
+                                ShouldAttack = true;
+                                //break;
+                            }
+                        }
+                    }
+                    return;
                 }
             }
         }
     }
 }
-

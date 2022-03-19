@@ -305,9 +305,9 @@ namespace Mirror
         public void ServerGetPlayerUnits(NetworkConnection conn, List<int> UnitsIds)
         {
             if(InGamePlayers[0].connectionToClient == conn)
-                firstPlayerUnits = UnitsIds;
+                firstPlayerUnits = UnitsIds.ToList();
             else if(InGamePlayers[1].connectionToClient == conn)
-                SecondPlayerUnits = UnitsIds;
+                SecondPlayerUnits = UnitsIds.ToList();
         }
 
         [Server]
@@ -379,6 +379,8 @@ namespace Mirror
         {
             if(teamId == 0) firstPlayerBattleUnits.Remove(unit);
             else if(teamId == 1) secondPlayerBattleUnits.Remove(unit);
+
+
 
             //Check for round ending
         }

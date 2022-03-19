@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
-using TMPro;
 
 namespace Mirror
 {
@@ -15,36 +14,38 @@ namespace Mirror
         [SerializeField]
         private Slider healthBar = null;
         [SerializeField]
-        private NavMeshAgent agent = null;
+        protected NavMeshAgent agent = null;
         [SerializeField]
-        private Transform AttackSpherePoint = null;
+        protected Transform AttackSpherePoint = null;
 
         private float maxHealth = 0f;
         private float health = 0f;
 
-        private int maxDamage = 2;
-        private int minDamage = 1;
+        protected int maxDamage = 2;
+        protected int minDamage = 1;
 
 
-        private float distTotarget;
+        protected float distTotarget;
 
-        private enum State
+        protected enum State
         {
             Chase,
             Attack,
-            Idle
+            Idle,
+            AttackAfterPause,
+            TargetLooking
         }
 
-        State unitState = State.Idle;
+        protected State unitState = State.Idle;
 
-        private int Teamid = 0;
-        private GameObject target = null;
+        protected int Teamid = 0;
+        protected GameObject target = null;
 
         private bool chase = false;
 
         private S_NetworkManagerSteel gameroom;
 
-        private S_NetworkManagerSteel GameRoom
+        protected S_NetworkManagerSteel GameRoom
         {
             get
             {
@@ -69,7 +70,7 @@ namespace Mirror
         {
             CalcDistances();
 
-            ShowHealth();
+            ShowHealth(Teamid);
             //this.transform.LookAt(target.transform.position);
             //this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
@@ -80,54 +81,54 @@ namespace Mirror
 
         private void Update()
         {
-            if (unitState == State.Idle) return;
+            //if (unitState == State.Idle) return;
 
-            if (target != null)
-            {
-                if (unitState == State.Attack) return;
+            //if (target != null)
+            //{
+            //    if (unitState == State.Attack) return;
 
-                if (distTotarget < 2f && unitState != State.Attack)
-                {
-                    Debug.Log("Trying to attack!");
-                    this.transform.LookAt(target.transform.position);
-                    this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+            //    if (distTotarget < 2f && unitState != State.Attack)
+            //    {
+            //        Debug.Log("Trying to attack!");
+            //        this.transform.LookAt(target.transform.position);
+            //        this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
-                    agent.isStopped = true;
-                    unitState = State.Attack;
+            //        agent.isStopped = true;
+            //        unitState = State.Attack;
 
-                    Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
+            //        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
 
-                    foreach (var hitCollider in colliders)
-                    {
-                        if(hitCollider.gameObject == target)
-                        {
-                            Debug.Log("Damage to " + target.name);
+            //        foreach (var hitCollider in colliders)
+            //        {
+            //            if(hitCollider.gameObject == target)
+            //            {
+            //                Debug.Log("Damage to " + target.name);
 
-                            System.Random rand = new System.Random();
+            //                System.Random rand = new System.Random();
 
-                            int dmg = rand.Next(minDamage ,maxDamage);
+            //                int dmg = rand.Next(minDamage ,maxDamage);
 
-                            target.GetComponent<S_Unit>().CalcDamage(dmg);
-                            break;
-                        }
-                    }
-                    unitState = State.Idle;
-                    this.CallWithDelay(ResetState, 2f);
+            //                target.GetComponent<S_Unit>().CalcDamage(dmg);
+            //                break;
+            //            }
+            //        }
+            //        unitState = State.Idle;
+            //        this.CallWithDelay(ResetState, 2f);
 
-                    return;
-                }
-                else if (unitState == State.Chase)
-                {
+            //        return;
+            //    }
+            //    else if (unitState == State.Chase)
+            //    {
                     
-                    agent.SetDestination(target.transform.position);
-                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-                    return;
-                }
-            }
+            //        agent.SetDestination(target.transform.position);
+            //        distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+            //        return;
+            //    }
+            //}
         }
 
         [Server]
-        public void ResetState()
+        public virtual void ResetState()
         {
             Debug.Log("Reseting");
             CalcDistances();
@@ -136,13 +137,21 @@ namespace Mirror
         }
 
         [ClientRpc]
-        public void ShowHealth()
+        public void ShowHealth(int teamId)
         {
             canvasUI.gameObject.SetActive(true);
+
+            GameObject[] findedPlayers;
+
+            findedPlayers =  GameObject.FindGameObjectsWithTag("Player");
+
+            foreach(GameObject player in findedPlayers)
+                if((teamId == player.GetComponent<S_GamePlayer>().netId - 1) && !player.GetComponent<S_GamePlayer>().hasAuthority)
+                    healthBar.fillRect.GetComponent<Image>().color = Color.red;
         }
 
         [Server]
-        public void CalcDistances()
+        public virtual void CalcDistances()
         {
             Debug.Log("Calc distance");
 
@@ -155,14 +164,14 @@ namespace Mirror
 
             foreach (GameObject unit in unitlists)
             {
-                Debug.Log("checking unit");
                 float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
                 if (dist < minDistance)
                 {
-                    Debug.Log("checking unit = new target");
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;
+                    Debug.Log("checking unit = new " + target.name + " Dis = " + distTotarget);
+                    agent.isStopped = false;
                 }
             }
         }
@@ -176,6 +185,7 @@ namespace Mirror
             //Dead
             if (health <= 0)
             {
+                Debug.Log("Died");
                 GameRoom.RemoveBattleUnit(Teamid, this.gameObject);
                 Destroy(this.gameObject);
             }

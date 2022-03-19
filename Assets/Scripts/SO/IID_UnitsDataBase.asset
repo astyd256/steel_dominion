@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: IID_UnitsDataBase
   m_EditorClassIdentifier: 
   UnitsData:
-  - {fileID: 11400000, guid: 43c4f61ad04861447a09732a0f088546, type: 2}
   - {fileID: 11400000, guid: ee6bdf47735f5f54eaab8beaba5256b7, type: 2}
+  - {fileID: 11400000, guid: 43c4f61ad04861447a09732a0f088546, type: 2}
   - {fileID: 11400000, guid: 20b6f66e542ddbb44bf73523cf756b12, type: 2}

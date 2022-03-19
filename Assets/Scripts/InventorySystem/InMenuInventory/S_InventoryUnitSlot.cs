@@ -16,6 +16,13 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     [SerializeField] private bool belongsToUnitsPanel = false;
     [SerializeField] private bool canDrag = true;
 
+    [SerializeField] private SO_UnitItemData unitData;
+
+    public int GetUnitWeight()
+    {
+        return unitData.UnitWeight;
+    }
+
     private void Start()
     {
         // Initialize BELONG variables
@@ -29,9 +36,14 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
         }
     }
 
-    public void SetBelongsToUnitsPanelToTrue()
+    public SO_UnitItemData GetUnitData()
     {
-        belongsToUnitsPanel = true;
+        return unitData;
+    }
+
+    public void SetBelongsToUnitsPanel(bool b)
+    {
+        belongsToUnitsPanel = b;
     }
 
     public bool GetBelongsToUnitsPanel()
@@ -40,11 +52,12 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
     }
 
     // SET DISPLAYED VALUES
-    public void InitSlotVisualisation(int unitWeight, string unitName, Sprite unitSprite)
+    public void InitSlotVisualisation(int unitWeight, string unitName, Sprite unitSprite, SO_UnitItemData newData)
     {
         unitNameTMP.text = unitName;
         unitWeightTMP.text = unitWeight.ToString();
         unitSpriteGUI.sprite = unitSprite;
+        unitData = newData;
         
     }
 
@@ -59,13 +72,8 @@ public class S_InventoryUnitSlot : MonoBehaviour // IT'S JUST A BLANK SHELL WITH
         return canDrag;
     }
 
-    public void SetCanDragTrue()
+    public void SetCanDrag(bool b)
     {
-        canDrag = true;
-    }
-
-    public void SetCanDragFalse()
-    {
-        canDrag = false;
+        canDrag = b;
     }
 }

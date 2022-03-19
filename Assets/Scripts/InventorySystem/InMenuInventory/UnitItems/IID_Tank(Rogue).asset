@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: IID_Tank(Rogue)
   m_EditorClassIdentifier: 
   id: 2
-  displayName: Tank(Rogue)
+  displayName: Rogue
   prefab: {fileID: 5134630462308171412, guid: b35278509bfa6f349be8a64e515b8d9a, type: 3}
   UnitWeight: 8
   unitSprite: {fileID: 21300000, guid: b99d3c32d0e0dbd428092e0ab5bf8af8, type: 3}
+  maxHealth: 50
+  minDamage: 3
+  maxDamage: 5
