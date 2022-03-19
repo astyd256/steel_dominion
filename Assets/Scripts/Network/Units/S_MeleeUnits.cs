@@ -82,6 +82,11 @@ namespace Mirror
                     }
                     return;
                 }
+                else if(distTotarget > 1.5f)
+                {
+                    agent.SetDestination(target.transform.position);
+                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+                }
             }
         }
     }

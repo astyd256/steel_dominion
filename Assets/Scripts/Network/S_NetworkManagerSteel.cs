@@ -28,14 +28,12 @@ namespace Mirror
         private List<GameObject> secondPlayerBattleUnits = new List<GameObject>();
 
         [SerializeField]
-        //private List<SO_UnitItemData> firstPlayerUnits = new List<SO_UnitItemData>();
         private List<int> firstPlayerUnits = new List<int>();
         private int firstPlayerWeight = 0;
         private bool firstCanPlace = false;
         private int firstPlayerWins = 0;
 
         [SerializeField]
-        //private List<SO_UnitItemData> SecondPlayerUnits = new List<SO_UnitItemData>();
         private List<int> SecondPlayerUnits = new List<int>();
         private int SecondPlayerWeight = 0;
         private bool secondCanPlace = false;

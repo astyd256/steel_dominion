@@ -64,7 +64,7 @@ namespace Mirror
         }
 
         [Server]
-        public void StartBehaviour()
+        public virtual void StartBehaviour()
         {
             CalcDistances();
 

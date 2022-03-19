@@ -12,27 +12,41 @@ namespace Mirror
 
         [SerializeField]
         private Transform towerRotateObject = null;
+        [SerializeField]
+        private Transform barrelRotateObject = null;
 
         [SerializeField]
         private float fireRate = 1f;
-
-        private float curFireTimer = 0f;
+        private float currentFireCooldown = 0;
 
         [SerializeField]
-        private float turningRate = 30;
+        private float pauseBetweenAttack = 5f;
+        private float currentPauseBetweenAttack = 0;
 
+        [SerializeField]
+        private int shotsAmount = 5;
+        private int currentShot = 0;
 
+        [SerializeField]
+        private float barrelRotateRate = 180f;
+
+        [SerializeField]
+        private float turningRate = 30f;
+
+        private enum TankState
+        {
+            Idle,
+            Shooting,
+            Reloading
+        }
+
+        private TankState tankState;
 
         void Start()
         {
-            towerRotateObject.rotation = Quaternion.Euler(-90, 0, 90);
+            //towerRotateObject.rotation = Quaternion.Euler(-90, 0, 90);
             unitState = State.Idle;
-        }
-
-        [ClientRpc]
-        public void RotateTower(Quaternion to)
-        {
-            towerRotateObject.rotation = Quaternion.RotateTowards(towerRotateObject.rotation, to, turningRate * Time.deltaTime);
+            tankState = TankState.Idle;
         }
 
         [Server]
@@ -40,81 +54,142 @@ namespace Mirror
         {
             if (unitState == State.Idle) return;
 
-            if (curFireTimer > 0f) curFireTimer -= Time.deltaTime;
 
-            if (target != null)
+            if (tankState == TankState.Shooting)
             {
-                if (unitState == State.AttackAfterPause) return;
+                currentFireCooldown -= Time.deltaTime;
 
-                if (distTotarget < 40f && unitState != State.Attack)
+                if (currentFireCooldown <= 0)
                 {
-                    var lookPos = target.transform.position - transform.position;
-                    Quaternion rotation = Quaternion.LookRotation(lookPos);
-
-                    rotation.eulerAngles = new Vector3(-90, 0, rotation.eulerAngles.y + 90f);
-
-                    towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
-
-
-
-                    //float angle = Quaternion.Angle(towerRotateObject.rotation, target.rotation);
-                    // if ()
-                    //  Debug.Log("Trying to attack! Rot = " + towerRotateObject.rotation.eulerAngles);
-                    //  this.transform.LookAt(target.transform.position);
-                    //  this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
-
-                    agent.isStopped = true;
-                    unitState = State.Attack;
-
-
-
-                    //Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
-
-                    //foreach (var hitCollider in colliders)
-                    //{
-                    //    if (hitCollider.gameObject == target)
-                    //    {
-                    //        Debug.Log("Damage to " + target.name);
-
-                    //        System.Random rand = new System.Random();
-
-                    //        int dmg = rand.Next(minDamage, maxDamage);
-
-                    //        target.GetComponent<S_Unit>().CalcDamage(dmg);
-                    //        break;
-                    //    }
-                    //}
-                    // unitState = State.Idle;
-                    // this.CallWithDelay(ResetState, 2f);
-
-                    return;
-                }
-                else if (unitState == State.Attack)
-                {
-                    var lookPos = target.transform.position - transform.position;
-                    Quaternion rotation = Quaternion.LookRotation(lookPos);
-
-                    rotation.eulerAngles = new Vector3(-90, 0, rotation.eulerAngles.y + 90f);
-
-                    towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
-
-                    //float angle = Quaternion.Angle(towerRotateObject.rotation, target.rotation);
-                    // if ()
-                    //   Debug.Log("Trying to attack state! Rot = " + towerRotateObject.rotation.eulerAngles);
-                    //  this.transform.LookAt(target.transform.position);
-                    //  this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
-
-                    agent.isStopped = true;
-                    //unitState = State.Attack;
-                }
-                else if (unitState == State.Chase)
-                {
-
-                    agent.SetDestination(target.transform.position);
-                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-                    return;
+                    MakeShot();
                 }
             }
+            else if (tankState == TankState.Reloading)
+            {
+                currentPauseBetweenAttack -= Time.deltaTime;
+
+                if (currentPauseBetweenAttack <= 0)
+                {
+                    Debug.Log("Reload complete!");
+                    tankState = TankState.Idle;
+                }
+            }
+
+            if (target != null)
+            {            
+                if (unitState == State.Chase && distTotarget > 35f)
+                {
+                  //  Debug.Log("Target far = " + distTotarget);
+                    agent.isStopped = false;
+                    agent.SetDestination(target.transform.position);
+                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+                }
+                else if (distTotarget < 35f)
+                {
+                   // Debug.Log("Target close = " + distTotarget);
+                    agent.isStopped = true;
+                }
+
+                if (unitState == State.Chase)
+                {
+                    var lookPos = target.transform.position - transform.position;
+
+                    Quaternion rotation = Quaternion.LookRotation(lookPos);
+
+                    rotation.eulerAngles = new Vector3(-90, 0, rotation.eulerAngles.y + 90f);
+
+                    float angle = Quaternion.Angle(towerRotateObject.rotation, rotation);
+
+                    if (angle > 0.5f) towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
+                    
+                    if(angle < 0.5f && distTotarget < 35f && (tankState != TankState.Shooting && tankState != TankState.Reloading))
+                    {
+                        Debug.Log("Start shooting seq!");
+                        TurnShootingSeq(true); 
+                    }
+                    
+
+
+                }
+            }
+
+            //if (unitState == State.Idle) return;
+
+            //if (curFireTimer > 0f) curFireTimer -= Time.deltaTime;
+
+            //if (target != null)
+            //{
+            //    if (unitState == State.AttackAfterPause) return;
+
+            //    if (distTotarget < 40f && unitState != State.Attack)
+            //    {
+            //        var lookPos = target.transform.position - transform.position;
+            //        Quaternion rotation = Quaternion.LookRotation(lookPos);
+
+            //        rotation.eulerAngles = new Vector3(-90, 0, rotation.eulerAngles.y + 90f);
+
+            //        towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
+
+
+
+            //        //float angle = Quaternion.Angle(towerRotateObject.rotation, target.rotation);
+            //        // if ()
+            //        //  Debug.Log("Trying to attack! Rot = " + towerRotateObject.rotation.eulerAngles);
+            //        //  this.transform.LookAt(target.transform.position);
+            //        //  this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+
+            //        agent.isStopped = true;
+            //        unitState = State.Attack;
+
+
+
+            //        //Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
+
+            //        //foreach (var hitCollider in colliders)
+            //        //{
+            //        //    if (hitCollider.gameObject == target)
+            //        //    {
+            //        //        Debug.Log("Damage to " + target.name);
+
+            //        //        System.Random rand = new System.Random();
+
+            //        //        int dmg = rand.Next(minDamage, maxDamage);
+
+            //        //        target.GetComponent<S_Unit>().CalcDamage(dmg);
+            //        //        break;
+            //        //    }
+            //        //}
+            //        // unitState = State.Idle;
+            //        // this.CallWithDelay(ResetState, 2f);
+
+            //        return;
+            //    }
+            //    else if (unitState == State.Attack)
+            //    {
+            //        var lookPos = target.transform.position - transform.position;
+            //        Quaternion rotation = Quaternion.LookRotation(lookPos);
+
+            //        rotation.eulerAngles = new Vector3(-90, 0, rotation.eulerAngles.y + 90f);
+
+            //        towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
+
+            //        //float angle = Quaternion.Angle(towerRotateObject.rotation, target.rotation);
+            //        // if ()
+            //        //   Debug.Log("Trying to attack state! Rot = " + towerRotateObject.rotation.eulerAngles);
+            //        //  this.transform.LookAt(target.transform.position);
+            //        //  this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
+
+            //        agent.isStopped = true;
+            //        //unitState = State.Attack;
+            //    }
+            //    else if (unitState == State.Chase)
+            //    {
+
+            //        agent.SetDestination(target.transform.position);
+            //        distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
+            //        return;
+            //    }
+            //}
         }
 
         [Client]
@@ -122,37 +197,96 @@ namespace Mirror
         {
             if (unitState == State.Idle) return;
 
+            //currentPauseBetweenAttack -= Time.deltaTime;
+
+            //if(currentPauseBetweenAttack <= 0)
+            //{
+            //    currentPauseBetweenAttack = 0;
+            //    TurnShootingSeq(false);
+            //}
+
             if (target != null)
             {
                 if (unitState == State.TargetLooking)
                 {
                     var lookPos = target.transform.position - transform.position;
+
                     Quaternion rotation = Quaternion.LookRotation(lookPos);
 
                     rotation.eulerAngles = new Vector3(-90, 0, rotation.eulerAngles.y + 90f);
 
-                    towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
+                    float angle = Quaternion.Angle(towerRotateObject.rotation, rotation);
 
-                    // dirToFace.LookAt(target.transform.position);
+                    if(angle > 0.5f) towerRotateObject.rotation = Quaternion.Slerp(towerRotateObject.rotation, rotation, Time.deltaTime * turningRate);
+                    
+                    if (angle < 0.5f && distTotarget < 35f)
+                    {
+                        Debug.Log("Look straight!");
+                    }
 
-                    // towerRotateObject.eulerAngles = new Vector3(-90, 0, dirToFace.rotation.z+90f);
 
-                    // towerRotateObject.eulerAngles = new Vector3(0, dirToFace.eulerAngles.y,0);
-
-
-
-                    // this.transform.LookAt(target.transform.position);
-                    //        this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
-
-                    //towerRotateObject.transform.eulerAngles = dirToFace;// new Vector3(-90, 0, dirToFace.z);
                 }
+
+                if (tankState == TankState.Shooting)
+                {
+                    // GameObject.Find("CameraRotator").transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
+                    barrelRotateObject.Rotate(barrelRotateRate * Time.deltaTime, 0, 0);
+                }
+
+
             }
+
         }
 
         private void Update()
         {
             if (isServer) ServerUpdate();
             else if (isClient) ClientUpdate();
+        }
+
+        [Server]
+        private void TurnShootingSeq(bool on)
+        {
+            if(on)
+            {
+                //currentPauseBetweenAttack = pauseBetweenAttack;
+                currentFireCooldown = 0;
+                currentShot = 0;
+                currentPauseBetweenAttack = 0;
+
+                tankState = TankState.Shooting;
+                ClientShooting(true);
+            }
+            else
+            {
+               // tankState = TankState.Idle;
+                ClientShooting(false);
+            }
+        }
+
+        [Server]
+        private void MakeShot()
+        {
+            currentShot++;
+            currentFireCooldown = fireRate;
+
+            if(currentShot == shotsAmount)
+            {
+                currentPauseBetweenAttack = pauseBetweenAttack;
+                tankState = TankState.Reloading;
+                Debug.Log("Reloading!");
+                TurnShootingSeq(false);
+            }
+        }
+
+        [Server]
+        public override void StartBehaviour()
+        {
+            CalcDistances();
+
+            ShowHealth(Teamid);
+
+            if (target != null) unitState = State.Chase;
         }
 
         [Server]
@@ -181,7 +315,7 @@ namespace Mirror
                     agent.isStopped = false;
                 }
             }
-            Debug.Log("Send target to client");
+   
             ClientGetTarget(target);
         }
 
@@ -192,6 +326,15 @@ namespace Mirror
             target = newTarget;
             unitState = State.TargetLooking;
             //Change state for client
+        }
+
+        [ClientRpc]
+        public void ClientShooting(bool shoot)
+        {
+            if (shoot)
+                tankState = TankState.Shooting;
+            else
+                tankState = TankState.Idle;
         }
 
     }

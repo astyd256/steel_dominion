@@ -594,7 +594,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5134630461791880894}
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 1.25, z: 0}
+  m_LocalPosition: {x: 0, y: 1.3, z: -1.733}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5134630461234329488}
@@ -811,8 +811,9 @@ MonoBehaviour:
   agent: {fileID: 8055061654728428621}
   AttackSpherePoint: {fileID: 9168584934556794804}
   towerRotateObject: {fileID: 5134630461791880893}
+  barrelRotateObject: {fileID: 5134630461234329488}
   fireRate: 1
-  turningRate: 30
+  turningRate: 15
 --- !u!1 &7800094441553012254
 GameObject:
   m_ObjectHideFlags: 0
