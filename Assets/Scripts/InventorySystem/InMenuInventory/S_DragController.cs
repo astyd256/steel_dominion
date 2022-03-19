@@ -24,6 +24,7 @@ public class S_DragController : MonoBehaviour
     [SerializeField] private Color dragColor;
     [SerializeField] private Color holdColor;
     [SerializeField] private Color addedColor;
+    [SerializeField] private Vector2 draggableColliderSize;
 
     void Update()
     {
@@ -102,9 +103,10 @@ public class S_DragController : MonoBehaviour
                             RectTransform rt = draggable.GetComponent<RectTransform>();
                             // Rigid body for interaction
                             draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic; 
-                            // Draggable size and collider size:
-                            rt.sizeDelta = new Vector2(155, 155);
-                            draggable.GetComponent<BoxCollider2D>().size = new Vector2(155, 155);
+                            // Draggable size
+                            rt.sizeDelta = hit.transform.gameObject.GetComponent<S_Draggable>().GetSize();
+                            // Collider size
+                            draggable.GetComponent<BoxCollider2D>().size = draggableColliderSize;
 
                             if (draggable != null)
                             {
@@ -117,14 +119,19 @@ public class S_DragController : MonoBehaviour
                         if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "UnitPanel")
                         {
                             //Collider size
-                            hit.transform.gameObject.GetComponent<BoxCollider2D>().size = new Vector2(155, 155);
+                            hit.transform.gameObject.GetComponent<BoxCollider2D>().size = draggableColliderSize;
                             hit.transform.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
                             hit.transform.gameObject.GetComponent<S_Draggable>().transform.SetParent(GameObject.Find("DragController").transform);
                             hit.transform.gameObject.GetComponent<Image>().color = normalColor;
                             //Size of remaining elements change
                             if (currentUnitsPanel.GetSlotsCount() > 0)
                             {
-                                currentUnitsPanel.SetLayoutGroupSize(1050 / currentUnitsPanel.GetSlotsCount(), 155);
+                                if (currentUnitsPanel.GetSlotsCount() - 1 > 0)
+                                {
+                                    currentUnitsPanel.SetLayoutGroupSize(1050 / (currentUnitsPanel.GetSlotsCount()-1), 155);
+                                }
+                                currentUnitsPanel.RosterWeight = (currentUnitsPanel.RosterWeight - hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
+
                             }
 
                             _currentDragged = hit.transform.gameObject.GetComponent<S_Draggable>();
@@ -164,6 +171,9 @@ public class S_DragController : MonoBehaviour
                 _lastDragged.GetComponent<Image>().color = addedColor;
 
                 _currentDragged.SetPlaceUnitPanel();
+                // Roster weight control (Because drop triggers OnTriggerExit, we need to add the value)
+                currentUnitsPanel.RosterWeight += _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
+                currentUnitsPanel.UpdateRosterWeight();
             }
 
         }
@@ -175,9 +185,7 @@ public class S_DragController : MonoBehaviour
             currentUnitsPanel.RemoveUnitFromPanel(_lastDragged.GetComponent<S_InventoryUnitSlot>());
             // Roster weight change
             currentUnitsPanel.ChangePlace(_lastDragged.GetComponent<S_InventoryUnitSlot>());
-            // RosterWeightChange
-            currentUnitsPanel.RosterWeight = (currentUnitsPanel.RosterWeight - _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
-            currentUnitsPanel.UpdateRosterWeight();
+            // RosterWeightChange at Draggable Trigger2D
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady() == false)
         {

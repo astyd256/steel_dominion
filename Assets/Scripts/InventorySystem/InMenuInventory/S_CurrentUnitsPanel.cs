@@ -88,9 +88,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         slotInstance = Instantiate(addingSlot, GetComponent<S_CurrentUnitsPanel>().transform); // Copy
         Destroy(slotInstance.GetComponent<Rigidbody2D>()); // MUSTHAVE
 
-        //Roster Weight Control:
-        RosterWeight += addingSlot.GetUnitWeight();
-        UpdateRosterWeight();
+        //Roster Weight Control at Draggable OnTriggerEnter2D
 
         slotInstance.name = (slotscount-1).ToString(); // Name = ID in panel;
 
@@ -110,9 +108,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             // Destroy Preview
             slotscount--;
             Destroy(transform.GetChild(indexForShuffle).gameObject); // Bug here on inventory close
-            // Roster Weight control
-            RosterWeight -= addingSlot.GetUnitWeight();
-            UpdateRosterWeight();
+            // Roster Weight control is at TriggerEnter2D
             //
             if (slotscount > 0)
             {
