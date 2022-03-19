@@ -22,8 +22,9 @@ namespace Mirror
         [Header("Game process")]
         [SerializeField]
         private SO_UnitsToPlay unitsData;
-
+        [SerializeField]
         private List<GameObject> firstPlayerBattleUnits = new List<GameObject>();
+        [SerializeField]
         private List<GameObject> secondPlayerBattleUnits = new List<GameObject>();
 
         [SerializeField]
@@ -31,14 +32,15 @@ namespace Mirror
         private List<int> firstPlayerUnits = new List<int>();
         private int firstPlayerWeight = 0;
         private bool firstCanPlace = false;
+        private int firstPlayerWins = 0;
 
         [SerializeField]
         //private List<SO_UnitItemData> SecondPlayerUnits = new List<SO_UnitItemData>();
         private List<int> SecondPlayerUnits = new List<int>();
         private int SecondPlayerWeight = 0;
         private bool secondCanPlace = false;
+        private int secondPlayerWins = 0;
 
-        private bool placingPhase = false;
         private bool firstPlayerPlacing = true;
 
 
@@ -46,6 +48,20 @@ namespace Mirror
         public static event Action OnClientDisconnected;
 
         public List<S_GamePlayer> InGamePlayers { get; } = new List<S_GamePlayer>();
+
+        private enum MatchState
+        { 
+            PlayerWaitingState,
+            UnitPlacementState,
+            BattleState,
+            BattleStartingState,
+            BattleEndingState,
+            AfterMatchState
+        }
+
+        private MatchState matchState = MatchState.PlayerWaitingState;
+        
+
 
         //Server start, stop, add player, connect client, disconnect client
         public override void OnStartServer()
@@ -148,16 +164,21 @@ namespace Mirror
         public void StartMatch()
         {
             if (!IsReadyToStart()) return;
-            Debug.Log("Starting");
-            placingPhase = true;
+
+            matchState = MatchState.UnitPlacementState;
+
             RemainingTime = PreMatchPlacementTime;
             timerisRunning = true;
 
             firstCanPlace = true;
             secondCanPlace = true;
+            firstPlayerPlacing = true;
 
             firstPlayerBattleUnits.Clear();
             secondPlayerBattleUnits.Clear();
+
+            firstPlayerWeight = 0;
+            SecondPlayerWeight = 0;
 
             List<int> unitsToSend = new List<int>();
             unitsToSend = firstPlayerUnits.ToList();
@@ -179,7 +200,7 @@ namespace Mirror
             {
                 int unitid = firstPlayerUnits[Unitid];
                 if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
-
+                Debug.Log("First player spawn unit = " + Quaternion.identity.eulerAngles);
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
 
@@ -196,7 +217,10 @@ namespace Mirror
                 int unitid = SecondPlayerUnits[Unitid];
                 if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() > InGameWeightMax) return;
 
-                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, Quaternion.identity);
+                Quaternion rot = Quaternion.identity;
+                rot.eulerAngles = new Vector3(rot.eulerAngles.x, 180, rot.eulerAngles.z);
+                Debug.Log("Second player spawn unit = " + rot.eulerAngles);
+                GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, rot);
                 NetworkServer.Spawn(unitObj);
 
                 unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
@@ -264,7 +288,7 @@ namespace Mirror
                     RemainingTime = 0f;
                     timerisRunning = false;
 
-                    if(placingPhase)
+                    if(matchState == MatchState.UnitPlacementState)
                     {
                         if (firstPlayerPlacing && firstCanPlace)
                         {
@@ -281,19 +305,34 @@ namespace Mirror
                             else
                              passTurnPlayerServer(1);
                         }
-                        else
+                        else if(!firstPlayerPlacing && !secondCanPlace)
                         {
-                            placingPhase = false;
-
-                            InGamePlayers[0].UpdateGameDisplayUI(GameTime, true, false);
-                            InGamePlayers[1].UpdateGameDisplayUI(GameTime, true, false);
-
-                            RemainingTime = GameTime;
-                            timerisRunning = true;
-
-                            foreach(GameObject unit in firstPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
-                            foreach (GameObject unit in secondPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
+                            matchState = MatchState.BattleStartingState;
+                            RemainingTime = 3f;
+                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
                         }
+                    }
+                    else if (matchState == MatchState.BattleStartingState)
+                    {
+                        matchState = MatchState.BattleState;
+
+                        InGamePlayers[0].UpdateGameDisplayUI(GameTime, true, false, false ,false);
+                        InGamePlayers[1].UpdateGameDisplayUI(GameTime, true, false, false, false);
+
+                        RemainingTime = GameTime;
+                        timerisRunning = true;
+
+                        foreach (GameObject unit in firstPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
+                        foreach (GameObject unit in secondPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
+                    }
+                    else if(matchState == MatchState.BattleEndingState)
+                    {
+                        StartMatch();
+                    }
+                    else if(matchState == MatchState.AfterMatchState)
+                    {
+                        Application.Quit();
                     }
                 }
             }
@@ -363,9 +402,10 @@ namespace Mirror
 
             if (!firstCanPlace && !secondCanPlace)
             {
+                matchState = MatchState.BattleStartingState;
                 RemainingTime = 3f;
-                InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false);
-                InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false);
+                InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
             }
         }
 
@@ -377,12 +417,82 @@ namespace Mirror
         [Server]
         public void RemoveBattleUnit(int teamId, GameObject unit)
         {
-            if(teamId == 0) firstPlayerBattleUnits.Remove(unit);
-            else if(teamId == 1) secondPlayerBattleUnits.Remove(unit);
+            Debug.Log("Killed = " + unit.name);
+            if (teamId == 0)
+            {
+                firstPlayerBattleUnits.Remove(unit);
+                Destroy(unit);
+            }
+            else if (teamId == 1)
+            {
+                secondPlayerBattleUnits.Remove(unit);
+                Destroy(unit);
+            }
 
+            int firstLeftUnits = firstPlayerBattleUnits.Count;
+            int secondLeftUnits = secondPlayerBattleUnits.Count;
 
+            if (firstLeftUnits == 0 || secondLeftUnits == 0)
+            {
+                Debug.Log("Round ended!");
+                if (firstLeftUnits == 0) secondPlayerWins++;
+                else if (secondLeftUnits == 0) firstPlayerWins++;
 
+                if (secondPlayerWins == 2 || firstPlayerWins == 2)
+                {
+                    timerisRunning = true;
+                    RemainingTime = 30f;
+                    matchState = MatchState.AfterMatchState;
+                    this.CallWithDelay(DestroyAllUnits, 2.5f);
+
+                    if (secondPlayerWins == 2)
+                    {
+                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
+                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
+                    }
+                    else if(firstPlayerWins == 2)
+                    {
+                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
+                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
+                    }
+                }
+                else
+                {
+                    Debug.Log("Units clearing!");
+                    matchState = MatchState.BattleEndingState;
+                    timerisRunning = true;
+                    RemainingTime = 3f;
+                    InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                    InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                    this.CallWithDelay(DestroyAllUnits, 2.5f);
+                }
+                return;
+            }     
             //Check for round ending
+        }
+
+        [Server]
+        public void DestroyAllUnits()
+        {
+            List<GameObject> tempUnits = firstPlayerBattleUnits.ToList();
+
+            if (firstPlayerBattleUnits.Count > 0)
+                foreach (GameObject unit in tempUnits)
+                {
+                    GameObject unitobj = unit;
+                    firstPlayerBattleUnits.Remove(unit);
+                    Destroy(unitobj);
+                }
+
+            tempUnits = secondPlayerBattleUnits.ToList();
+
+            if (secondPlayerBattleUnits.Count > 0)
+                foreach (GameObject unit in tempUnits)
+                {
+                    GameObject unitobj = unit;
+                    secondPlayerBattleUnits.Remove(unit);
+                    Destroy(unitobj);
+                }
         }
 
         //public Transform leftRacketSpawn;

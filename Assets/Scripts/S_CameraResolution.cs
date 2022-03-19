@@ -7,10 +7,11 @@ public class S_CameraResolution : MonoBehaviour
     public int x = 585, y = 270;
     public Camera cam;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Screen.SetResolution(x, y, false);
         cam.aspect = 16f / 9f;
-        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = Screen.currentResolution.refreshRate;
     }
 }

@@ -259,15 +259,22 @@ namespace Mirror
             ListUnits();
         }
         [TargetRpc]
-        public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI)
+        public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI, bool ShowResult, bool win)
         {
             timerRemaining = newValue;
             timerState = startTimer;
 
             unitsInventory.SetActive(showInventoryUI);
+            weightText.gameObject.SetActive(showInventoryUI);
 
             if(currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
             else passButton.gameObject.SetActive(false);
+
+            if(ShowResult)
+            {
+                weightText.gameObject.SetActive(true);
+                weightText.text = (win) ? "You win!" : "You lose!";
+            }
         }
 
         [TargetRpc]
@@ -278,10 +285,15 @@ namespace Mirror
 
             maxWeight = maxWeightToPlace;
 
-            if (resetWeight) currentWeight = 0;
+            if (resetWeight)
+            {
+                currentWeight = 0;
+                weightText.text = "0/"+maxWeight.ToString();
+            }
 
             if (CanPlace)
             {
+                weightText.gameObject.SetActive(true);
                 spawnArea.SetActive(true);
                 unitsInventory.SetActive(true);
 
@@ -290,6 +302,7 @@ namespace Mirror
             }
             else
             {
+                weightText.gameObject.SetActive(false);
                 spawnArea.SetActive(false);
                 unitsInventory.SetActive(false);
                 passButton.gameObject.SetActive(false);
@@ -335,6 +348,7 @@ namespace Mirror
         public void btnPass()
         {
             spawnArea.SetActive(false);
+            weightText.gameObject.SetActive(false);
             unitsInventory.SetActive(false);
             passButton.gameObject.SetActive(false);
             passTurns();
