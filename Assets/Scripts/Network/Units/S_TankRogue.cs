@@ -16,7 +16,10 @@ namespace Mirror
         private Transform barrelRotateObject = null;
 
         [SerializeField]
-        private float fireRate = 1f;
+        private Transform projectilePrefab = null;
+
+        [SerializeField]
+        private float fireRate = 2f;
         private float currentFireCooldown = 0;
 
         [SerializeField]
@@ -72,6 +75,7 @@ namespace Mirror
                 {
                     Debug.Log("Reload complete!");
                     tankState = TankState.Idle;
+                    CalcDistances();
                 }
             }
 
@@ -221,7 +225,7 @@ namespace Mirror
                     
                     if (angle < 0.5f && distTotarget < 35f)
                     {
-                        Debug.Log("Look straight!");
+                       // Debug.Log("Look straight!");
                     }
 
 
@@ -270,13 +274,39 @@ namespace Mirror
             currentShot++;
             currentFireCooldown = fireRate;
 
+            if(target == null)
+            {
+                CalcDistances();
+                return;
+            }
+
+            ClientMakeShot();
+            Transform bulletTransform = Instantiate(projectilePrefab, AttackSpherePoint.position, Quaternion.identity);
+            Vector3 shootDir = (target.transform.position - AttackSpherePoint.position).normalized;
+            
+            System.Random rand = new System.Random();
+
+            bulletTransform.GetComponent<S_TankProjectile>().SetData(rand.Next(minDamage, maxDamage), Teamid, shootDir, 100f);
+
             if(currentShot == shotsAmount)
             {
                 currentPauseBetweenAttack = pauseBetweenAttack;
                 tankState = TankState.Reloading;
                 Debug.Log("Reloading!");
                 TurnShootingSeq(false);
+                CalcDistances();
             }
+        }
+
+        [ClientRpc]
+        private void ClientMakeShot()
+        {
+            Transform bulletTransform = Instantiate(projectilePrefab, AttackSpherePoint.position, Quaternion.identity);
+            Vector3 shootDir = (target.transform.position - AttackSpherePoint.position).normalized;
+
+            System.Random rand = new System.Random();
+
+            bulletTransform.GetComponent<S_TankProjectile>().SetData(0, Teamid, shootDir, 100f);
         }
 
         [Server]
@@ -303,11 +333,10 @@ namespace Mirror
 
             foreach (GameObject unit in unitlists)
             {
-                Debug.Log("checking unit");
+                Debug.Log("checking unit for tank");
                 float dist = Vector3.Distance(this.gameObject.transform.position, unit.transform.position);
                 if (dist < minDistance)
                 {
-
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;
@@ -315,14 +344,23 @@ namespace Mirror
                     agent.isStopped = false;
                 }
             }
-   
-            ClientGetTarget(target);
+
+            if(target == null) ClientGetTarget(null);
+            else ClientGetTarget(target);
+
+            if (target != null) unitState = State.Chase;
         }
 
         [ClientRpc]
         public void ClientGetTarget(GameObject newTarget)
         {
-            Debug.Log("New target = " + newTarget.name);
+            if (newTarget == null)
+            {
+                target = null;
+                unitState = State.Idle;
+                tankState = TankState.Idle;
+                return;
+            }
             target = newTarget;
             unitState = State.TargetLooking;
             //Change state for client

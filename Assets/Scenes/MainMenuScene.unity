@@ -2477,6 +2477,8 @@ MonoBehaviour:
   PreMatchPlacementTime: 20
   InGameWeightMax: 15
   unitsData: {fileID: 11400000, guid: 3c31dee464c60a8458e17ead49d350e3, type: 2}
+  firstPlayerBattleUnits: []
+  secondPlayerBattleUnits: []
   firstPlayerUnits: 
   SecondPlayerUnits: 
 --- !u!4 &763674083
