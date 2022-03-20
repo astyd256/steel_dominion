@@ -32,4 +32,9 @@ public class S_MainMenuManager : MonoBehaviour
     {
         // S_SavePlayerData.LoadPlayer();
     }
+
+    // Settings
+
+
+
 }
