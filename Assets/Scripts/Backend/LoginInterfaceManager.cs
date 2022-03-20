@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+#if !UNITY_SERVER 
 public class LoginInterfaceManager : MonoBehaviour
 {
     [SerializeField]
@@ -17,9 +18,9 @@ public class LoginInterfaceManager : MonoBehaviour
     [SerializeField]
     private GameObject Menu;
     [SerializeField]
-    private TMP_InputField Email;
+    private TMP_InputField emailField;
     [SerializeField]
-    private TMP_InputField Password;
+    private TMP_InputField passwordField;
     [SerializeField]
     private TMP_Text userPanel;
 
@@ -36,7 +37,6 @@ public class LoginInterfaceManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
     }
     public void toLobby()
     {
@@ -50,7 +50,7 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
-        userPanel.text = $"name {FirebaseManager.instance.GetUserName()}\n xp {FirebaseManager.instance.GetUserXp()}";
+        userPanel.text = $"{FirebaseManager.instance.GetUserName()}\nlevel {Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp()/20)) + 1}";
     }
     public void toRegisterMenu()
     {
@@ -66,6 +66,19 @@ public class LoginInterfaceManager : MonoBehaviour
     }
     public void VerifyInputs() //TODO: PROBABLY rewrite this code to add more restrictions in the password.
     {
-        RegisterButton.interactable = (Email.text.Length >= 8 && Password.text.Length >= 8);
+        RegisterButton.interactable = (emailField.text.Length >= 8 && passwordField.text.Length >= 8);
+    }
+    public void Register()
+    {
+        FirebaseManager.instance.Registeration(emailField.text, passwordField.text);
+    }
+    public void Login()
+    {
+        FirebaseManager.instance.Login(emailField.text, passwordField.text);
+    }
+    public void LoginAnonymous()
+    {
+        FirebaseManager.instance.LoginAnonymous();
     }
 }
+#endif
