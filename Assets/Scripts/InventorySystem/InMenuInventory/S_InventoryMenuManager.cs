@@ -18,7 +18,7 @@ public class S_InventoryMenuManager : MonoBehaviour
     [SerializeField] private Vector2 slotSize;
 
 
-    [SerializeField] private Dictionary<SO_UnitItemData, S_InventoryUnitSlot> UnitToSlotMap = new Dictionary<SO_UnitItemData, S_InventoryUnitSlot>();
+    //[SerializeField] private Dictionary<SO_UnitItemData, S_InventoryUnitSlot> UnitToSlotMap = new Dictionary<SO_UnitItemData, S_InventoryUnitSlot>();
     
     private bool itemMenuOpened = false;
 

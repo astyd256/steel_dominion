@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
-    [SerializeField] public string _userName;
+    [SerializeField] private string _userName;
     [SerializeField] TextMeshProUGUI _userNameChangeTMP;
     [SerializeField] TextMeshProUGUI _userNameProfileTMP;
     [SerializeField] TMP_InputField _userNameInputField;
