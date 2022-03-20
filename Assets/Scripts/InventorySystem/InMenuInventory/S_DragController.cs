@@ -25,117 +25,125 @@ public class S_DragController : MonoBehaviour
     [SerializeField] private Color holdColor;
     [SerializeField] private Color addedColor;
     [SerializeField] private Vector2 draggableColliderSize;
+    [SerializeField] private S_MainMenuManager mainMenuManager;
+
+    private void Start()
+    {
+    }
 
     void Update()
     {
-        // Drop on mouseUp or touch.end
-        if (_isDragActive && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
+        if (mainMenuManager.interactive)
         {
-            Drop();
-            return;
-        }
-
-        if (Input.GetMouseButtonDown(0)) // Initial position take
-        {
-            Vector3 mousePos = Input.mousePosition;
-            _initialPosition = new Vector2(mousePos.x, mousePos.y);
-            int layermask = 1 << 5;
-            hit = Physics2D.Raycast(_initialPosition, Vector2.zero, 1000f, layermask); // taken
-            if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
+            // Drop on mouseUp or touch.end
+            if (_isDragActive && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
             {
-                _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
-                _lastDragged.GetComponent<Image>().color = holdColor;
+                Drop();
+                return;
             }
-        }
-        if (Input.GetMouseButtonUp(0)) // Clickhold highlight end
-        {
-            if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
+
+            if (Input.GetMouseButtonDown(0)) // Initial position take
             {
-                if (_lastDragged.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
+                Vector3 mousePos = Input.mousePosition;
+                _initialPosition = new Vector2(mousePos.x, mousePos.y);
+                int layermask = 1 << 5;
+                hit = Physics2D.Raycast(_initialPosition, Vector2.zero, 1000f, layermask); // taken
+                if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
                 {
-                    _lastDragged.GetComponent<Image>().color = normalColor;
-                }
-                else if (_lastDragged.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == false)
-                {
-                    _lastDragged.GetComponent<Image>().color = addedColor;
+                    _lastDragged = hit.transform.gameObject.GetComponent<S_Draggable>(); // Copied object
+                    _lastDragged.GetComponent<Image>().color = holdColor;
                 }
             }
-        }
-
-        if (Input.GetMouseButton(0))
-        {
-            Vector3 mousePos = Input.mousePosition; 
-            _screenPosition = new Vector2(mousePos.x, mousePos.y);
-        }
-        else if (Input.touchCount > 0)
-        {
-            _screenPosition = Input.GetTouch(0).position;
-        }
-        else
-        {
-            return;
-        }
-
-        if (_isDragActive)
-        {
-            Drag(); 
-        }
-        else // Try drag start
-        {
-            // Here was raycast before
-            if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + 30) || 
-                (_screenPosition.x <= _initialPosition.x - 30) || (_screenPosition.y >= _initialPosition.y + 30) ||
-                (_screenPosition.y <= _initialPosition.y - 30)))
+            if (Input.GetMouseButtonUp(0)) // Clickhold highlight end
             {
-                if (hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
+                if (hit.collider != null && hit.collider.tag == "UnitSlot") // If valid object
                 {
+                    if (_lastDragged.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
+                    {
+                        _lastDragged.GetComponent<Image>().color = normalColor;
+                    }
+                    else if (_lastDragged.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == false)
+                    {
+                        _lastDragged.GetComponent<Image>().color = addedColor;
+                    }
+                }
+            }
 
-                    // Only works with collider
-                    // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
-                    
-                    if (hit.transform.gameObject.GetComponent<S_Draggable>().GetDraggableType() == "InventoryUnitSlot")
-                    {   // FROM INVENTORY
-                        if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "InventoryUnits")
-                        {
-                            // Need to create a copy of this object
-                            S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
-                            // Width and Height setting:
-                            RectTransform rt = draggable.GetComponent<RectTransform>();
-                            // Rigid body for interaction
-                            draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic; 
-                            // Draggable size
-                            rt.sizeDelta = hit.transform.gameObject.GetComponent<S_Draggable>().GetSize();
-                            // Collider size
-                            draggable.GetComponent<BoxCollider2D>().size = draggableColliderSize;
+            if (Input.GetMouseButton(0))
+            {
+                Vector3 mousePos = Input.mousePosition;
+                _screenPosition = new Vector2(mousePos.x, mousePos.y);
+            }
+            else if (Input.touchCount > 0)
+            {
+                _screenPosition = Input.GetTouch(0).position;
+            }
+            else
+            {
+                return;
+            }
 
-                            if (draggable != null)
+            if (_isDragActive)
+            {
+                Drag();
+            }
+            else // Try drag start
+            {
+                // Here was raycast before
+                if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + 30) ||
+                    (_screenPosition.x <= _initialPosition.x - 30) || (_screenPosition.y >= _initialPosition.y + 30) ||
+                    (_screenPosition.y <= _initialPosition.y - 30)))
+                {
+                    if (hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
+                    {
+
+                        // Only works with collider
+                        // NEED TO SET APPROPRIATE SIZE AND ADD ANIMATIONS IN FUTURE:::
+
+                        if (hit.transform.gameObject.GetComponent<S_Draggable>().GetDraggableType() == "InventoryUnitSlot")
+                        {   // FROM INVENTORY
+                            if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "InventoryUnits")
                             {
-                                _currentDragged = draggable; // Copy
-                                _currentDragged.GetComponent<Image>().color = normalColor;
+                                // Need to create a copy of this object
+                                S_Draggable draggable = Instantiate(hit.transform.gameObject.GetComponent<S_Draggable>(), unitCopyParent);
+                                // Width and Height setting:
+                                RectTransform rt = draggable.GetComponent<RectTransform>();
+                                // Rigid body for interaction
+                                draggable.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                                // Draggable size
+                                rt.sizeDelta = hit.transform.gameObject.GetComponent<S_Draggable>().GetSize();
+                                // Collider size
+                                draggable.GetComponent<BoxCollider2D>().size = draggableColliderSize;
+
+                                if (draggable != null)
+                                {
+                                    _currentDragged = draggable; // Copy
+                                    _currentDragged.GetComponent<Image>().color = normalColor;
+                                    initDrag();
+                                }
+
+                            } // FROM PANEL
+                            if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "UnitPanel")
+                            {
+                                //Collider size
+                                hit.transform.gameObject.GetComponent<BoxCollider2D>().size = draggableColliderSize;
+                                hit.transform.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                                hit.transform.gameObject.GetComponent<S_Draggable>().transform.SetParent(GameObject.Find("DragController").transform);
+                                hit.transform.gameObject.GetComponent<Image>().color = normalColor;
+                                //Size of remaining elements change
+                                if (currentUnitsPanel.GetSlotsCount() > 0)
+                                {
+                                    if (currentUnitsPanel.GetSlotsCount() - 1 > 0)
+                                    {
+                                        currentUnitsPanel.SetLayoutGroupSize(currentUnitsPanel.panelWidth / (currentUnitsPanel.GetSlotsCount() - 1), currentUnitsPanel.panelHeight);
+                                    }
+                                    currentUnitsPanel.RosterWeight = (currentUnitsPanel.RosterWeight - hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
+
+                                }
+
+                                _currentDragged = hit.transform.gameObject.GetComponent<S_Draggable>();
                                 initDrag();
                             }
-
-                        } // FROM PANEL
-                        if (hit.transform.gameObject.GetComponent<S_Draggable>().GetPlace() == "UnitPanel")
-                        {
-                            //Collider size
-                            hit.transform.gameObject.GetComponent<BoxCollider2D>().size = draggableColliderSize;
-                            hit.transform.gameObject.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-                            hit.transform.gameObject.GetComponent<S_Draggable>().transform.SetParent(GameObject.Find("DragController").transform);
-                            hit.transform.gameObject.GetComponent<Image>().color = normalColor;
-                            //Size of remaining elements change
-                            if (currentUnitsPanel.GetSlotsCount() > 0)
-                            {
-                                if (currentUnitsPanel.GetSlotsCount() - 1 > 0)
-                                {
-                                    currentUnitsPanel.SetLayoutGroupSize(currentUnitsPanel.panelWidth / (currentUnitsPanel.GetSlotsCount()-1), currentUnitsPanel.panelHeight);
-                                }
-                                currentUnitsPanel.RosterWeight = (currentUnitsPanel.RosterWeight - hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetUnitWeight());
-
-                            }
-
-                            _currentDragged = hit.transform.gameObject.GetComponent<S_Draggable>();
-                            initDrag();
                         }
                     }
                 }

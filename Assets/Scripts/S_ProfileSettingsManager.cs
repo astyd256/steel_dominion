@@ -2,33 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
-    [SerializeField] GameObject _profileSettingsPanel;
     [SerializeField] public string _userName;
-    [SerializeField] TextMeshProUGUI _userNameTMP;
+    [SerializeField] TextMeshProUGUI _userNameChangeTMP;
+    [SerializeField] TextMeshProUGUI _userNameProfileTMP;
     [SerializeField] TMP_InputField _userNameInputField;
-
-
-    public void OpenProfileSettings()
-    {
-        _profileSettingsPanel.SetActive(true);
-    }
-
-    public void CloseProfileSettings()
-    {
-        _profileSettingsPanel.SetActive(false);
-    }
-
-    public void StartEditingName()
-    {
-        _userNameInputField.interactable = true;
-    }
+    [SerializeField] public GameObject profileSettingsPanel;
+    [SerializeField] public GameObject changeNamePanel;
+    [SerializeField] public Button clickScreenButton;
 
     public void ChangeName()
     {
-        _userName = _userNameTMP.text;
+        _userName = _userNameChangeTMP.text;
         _userNameInputField.interactable = false;
+        _userNameProfileTMP.text = _userName;
+
+        // Menu close:
+        changeNamePanel.SetActive(false);
+        clickScreenButton.interactable = true;
+        profileSettingsPanel.GetComponent<CanvasGroup>().interactable = true;
+    }
+
+    public void CancelNameChange()
+    {
+        // Menu close:
+        changeNamePanel.SetActive(false);
+        clickScreenButton.interactable = true;
+        profileSettingsPanel.GetComponent<CanvasGroup>().interactable = true;
     }
 }
