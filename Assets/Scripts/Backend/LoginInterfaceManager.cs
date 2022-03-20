@@ -50,7 +50,7 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
-        userPanel.text = $"{FirebaseManager.instance.GetUserName()}\nlevel {Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp()/20)) + 1}";
+        userPanel.text = $"{FirebaseManager.instance.GetUserName()}{Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp()/20)) + 1}";
     }
     public void toRegisterMenu()
     {

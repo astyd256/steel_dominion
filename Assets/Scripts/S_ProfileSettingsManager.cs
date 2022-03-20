@@ -13,17 +13,31 @@ public class S_ProfileSettingsManager : MonoBehaviour
     [SerializeField] public GameObject profileSettingsPanel;
     [SerializeField] public GameObject changeNamePanel;
     [SerializeField] public Button clickScreenButton;
+    [SerializeField] public TextMeshProUGUI _userNameInMenu;
+    private void Start()
+    {
+        _userNameProfileTMP.text = _userName;
+        _userNameInMenu.text = _userName;
+        _userNameInputField.onValueChanged.AddListener(delegate { RemoveSpaces(); });
+    }
+    void RemoveSpaces()
+    {
+        _userNameInputField.text = _userNameInputField.text.Replace(" ", "");
+    }
 
     public void ChangeName()
     {
-        _userName = _userNameChangeTMP.text;
-        _userNameInputField.interactable = false;
-        _userNameProfileTMP.text = _userName;
+        if (_userNameInputField.text != "")
+        {
+            _userName = _userNameChangeTMP.text;
+            _userNameProfileTMP.text = _userName;
+            _userNameInMenu.text = _userName;
 
-        // Menu close:
-        changeNamePanel.SetActive(false);
-        clickScreenButton.interactable = true;
-        profileSettingsPanel.GetComponent<CanvasGroup>().interactable = true;
+            // Menu close:
+            changeNamePanel.SetActive(false);
+            clickScreenButton.interactable = true;
+            profileSettingsPanel.GetComponent<CanvasGroup>().interactable = true;
+        }
     }
 
     public void CancelNameChange()

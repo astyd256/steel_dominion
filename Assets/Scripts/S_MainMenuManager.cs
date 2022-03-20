@@ -17,7 +17,6 @@ public class S_MainMenuManager : MonoBehaviour
 
     [SerializeField] public bool interactive = true;
 
-
     public void SavePlayer()
     {
         List<int> unitsIds = new List<int>();
