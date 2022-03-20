@@ -1492,6 +1492,9 @@ MonoBehaviour:
   settingsManager: {fileID: 431703292}
   inventoryMenuManager: {fileID: 431703291}
   clickScreenButton: {fileID: 1175963827}
+  inventoryPanel: {fileID: 1111222473}
+  inventoryOpenButton: {fileID: 654717978}
+  inventoryActive: 0
   interactive: 1
 --- !u!114 &431703291
 MonoBehaviour:
@@ -1520,11 +1523,8 @@ MonoBehaviour:
   unitInventorySlotPrefab: {fileID: 4109699729706030860, guid: 25eb588d186069a4aa44e2a331dbc554,
     type: 3}
   inventoryContainer: {fileID: 1980655376}
-  inventoryPanel: {fileID: 1111222473}
-  inventoryOpenButton: {fileID: 654717978}
   ActiveButtonColor: {r: 0, g: 0.27450982, b: 0.48627454, a: 1}
   ButtonColor: {r: 0.15686275, g: 0.1254902, b: 0.27450982, a: 1}
-  inventoryActive: 0
   slotSize: {x: 155, y: 155}
 --- !u!114 &431703292
 MonoBehaviour:
@@ -2519,8 +2519,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 431703291}
-        m_TargetAssemblyTypeName: S_InventoryMenuManager, Assembly-CSharp
+      - m_Target: {fileID: 431703290}
+        m_TargetAssemblyTypeName: S_MainMenuManager, Assembly-CSharp
         m_MethodName: SwitchInventory
         m_Mode: 1
         m_Arguments:

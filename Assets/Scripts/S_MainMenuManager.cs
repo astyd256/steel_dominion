@@ -15,6 +15,10 @@ public class S_MainMenuManager : MonoBehaviour
     [SerializeField] private S_InventoryMenuManager inventoryMenuManager;
     [SerializeField] public Button clickScreenButton;
 
+    [SerializeField] private GameObject inventoryPanel;    // Inventory panel
+    [SerializeField] private Button inventoryOpenButton;   // Inventory open button
+    [SerializeField] private bool inventoryActive = false;
+
     [SerializeField] public bool interactive = true;
 
     public void SavePlayer()
@@ -39,6 +43,28 @@ public class S_MainMenuManager : MonoBehaviour
     public void LoadPlayer()
     {
         // S_SavePlayerData.LoadPlayer();
+    }
+
+    //Panel response on inventory button press
+    public void SwitchInventory()
+    {
+        if (!inventoryActive)
+        {
+            inventoryOpenButton.GetComponent<Image>().color = ActiveButtonColor;
+        }
+        else
+        {
+            inventoryOpenButton.GetComponent<Image>().color = ButtonColor;
+            //unitInventorySlots.Clear();
+        }
+        inventoryPanel.SetActive(!inventoryPanel.activeSelf);
+        inventoryActive = !inventoryActive;
+
+        // SlotSize refresh
+        if (inventoryActive)
+        {
+            GameObject.Find("InventoryUnitsParent").GetComponent<GridLayoutGroup>().cellSize = inventoryMenuManager.GetSlotSize();
+        }
     }
 
     // Settings

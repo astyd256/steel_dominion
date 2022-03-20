@@ -12,11 +12,8 @@ public class S_InventoryMenuManager : MonoBehaviour
     [SerializeField] private List<S_InventoryUnitSlot> unitInventorySlots = new List<S_InventoryUnitSlot>();
     [SerializeField] private S_InventoryUnitSlot unitInventorySlotPrefab; // SLOT PREFAB
     [SerializeField] private Transform inventoryContainer; // Container for inventory
-    [SerializeField] private GameObject inventoryPanel;    // Inventory panel
-    [SerializeField] private Button inventoryOpenButton;   // Inventory open button
     [SerializeField] public Color ActiveButtonColor;
     [SerializeField] public Color ButtonColor;
-    [SerializeField] private bool inventoryActive = false;
 
     [SerializeField] private Vector2 slotSize;
 
@@ -74,28 +71,6 @@ public class S_InventoryMenuManager : MonoBehaviour
         }
         else
         {
-        }
-    }
-
-    //Panel response on inventory button press
-    public void SwitchInventory()
-    {
-        if (!inventoryActive)
-        {
-            inventoryOpenButton.GetComponent<Image>().color = ActiveButtonColor;
-        }
-        else
-        {
-            inventoryOpenButton.GetComponent<Image>().color = ButtonColor;
-            //unitInventorySlots.Clear();
-        }
-        inventoryPanel.SetActive(!inventoryPanel.activeSelf);
-        inventoryActive = !inventoryActive;
-
-        // SlotSize refresh
-        if (inventoryActive)
-        {
-            GameObject.Find("InventoryUnitsParent").GetComponent<GridLayoutGroup>().cellSize = slotSize;
         }
     }
 
