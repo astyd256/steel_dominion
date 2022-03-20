@@ -153,11 +153,11 @@ namespace Mirror
                 //Debug.Log("Inventory draw - " + unit.id);
                 GameObject obj = Instantiate(InventoryItem, ItemContent);
                 unitBtns.Add(obj);
-                var itemName = obj.transform.Find("TMP_Unit").GetComponent<TMP_Text>();
                 var itemScript = obj.GetComponent<S_UnitButton>();
-                itemName.text = unit.displayName;
+                // Weight, name, sprite
+                itemScript.SetData(unit);
+
                 itemScript.unitListid = i;
-                itemScript.unitWeight = unit.GetWeight();
                 itemScript.ClientUnitClicked += ToggleToPlaceUnit;
                 i++;
 
