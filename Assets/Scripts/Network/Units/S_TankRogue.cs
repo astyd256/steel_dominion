@@ -52,7 +52,7 @@ namespace Mirror
             tankState = TankState.Idle;
         }
 
-        [Server]
+        [ServerCallback]
         public void ServerUpdate()
         {
             if (unitState == State.Idle) return;

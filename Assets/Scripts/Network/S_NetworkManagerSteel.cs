@@ -11,6 +11,22 @@ namespace Mirror
     [AddComponentMenu("")]
     public class S_NetworkManagerSteel : NetworkManager
     {
+        [Header("Debug")]
+        [SerializeField]
+        private int firstPlayerWeight = 0;
+        [SerializeField]
+        private bool firstCanPlace = false;
+        [SerializeField]
+        private int firstPlayerWins = 0;
+        [SerializeField]
+        private int SecondPlayerWeight = 0;
+        [SerializeField]
+        private bool secondCanPlace = false;
+        [SerializeField]
+        private int secondPlayerWins = 0;
+        [SerializeField]
+        private bool firstPlayerPlacing = true;
+
         [Header("Game settings")]
         public float GameTime = 180f;
         public float PreMatchPlacementTime = 15f;
@@ -28,17 +44,17 @@ namespace Mirror
 
         [SerializeField]
         private List<int> firstPlayerUnits = new List<int>();
-        private int firstPlayerWeight = 0;
-        private bool firstCanPlace = false;
-        private int firstPlayerWins = 0;
+        
+       
+       
 
         [SerializeField]
         private List<int> SecondPlayerUnits = new List<int>();
-        private int SecondPlayerWeight = 0;
-        private bool secondCanPlace = false;
-        private int secondPlayerWins = 0;
+        
+        
+        
 
-        private bool firstPlayerPlacing = true;
+        
 
 
         public static event Action OnClientConnected;
@@ -381,16 +397,18 @@ namespace Mirror
             //Check first
             foreach (var unitid in firstPlayerUnits)
                 if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() <= InGameWeightMax) firstCanPlace = true;
+            //Check second
+            foreach (var unitid in SecondPlayerUnits)
+                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() <= InGameWeightMax) secondCanPlace = true;
+
+            if (firstCanPlace && !firstPlayerPlacing && !secondCanPlace) firstPlayerPlacing = true;
 
             List<int> unitsToSend = new List<int>();
             unitsToSend = firstPlayerUnits.ToList();
             InGamePlayers[0].StartPreMatchStep(RemainingTime, true, unitsToSend, !firstCanPlace ? false : firstPlayerPlacing, InGameWeightMax, false);
 
             firstPlayerPlacing = firstCanPlace ? firstPlayerPlacing : false;
-            
-            //Check second
-            foreach (var unitid in SecondPlayerUnits)
-                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() <= InGameWeightMax) secondCanPlace = true;
+                   
 
             unitsToSend.Clear();
             unitsToSend = SecondPlayerUnits.ToList();
@@ -481,9 +499,10 @@ namespace Mirror
                     else
                     {
                         Debug.Log("Units clearing!");
-                        matchState = MatchState.BattleEndingState;
+                        
                         timerisRunning = true;
                         RemainingTime = 3f;
+                        matchState = MatchState.BattleEndingState;
                         InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
                         InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
                         this.CallWithDelay(DestroyAllUnits, 2.5f);
