@@ -219,7 +219,7 @@ public class FirebaseManager : MonoBehaviour
             else
             {
                 //Data has been retrieved
-                xp = Convert.ToInt32(task.Child("xp").Value.ToString());
+                xp = Convert.ToInt32(task.Child("xp").Value);
             }
 
         }
