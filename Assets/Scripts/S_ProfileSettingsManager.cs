@@ -32,6 +32,7 @@ public class S_ProfileSettingsManager : MonoBehaviour
             _userName = _userNameChangeTMP.text;
             _userNameProfileTMP.text = _userName;
             _userNameInMenu.text = _userName;
+            FirebaseManager.instance.ChangeUsername(_userName);
 
             // Menu close:
             changeNamePanel.SetActive(false);
