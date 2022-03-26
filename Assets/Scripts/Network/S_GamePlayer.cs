@@ -28,7 +28,7 @@ namespace Mirror
 
         private bool placeState = false;
         private int idToPlace = -1;
-
+        
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
@@ -167,7 +167,6 @@ namespace Mirror
             }
         }
        
-
         public void HandlereadyStatusChanged(bool oldValue, bool newValue) => UpdateDisplay();
         public void HandleDisplayPlayerNameChanged(string oldValue, string newValue) => UpdateDisplay();
 

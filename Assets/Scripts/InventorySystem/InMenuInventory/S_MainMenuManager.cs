@@ -25,7 +25,7 @@ public class S_MainMenuManager : MonoBehaviour
        //     unitsIds.Add(unit.id);
        // }
 
-        S_SavePlayerData.SavePlayer("Default", unitsIds);
+        S_SavePlayerData.SavePlayer(FirebaseManager.instance.GetUserName(), unitsIds);
     }
 
     public void LoadPlayer()
