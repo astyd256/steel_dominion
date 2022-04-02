@@ -33,12 +33,14 @@ namespace Mirror
             Attack,
             Idle,
             AttackAfterPause,
+            PreAttack,
             TargetLooking
         }
-
+        [SerializeField]
         protected State unitState = State.Idle;
 
         protected int Teamid = 0;
+        [SerializeField]
         protected GameObject target = null;
 
         private S_NetworkManagerSteel gameroom;

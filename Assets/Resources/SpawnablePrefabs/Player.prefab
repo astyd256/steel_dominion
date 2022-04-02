@@ -1468,6 +1468,8 @@ MonoBehaviour:
   weightText: {fileID: 4255345467473617481}
   maxWeight: 0
   currentWeight: 0
+  cameraMoveForward: 0
+  origZloc: 0
   gameUI: {fileID: 1549168818013449052}
   playerNameTexts:
   - {fileID: 1516786484809771933}

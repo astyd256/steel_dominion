@@ -23,6 +23,9 @@ namespace Mirror
 
         public int maxWeight = 0;
         public int currentWeight = 0;
+        public float cameraMoveForward = 0f;
+        [SerializeField]
+        public float origZloc; 
 
         private List<GameObject> unitBtns = new List<GameObject>();
 
@@ -73,7 +76,7 @@ namespace Mirror
             S_PlayerData data = S_SavePlayerData.LoadPlayer();
 
             transform.parent = GameObject.Find("CameraRotator").transform;
-
+            origZloc = this.transform.position.z;
             CmdSetDisplayName(data.playername);
             CmdGetUnits(data.unitData, netId);
   
@@ -234,9 +237,12 @@ namespace Mirror
                 LayerMask mask = LayerMask.GetMask("OnlyRaycast");
                 if(Physics.Raycast(ray, out RaycastHit hit, mask))
                 {
-                    placeState = false;
+                    if (hit.transform.gameObject.layer == LayerMask.NameToLayer("OnlyRaycast"))
+                    {
+                        placeState = false;
 
-                    if(currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
+                        if (currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
+                    }
                     //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
                     //unitBtns.RemoveAt(idToPlace);
                     //ListUnits();
@@ -248,7 +254,18 @@ namespace Mirror
             }
             else if(Input.GetMouseButton(0) && !placeState)
             {
-                GameObject.Find("CameraRotator").transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
+                if(netId == 1) cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -10f, 40f);
+                else cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -40f, 10f);
+
+                transform.localPosition = new Vector3(0f, 35f, origZloc + cameraMoveForward);
+
+                GameObject camera = GameObject.Find("CameraRotator");
+                camera.transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
+
+                
+               // this.transform.position.z = origZloc + cameraMoveForward;
+               // camera
+                
             }
         }
 
