@@ -202,13 +202,14 @@ namespace Mirror
                 //Destroy(this.gameObject);
             }
 
-            SetHealthBarValue(health / maxHealth);
+            SetHealthBarValue(health / maxHealth, Mathf.FloorToInt(dmg));
         }
 
         [ClientRpc]
-        public void SetHealthBarValue(float newVal)
+        public void SetHealthBarValue(float newVal, int damage)
         {
             healthBar.value = newVal;
+            S_DamageText.Create(this.transform.position, damage);
         }
     }
 }

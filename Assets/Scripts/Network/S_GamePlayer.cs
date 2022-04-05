@@ -42,6 +42,7 @@ namespace Mirror
 
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
+        [SerializeField] private Camera playercameraUI = null;
         [SerializeField] private GameObject spawnArea = null;
         
 
@@ -99,6 +100,7 @@ namespace Mirror
             if (hasAuthority)
             {
                 playercamera.gameObject.SetActive(true);
+                playercameraUI.gameObject.SetActive(true);
             }
 
             GameRoom.InGamePlayers.Add(this);

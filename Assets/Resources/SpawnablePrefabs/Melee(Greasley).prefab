@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1416670599024137293}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -45,7 +45,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7508400496740290888}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Handle Slide Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -638,7 +638,8 @@ GameObject:
   - component: {fileID: 8422693296398636691}
   - component: {fileID: 2054379483065300462}
   - component: {fileID: 3940236532282999671}
-  m_Layer: 2
+  - component: {fileID: 6013342732929940793}
+  m_Layer: 11
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -726,6 +727,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &6013342732929940793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6149426089734378895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a842cc8b9f343a94082a23d24eceeeb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6269072039879319974
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,7 +750,7 @@ GameObject:
   - component: {fileID: 8292957553870639718}
   - component: {fileID: 6463485788066265749}
   - component: {fileID: 1094245275523473638}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -812,7 +825,7 @@ GameObject:
   - component: {fileID: 8119310706031655310}
   - component: {fileID: 1395344532043113941}
   - component: {fileID: 2285496187887872605}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -886,7 +899,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5749316508734946066}
   - component: {fileID: 4664935417779671178}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Slider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
