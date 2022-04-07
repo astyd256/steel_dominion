@@ -70,7 +70,7 @@ public class LoginInterfaceManager : MonoBehaviour
     }
     public void Register()
     {
-        FirebaseManager.instance.Registeration(emailField.text, passwordField.text);
+        FirebaseManager.instance.Registration(emailField.text, passwordField.text);
     }
     public void Login()
     {

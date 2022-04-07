@@ -15,7 +15,7 @@ public class FirebaseManager : MonoBehaviour
     public static FirebaseManager instance;
     private FirebaseAuth auth;
     public FirebaseUser user;
-    public DatabaseReference dbReference;
+    private DatabaseReference dbReference;
     #if !UNITY_SERVER 
     private int xp = 0;
     [Header("Temporary log")]
@@ -71,7 +71,7 @@ public class FirebaseManager : MonoBehaviour
             LoginInterfaceManager.instance.toLobby();
         }
     }
-    public void Registeration(string email, string password)
+    public void Registration(string email, string password)
     {   
         StartCoroutine(RegisterLogic(email, password));
     }   
