@@ -23,12 +23,15 @@ namespace Mirror
 
         public int maxWeight = 0;
         public int currentWeight = 0;
+        public float cameraMoveForward = 0f;
+        [SerializeField]
+        public float origZloc; 
 
         private List<GameObject> unitBtns = new List<GameObject>();
 
         private bool placeState = false;
         private int idToPlace = -1;
-
+        
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
@@ -39,6 +42,7 @@ namespace Mirror
 
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
+        [SerializeField] private Camera playercameraUI = null;
         [SerializeField] private GameObject spawnArea = null;
         
 
@@ -73,7 +77,7 @@ namespace Mirror
             S_PlayerData data = S_SavePlayerData.LoadPlayer();
 
             transform.parent = GameObject.Find("CameraRotator").transform;
-
+            origZloc = this.transform.position.z;
             CmdSetDisplayName(data.playername);
             CmdGetUnits(data.unitData, netId);
   
@@ -96,6 +100,7 @@ namespace Mirror
             if (hasAuthority)
             {
                 playercamera.gameObject.SetActive(true);
+                playercameraUI.gameObject.SetActive(true);
             }
 
             GameRoom.InGamePlayers.Add(this);
@@ -153,11 +158,11 @@ namespace Mirror
                 //Debug.Log("Inventory draw - " + unit.id);
                 GameObject obj = Instantiate(InventoryItem, ItemContent);
                 unitBtns.Add(obj);
-                var itemName = obj.transform.Find("TMP_Unit").GetComponent<TMP_Text>();
                 var itemScript = obj.GetComponent<S_UnitButton>();
-                itemName.text = unit.displayName;
+                // Weight, name, sprite
+                itemScript.SetData(unit);
+
                 itemScript.unitListid = i;
-                itemScript.unitWeight = unit.GetWeight();
                 itemScript.ClientUnitClicked += ToggleToPlaceUnit;
                 i++;
 
@@ -167,7 +172,6 @@ namespace Mirror
             }
         }
        
-
         public void HandlereadyStatusChanged(bool oldValue, bool newValue) => UpdateDisplay();
         public void HandleDisplayPlayerNameChanged(string oldValue, string newValue) => UpdateDisplay();
 
@@ -235,9 +239,12 @@ namespace Mirror
                 LayerMask mask = LayerMask.GetMask("OnlyRaycast");
                 if(Physics.Raycast(ray, out RaycastHit hit, mask))
                 {
-                    placeState = false;
+                    if (hit.transform.gameObject.layer == LayerMask.NameToLayer("OnlyRaycast"))
+                    {
+                        placeState = false;
 
-                    if(currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
+                        if (currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
+                    }
                     //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
                     //unitBtns.RemoveAt(idToPlace);
                     //ListUnits();
@@ -249,7 +256,18 @@ namespace Mirror
             }
             else if(Input.GetMouseButton(0) && !placeState)
             {
-                GameObject.Find("CameraRotator").transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
+                if(netId == 1) cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -10f, 40f);
+                else cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -40f, 10f);
+
+                transform.localPosition = new Vector3(0f, 35f, origZloc + cameraMoveForward);
+
+                GameObject camera = GameObject.Find("CameraRotator");
+                camera.transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
+
+                
+               // this.transform.position.z = origZloc + cameraMoveForward;
+               // camera
+                
             }
         }
 

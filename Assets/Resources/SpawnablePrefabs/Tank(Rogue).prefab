@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4714689834924779473}
   - component: {fileID: 4667278035683024389}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Slider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 4541819922391848564}
   - component: {fileID: 5923727872396781527}
   - component: {fileID: 6702996201816090794}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -207,7 +207,8 @@ GameObject:
   - component: {fileID: 4683803078764863014}
   - component: {fileID: 8282870934527479885}
   - component: {fileID: 4367120942268698816}
-  m_Layer: 2
+  - component: {fileID: 177774575356868410}
+  m_Layer: 11
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -295,6 +296,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &177774575356868410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231930140198767576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a842cc8b9f343a94082a23d24eceeeb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3321154476788406649
 GameObject:
   m_ObjectHideFlags: 0
@@ -304,7 +317,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7960644969249355173}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Handle Slide Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -341,7 +354,7 @@ GameObject:
   - component: {fileID: 7275322397100290909}
   - component: {fileID: 3269084178604045086}
   - component: {fileID: 3114398161131622209}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -416,6 +429,7 @@ GameObject:
   - component: {fileID: 5134630461234329488}
   - component: {fileID: 5134630461234329518}
   - component: {fileID: 5134630461234329519}
+  - component: {fileID: 8965559749830655263}
   m_Layer: 7
   m_Name: Gun
   m_TagString: Untagged
@@ -487,6 +501,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!111 &8965559749830655263
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5134630461234329489}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 0}
+  m_Animations:
+  - {fileID: 7400000, guid: 7cd5e1e8e8d271b4594ab09710380610, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 0
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!1 &5134630461641738395
 GameObject:
   m_ObjectHideFlags: 0
@@ -660,9 +690,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5134630462308171411}
   - component: {fileID: 7352811909031706578}
-  - component: {fileID: 8055061654728428621}
   - component: {fileID: 999274859735282440}
   - component: {fileID: 9198749888288028835}
+  - component: {fileID: 8055061654728428621}
   - component: {fileID: 2333236054583380170}
   - component: {fileID: 1240474559673399686}
   - component: {fileID: 3606507606733234580}
@@ -705,29 +735,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!195 &8055061654728428621
-NavMeshAgent:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5134630462308171412}
-  m_Enabled: 1
-  m_AgentTypeID: 0
-  m_Radius: 5
-  m_Speed: 2
-  m_Acceleration: 8
-  avoidancePriority: 50
-  m_AngularSpeed: 80
-  m_StoppingDistance: 0
-  m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
-  m_AutoRepath: 1
-  m_Height: 3
-  m_BaseOffset: 1.5
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_CollisionDetection: 3
 --- !u!65 &999274859735282440
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -754,6 +762,28 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5, y: 1, z: 3}
   m_Center: {x: 0, y: 0, z: 5}
+--- !u!195 &8055061654728428621
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5134630462308171412}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 4
+  m_Speed: 2
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 80
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 3
+  m_BaseOffset: 1.5
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!114 &2333236054583380170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -823,6 +853,8 @@ MonoBehaviour:
   healthBar: {fileID: 4667278035683024389}
   agent: {fileID: 8055061654728428621}
   AttackSpherePoint: {fileID: 9168584934556794804}
+  unitState: 2
+  target: {fileID: 0}
   towerRotateObject: {fileID: 5134630461791880893}
   barrelRotateObject: {fileID: 5134630461234329488}
   projectilePrefab: {fileID: 1721495210498149149, guid: 0792e03750c21064d895b85364c47b74,
@@ -832,6 +864,7 @@ MonoBehaviour:
   shotsAmount: 5
   barrelRotateRate: 540
   turningRate: 15
+  anim: {fileID: 8965559749830655263}
 --- !u!1 &7800094441553012254
 GameObject:
   m_ObjectHideFlags: 0
@@ -841,7 +874,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1201933804548543978}
-  m_Layer: 2
+  m_Layer: 11
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -36,6 +36,9 @@ namespace Mirror
         [SerializeField]
         private float turningRate = 30f;
 
+        [SerializeField]
+        private Animation anim;
+
         private enum TankState
         {
             Idle,
@@ -52,7 +55,7 @@ namespace Mirror
             tankState = TankState.Idle;
         }
 
-        [Server]
+        [ServerCallback]
         public void ServerUpdate()
         {
             if (unitState == State.Idle) return;
@@ -307,6 +310,8 @@ namespace Mirror
             System.Random rand = new System.Random();
 
             bulletTransform.GetComponent<S_TankProjectile>().SetData(0, Teamid, shootDir, 100f);
+
+            anim.Play("GunShot");
         }
 
         [Server]

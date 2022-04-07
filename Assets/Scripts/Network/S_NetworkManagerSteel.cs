@@ -17,29 +17,30 @@ namespace Mirror
         public int InGameWeightMax = 15;
         private float RemainingTime = 0f;
         private bool timerisRunning = false;
-        
-        [Header("Game process")]
         [SerializeField]
         private SO_UnitsToPlay unitsData;
-        [SerializeField]
-        private List<GameObject> firstPlayerBattleUnits = new List<GameObject>();
-        [SerializeField]
-        private List<GameObject> secondPlayerBattleUnits = new List<GameObject>();
+
+        [Header("Game process")]
 
         [SerializeField]
-        private List<int> firstPlayerUnits = new List<int>();
+        private List<GameObject> firstPlayerBattleUnits = new List<GameObject>();
         private int firstPlayerWeight = 0;
         private bool firstCanPlace = false;
         private int firstPlayerWins = 0;
 
         [SerializeField]
-        private List<int> SecondPlayerUnits = new List<int>();
+        private List<GameObject> secondPlayerBattleUnits = new List<GameObject>();
         private int SecondPlayerWeight = 0;
         private bool secondCanPlace = false;
         private int secondPlayerWins = 0;
 
         private bool firstPlayerPlacing = true;
 
+        [SerializeField]
+        private List<int> firstPlayerUnits = new List<int>();
+        
+        [SerializeField]
+        private List<int> SecondPlayerUnits = new List<int>();
 
         public static event Action OnClientConnected;
         public static event Action OnClientDisconnected;
@@ -58,12 +59,9 @@ namespace Mirror
 
         private MatchState matchState = MatchState.PlayerWaitingState;
         
-
-
         //Server start, stop, add player, connect client, disconnect client
         public override void OnStartServer()
         {
-
             spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
         }
 
@@ -90,10 +88,10 @@ namespace Mirror
             OnClientDisconnected?.Invoke();
         }
 
-        public override void OnServerConnect(NetworkConnection conn)
-        {
+        //public override void OnServerConnect(NetworkConnection conn)
+        //{
             
-        }
+        //}
 
         public override void OnServerDisconnect(NetworkConnection conn)
         {
@@ -103,7 +101,7 @@ namespace Mirror
                 InGamePlayers.Remove(player);
 
                 //Notify players for debug
-                NotifyPlayersofReadyState();
+               // NotifyPlayersofReadyState();
                 //Check game state, if in prematch state = abort match with no results
                 //if in match and mathc time > 30 seconds then disconnected player is lost
                 //if in match results then write match results in database
@@ -136,13 +134,13 @@ namespace Mirror
         
         //Lobby functions
 
-        public void NotifyPlayersofReadyState()
-        {
-           // foreach (var player in InGamePlayers)
-           // {
-                //player.HandleReadyToStart(IsReadyToStart());
-           // }
-        }
+        //public void NotifyPlayersofReadyState()
+        //{
+        //   // foreach (var player in InGamePlayers)
+        //   // {
+        //        //player.HandleReadyToStart(IsReadyToStart());
+        //   // }
+        //}
 
         private bool IsReadyToStart()
         {
@@ -381,16 +379,18 @@ namespace Mirror
             //Check first
             foreach (var unitid in firstPlayerUnits)
                 if (firstPlayerWeight + unitsData.UnitsData[unitid].GetWeight() <= InGameWeightMax) firstCanPlace = true;
+            //Check second
+            foreach (var unitid in SecondPlayerUnits)
+                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() <= InGameWeightMax) secondCanPlace = true;
+
+            if (firstCanPlace && !firstPlayerPlacing && !secondCanPlace) firstPlayerPlacing = true;
 
             List<int> unitsToSend = new List<int>();
             unitsToSend = firstPlayerUnits.ToList();
             InGamePlayers[0].StartPreMatchStep(RemainingTime, true, unitsToSend, !firstCanPlace ? false : firstPlayerPlacing, InGameWeightMax, false);
 
             firstPlayerPlacing = firstCanPlace ? firstPlayerPlacing : false;
-            
-            //Check second
-            foreach (var unitid in SecondPlayerUnits)
-                if (SecondPlayerWeight + unitsData.UnitsData[unitid].GetWeight() <= InGameWeightMax) secondCanPlace = true;
+                   
 
             unitsToSend.Clear();
             unitsToSend = SecondPlayerUnits.ToList();
@@ -481,9 +481,10 @@ namespace Mirror
                     else
                     {
                         Debug.Log("Units clearing!");
-                        matchState = MatchState.BattleEndingState;
+                        
                         timerisRunning = true;
                         RemainingTime = 3f;
+                        matchState = MatchState.BattleEndingState;
                         InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
                         InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
                         this.CallWithDelay(DestroyAllUnits, 2.5f);
@@ -518,33 +519,5 @@ namespace Mirror
                 }
         }
 
-        //public Transform leftRacketSpawn;
-        //public Transform rightRacketSpawn;
-        //GameObject ball;
-
-        //public override void OnServerAddPlayer(NetworkConnection conn)
-        //{
-        //    // add player at correct spawn position
-        //    Transform start = numPlayers == 0 ? leftRacketSpawn : rightRacketSpawn;
-        //    GameObject player = Instantiate(playerPrefab, start.position, start.rotation);
-        //    NetworkServer.AddPlayerForConnection(conn, player);
-
-        //    // spawn ball if two players
-        //    if (numPlayers == 2)
-        //    {
-        //        ball = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Ball"));
-        //        NetworkServer.Spawn(ball);
-        //    }
-        //}
-
-        //public override void OnServerDisconnect(NetworkConnection conn)
-        //{
-        //    // destroy ball
-        //    if (ball != null)
-        //        NetworkServer.Destroy(ball);
-
-        //    // call base functionality (actually destroys the player)
-        //    base.OnServerDisconnect(conn);
-        //}
     }
 }

@@ -10,7 +10,7 @@ public class S_PlayerData
 
     public S_PlayerData(string name, List<int> unitdata)
     {
-        playername = name;
+        playername = name; 
         unitData = unitdata;
     }
 }

@@ -2,11 +2,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class S_UnitButton : MonoBehaviour
 {
     public event Action<int> ClientUnitClicked;
     private Button btn;
+    [SerializeField] private Image unitSpriteGUI;
+    [SerializeField] private TextMeshProUGUI unitNameTMP;
+    [SerializeField] private TextMeshProUGUI unitWeightTMP;
+
+    private string unitName;
 
     public int unitListid = 0;
     public int unitWeight = 0;
@@ -15,6 +21,17 @@ public class S_UnitButton : MonoBehaviour
     private void Awake()
     {
         btn = this.GetComponent<Button>();
+    }
+
+    public void SetData(SO_UnitItemData unit)
+    {
+        // Data:
+        unitName = unit.displayName;
+        unitWeight = unit.GetWeight();
+        //Visualization
+        unitNameTMP.text = unitName;
+        unitWeightTMP.text = unitWeight.ToString();
+        unitSpriteGUI.sprite = unit.unitSprite;
     }
     public void ClickButton()
     {
