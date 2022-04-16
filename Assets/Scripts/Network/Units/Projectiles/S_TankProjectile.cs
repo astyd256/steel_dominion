@@ -9,6 +9,10 @@ public class S_TankProjectile : MonoBehaviour
     private Vector3 shootDir;
     private float moveSpeed = 0f;
 
+#if !UNITY_SERVER
+    private bool dead = false;
+#endif
+
     private Mirror.S_NetworkManagerSteel gameroom;
 
     protected Mirror.S_NetworkManagerSteel GameRoom
@@ -34,7 +38,14 @@ public class S_TankProjectile : MonoBehaviour
     {
         if(other.gameObject.layer == LayerMask.NameToLayer("Default"))
         {
+#if !UNITY_SERVER
+            dead = true;
+            moveSpeed = 0.2f;
+            transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+#endif
+#if UNITY_SERVER
             Destroy(this.gameObject);
+#endif
             return;
         }
 
@@ -42,13 +53,30 @@ public class S_TankProjectile : MonoBehaviour
         {
            other.GetComponent<Mirror.S_Unit>().CalcDamage(damage);
 
+#if !UNITY_SERVER
+            dead = true;
+            moveSpeed = 0.2f;
+            transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+#endif
+#if UNITY_SERVER
             Destroy(this.gameObject);
+#endif
             return;
         }
     }
 
     private void Update()
     {
+#if !UNITY_SERVER
+        if (!dead) transform.position += shootDir * moveSpeed * Time.deltaTime;
+        else
+        {
+            moveSpeed -= Time.deltaTime;
+            if(moveSpeed < 0) Destroy(this.gameObject);
+        }
+#endif
+#if UNITY_SERVER
         transform.position += shootDir * moveSpeed * Time.deltaTime;
+#endif
     }
 }

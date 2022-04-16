@@ -411,6 +411,11 @@ namespace Mirror
             return (playerid == 0) ? firstPlayerBattleUnits : secondPlayerBattleUnits;
         }
 
+        public List<GameObject> GetBattlePlayerUnitsByTeam(int teamid)
+        {
+            return (teamid == 0) ? firstPlayerBattleUnits : secondPlayerBattleUnits;
+        }
+
         [Server]
         public void RemoveBattleUnit(int teamId, GameObject unit)
         {

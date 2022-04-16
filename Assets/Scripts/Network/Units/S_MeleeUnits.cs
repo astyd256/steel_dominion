@@ -1,139 +1,197 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Mirror
 {
     public class S_MeleeUnits : S_Unit
     {
-        [SerializeField]
         private bool ShouldAttack = false;
-        [SerializeField]
-        private float attackCooldown = 0f;
+
+        [Header("Attack settings")]
+        [SerializeField] private float attackCooldown = 2f;
+        private float curAttackCooldown = 0f;
+        [SerializeField] private float attackPause = 0.37f;
+        private float curAttackPause = 0;
 
         [SerializeField]
         private Animation weaponAnim = null;
 
-        [Server]
-        public override void ResetState()
-        {
-           // Debug.Log("Reseting");
-            ShouldAttack = false;
-            CalcDistances();
+        [SerializeField]
+        private float attackDistance = 5f;
 
-            if (target != null) unitState = State.Chase;
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+            path = new NavMeshPath();
         }
 
         [ServerCallback]
-
         private void Update()
         {
-            if (unitState == State.Idle) return;
+            if (!isAlive) return;
 
-            if(unitState == State.AttackAfterPause)
+            if (curAttackCooldown > 0) curAttackCooldown -= Time.deltaTime;
+
+            if (curAttackPause > 0)
             {
-                attackCooldown -= Time.deltaTime;
-
-                if(attackCooldown <= 0f)
+                curAttackPause -= Time.deltaTime;
+                if(curAttackPause <= 0)
                 {
-                    ResetState();
-                    attackCooldown = 2f;
+                    Debug.Log("Make hit!");
+                    MakeHit();
                 }
             }
 
-            if (target != null)
+            CalcDistances();
+            if(target != null)
             {
-               // Debug.Log("Update = " + unitState + " Dis = " + distTotarget);
-                if (unitState == State.Attack)
+                agent.CalculatePath(target.transform.position, path);
+
+                if(path.status != NavMeshPathStatus.PathInvalid)
                 {
-                    if(attackCooldown > 0f) attackCooldown -= Time.deltaTime;
-                    else if(attackCooldown <= 0f)
+                    float TargetCheckDistance = 10f;
+                    float distanceCheckToTarget = Vector3.Distance(transform.position, target.transform.position);
+
+                    if(distanceCheckToTarget < TargetCheckDistance)
                     {
-                        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 2f);
-                        // Debug.Log("Trying to attack!");
-                        foreach (var hitCollider in colliders)
-                        {
-                            if (hitCollider.gameObject.name == target.name)
-                            {
-                                // Debug.Log("Damage to " + target.name);
-                                // Debug.Log("enemy hit");
-
-                                System.Random rand = new System.Random();
-
-                                int dmg = rand.Next(minDamage, maxDamage);
-
-                                target.GetComponent<S_Unit>().CalcDamage(dmg);
-                                break;
-                            }
-                        }
-                        unitState = State.AttackAfterPause;
-                        attackCooldown = 2f;
-                    }
-
-                    return;
-                };
-
-                if (((distTotarget < 1.5f  || ShouldAttack) && unitState != State.Attack) && unitState != State.AttackAfterPause && unitState !=State.PreAttack)
-                {
-                    // Debug.Log("Trying to attack!");
-                    this.transform.LookAt(target.transform.position);
-                    this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
-
-                    agent.isStopped = true;
-                    unitState = State.Attack;
-                    attackCooldown = 0.37f;
-
-                    ClientMakeAttack();
+                        Collider[] colliders = Physics.OverlapSphere(transform.position, attackDistance, 1 << 7);
                    
-                   // this.CallWithDelay(ResetState, 2f);
-
-                    return;
-                }
-                else if (unitState == State.Chase)
-                {
-                    CalcDistances();
-                    agent.SetDestination(target.transform.position);
-                    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-
-                    ShouldAttack = false;
-
-                    if (distTotarget < 6.5f)
-                    {
-                        // Debug.Log("Check Should attack!");
-                        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 1f);
-
-                        foreach (var hitCollider in colliders)
-                        {
-                            //  Debug.Log("Check  =  "+ hitCollider.name);
-                            if (hitCollider.gameObject == target)
-                            {
-                                //Debug.Log("Should attack!");
-                                //Debug.Log("In range for attack = " + unitState);
-                                ShouldAttack = true;
-                                //break;
-                            }
-                        }
+                        foreach(Collider collider in colliders) if(collider.gameObject == target) ShouldAttack = true;                          
                     }
-                    return;
+
+                    if(!ShouldAttack)
+                    {
+                        //Enemy is far
+                        Vector3 dirToMovePosition = (path.corners[1] - transform.position).normalized;
+
+                        float obstacleDistanceCheck = 7.5f;
+                        RaycastHit hit;
+
+                        if(!Physics.BoxCast(transform.position, new Vector3(1.5f,1.5f,1.5f), transform.forward,out hit, transform.rotation, obstacleDistanceCheck, 1))
+                        {
+                            forwardAmount = 1f;
+                        }
+                        else forwardAmount = 0f;
+
+                        float angleToDir = Vector3.SignedAngle(transform.forward, dirToMovePosition, Vector3.up);
+                        if (angleToDir > 0) turnAmount = 1f;
+                        else turnAmount = -1f;
+
+                        unitState = State.Moving;
+                    }
+                    else
+                    {
+                        //Enemy in attack range
+                        Vector3 dirToLookPosition = (target.transform.position - transform.position).normalized;
+                        float angleToDir = Vector3.SignedAngle(transform.forward, dirToLookPosition, Vector3.up);
+
+                        if (angleToDir > 15f) turnAmount = 1f;
+                        else if (angleToDir < -15f) turnAmount = -1f;
+                        else turnAmount = 0f;
+
+                        forwardAmount = 0f;
+
+                        if (curAttackCooldown <= 0) HandleAttack();
+
+                        unitState= State.Idle;
+                    }
                 }
-                //else if(distTotarget > 2f && unitState != State.Attack)
-                //{
-                //    agent.SetDestination(target.transform.position);
-                //    distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-                //}
             }
+            else
+            {
+                //No target
+                forwardAmount = 0f;
+                turnAmount = 0f;
+
+                unitState = State.Idle;
+            }
+
+            HandleMovement();
+        }
+
+        [ServerCallback]
+        public void HandleMovement()
+        {
+            if (forwardAmount > 0)
+            {
+                if (speed < 0) speed += forwardAmount * brakeSpeed * Time.deltaTime;
+                else speed += forwardAmount * acceleration * Time.deltaTime;
+
+            }
+            else if (forwardAmount < 0)
+            {
+                if (speed > 0) speed += forwardAmount * brakeSpeed * Time.deltaTime;
+                else speed += forwardAmount * reverseSpeed * Time.deltaTime;
+            }
+            else if (forwardAmount == 0)
+            {
+                if (speed > 0) speed -= idleSlowdown * Time.deltaTime;
+                else if (speed < 0) speed += idleSlowdown * Time.deltaTime;
+            }
+
+            speed = Mathf.Clamp(speed, speedMin, speedMax);
+
+            agent.Move(transform.forward * speed * Time.deltaTime);
+
+            if (turnAmount > 0 || turnAmount < 0)
+            {
+                if ((turnSpeed > 0 && turnAmount < 0) || (turnSpeed < 0 && turnAmount > 0))
+                {
+                    float minTurnAmount = 20f;
+                    turnSpeed = turnAmount * minTurnAmount;
+                }
+                turnSpeed += turnAmount * turnSpeedAcceleration * Time.deltaTime;
+            }
+            else
+            {
+                if (turnSpeed > 0) turnSpeed -= turnIdleSlowdown * Time.deltaTime;
+                else if (turnSpeed < 0) turnSpeed += turnIdleSlowdown * Time.deltaTime;
+                else if (turnSpeed > -1f && turnSpeed < +1f) turnSpeed = 0f;
+            }
+
+            float speedNormalized = speed / speedMax;
+            float invertSpeedNormalized = Mathf.Clamp(1 - speedNormalized, .75f, 1f);
+
+            turnSpeed = Mathf.Clamp(turnSpeed, -turnSpeedMax, turnSpeedMax);
+
+            unitRB.angularVelocity = new Vector3(0, turnSpeed * (invertSpeedNormalized * 1f) * Mathf.Deg2Rad, 0);
+        }
+
+        [ServerCallback]
+        public void HandleAttack()
+        {
+            curAttackPause = attackPause;
+            curAttackCooldown = attackCooldown;
+            ClientMakeAttack();
+        }
+
+        [ServerCallback]
+        public void MakeHit()
+        {
+            if (target == null) return;
+
+            Collider[] colliders = Physics.OverlapSphere(transform.position, 5f, 1 << 7);
+            foreach (var col in colliders)
+            {
+                if (col.gameObject == target)
+                {
+                    System.Random rand = new System.Random();
+
+                    int dmg = rand.Next(minDamage, maxDamage);
+
+                    if (target != null) target.GetComponent<S_Unit>().CalcDamage(dmg);
+
+                    break;
+                }
+            }
+
+            ShouldAttack = false;
         }
 
         [ClientRpc]
         private void ClientMakeAttack()
         {
-            //Transform bulletTransform = Instantiate(projectilePrefab, AttackSpherePoint.position, Quaternion.identity);
-            //Vector3 shootDir = (target.transform.position - AttackSpherePoint.position).normalized;
-
-            //System.Random rand = new System.Random();
-
-            //bulletTransform.GetComponent<S_TankProjectile>().SetData(0, Teamid, shootDir, 100f);
-
             if(weaponAnim != null) weaponAnim.Play("ArmsAttack");
-
         }
     }
 }

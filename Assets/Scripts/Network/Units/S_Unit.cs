@@ -9,40 +9,57 @@ namespace Mirror
 {
     public class S_Unit : NetworkBehaviour
     {
-        [SerializeField]
-        private Canvas canvasUI = null;
-        [SerializeField]
-        private Slider healthBar = null;
-        [SerializeField]
-        protected NavMeshAgent agent = null;
-        [SerializeField]
-        protected Transform AttackSpherePoint = null;
+        protected bool isAlive = false;
 
+        //Components refs
+        private Canvas canvasUI = null;
+        private Slider healthBar = null;
+        protected NavMeshAgent agent = null;
+        protected Rigidbody unitRB = null;
+        
+
+        //Unit stats
+        protected int Teamid = 0;
         private float maxHealth = 0f;
         private float health = 0f;
-
         protected int maxDamage = 2;
         protected int minDamage = 1;
 
-
+        //Target info
         protected float distTotarget;
-
-        protected enum State
-        {
-            Chase,
-            Attack,
-            Idle,
-            AttackAfterPause,
-            PreAttack,
-            TargetLooking
-        }
-        [SerializeField]
-        protected State unitState = State.Idle;
-
-        protected int Teamid = 0;
-        [SerializeField]
         protected GameObject target = null;
 
+        //Unit movement stats
+        protected NavMeshPath path;
+
+        protected float forwardAmount = 0;
+        protected float turnAmount = 0;
+
+        
+        protected float speed;
+        [Header("Movement settings")]
+        [SerializeField] protected float speedMax = 70f;
+        [SerializeField] protected float speedMin = -50f;
+
+        [SerializeField] protected float acceleration = 30f;
+        [SerializeField] protected float brakeSpeed = 100f;
+        [SerializeField] protected float reverseSpeed = 30f;
+        [SerializeField] protected float idleSlowdown = 10f;
+
+        protected float turnSpeed;
+        [SerializeField] protected float turnSpeedMax = 300f;
+        [SerializeField] protected float turnSpeedAcceleration = 300f;
+        [SerializeField] protected float turnIdleSlowdown = 500f;
+
+        //Unit state
+        protected enum State
+        {
+            Moving,
+            Idle
+        }
+        protected State unitState = State.Idle;
+
+        //Network object info
         private S_NetworkManagerSteel gameroom;
 
         protected S_NetworkManagerSteel GameRoom
@@ -83,69 +100,25 @@ namespace Mirror
             CalcDistances();
 
             ShowHealth(Teamid);
+
+            isAlive = true;
             //this.transform.LookAt(target.transform.position);
             //this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
 
-            if(target != null) unitState = State.Chase;
+            //if(target != null) unitState = State.Chase;
         }
 
-        [ServerCallback]
-
-        private void Update()
-        {
-            //if (unitState == State.Idle) return;
-
-            //if (target != null)
-            //{
-            //    if (unitState == State.Attack) return;
-
-            //    if (distTotarget < 2f && unitState != State.Attack)
-            //    {
-            //        Debug.Log("Trying to attack!");
-            //        this.transform.LookAt(target.transform.position);
-            //        this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
-
-            //        agent.isStopped = true;
-            //        unitState = State.Attack;
-
-            //        Collider[] colliders = Physics.OverlapSphere(AttackSpherePoint.position, 10f);
-
-            //        foreach (var hitCollider in colliders)
-            //        {
-            //            if(hitCollider.gameObject == target)
-            //            {
-            //                Debug.Log("Damage to " + target.name);
-
-            //                System.Random rand = new System.Random();
-
-            //                int dmg = rand.Next(minDamage ,maxDamage);
-
-            //                target.GetComponent<S_Unit>().CalcDamage(dmg);
-            //                break;
-            //            }
-            //        }
-            //        unitState = State.Idle;
-            //        this.CallWithDelay(ResetState, 2f);
-
-            //        return;
-            //    }
-            //    else if (unitState == State.Chase)
-            //    {
-                    
-            //        agent.SetDestination(target.transform.position);
-            //        distTotarget = Vector3.Distance(this.gameObject.transform.position, target.transform.position);
-            //        return;
-            //    }
-            //}
+        public override void OnStartServer()
+        {        
+            agent = this.GetComponent<NavMeshAgent>();
+            unitRB = this.GetComponent<Rigidbody>();
         }
 
-        [Server]
-        public virtual void ResetState()
+        public override void OnStartClient()
         {
-         //   Debug.Log("Reseting");
-            CalcDistances();
-
-            if (target != null) unitState = State.Chase;
+            canvasUI = this.transform.Find("Canvas").GetComponent<Canvas>();
+            healthBar = canvasUI.transform.Find("HPSlider").GetComponent<Slider>();
+            this.GetComponent<Rigidbody>().isKinematic = true;
         }
 
         [ClientRpc]
@@ -165,8 +138,6 @@ namespace Mirror
         [Server]
         public virtual void CalcDistances()
         {
-            //Debug.Log("Calc distance");
-
             target = null;
             float minDistance = 1000000;
             List<GameObject> unitlists = new List<GameObject>();
@@ -182,8 +153,6 @@ namespace Mirror
                     minDistance = dist;
                     distTotarget = minDistance;
                     target = unit;
-                 //   Debug.Log("checking unit = new " + target.name + " Dis = " + distTotarget);
-                    agent.isStopped = false;
                 }
             }
         }
