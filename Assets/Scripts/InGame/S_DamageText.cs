@@ -41,7 +41,7 @@ public class S_DamageText : MonoBehaviour
     {
         transform.LookAt(transform.position + playerCamera.transform.rotation * Vector3.forward, playerCamera.transform.rotation * Vector3.up);
 
-        float moveDropSpeed = 20f;
+        float moveDropSpeed = 25f;
 
         transform.position += new Vector3(0, moveYSpeed, 0) * Time.deltaTime;
 

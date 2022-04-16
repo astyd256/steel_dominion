@@ -277,7 +277,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3276421658963516711}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.9, z: -0.45}
+  m_LocalPosition: {x: 0, y: 2.9, z: -0.45}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3276421658859873839}
@@ -369,7 +369,7 @@ Transform:
   m_Children:
   - {fileID: 3276421658963516710}
   - {fileID: 8936250718313753396}
-  - {fileID: 5064822757577252070}
+  - {fileID: 1099235966008137272}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -381,14 +381,14 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3276421659754879400}
   serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Mass: 650
+  m_Drag: 5
+  m_AngularDrag: 5
   m_UseGravity: 1
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 3
+  m_Constraints: 84
+  m_CollisionDetection: 1
 --- !u!65 &7908833404149090709
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -400,8 +400,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.5, y: 4.005205, z: 2}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 2.5, y: 4, z: 2}
+  m_Center: {x: 0, y: 2.05, z: 0}
 --- !u!195 &2234612995548690625
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -421,7 +421,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 4
-  m_BaseOffset: 2
+  m_BaseOffset: -0.05
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!114 &7276582214107497523
@@ -489,15 +489,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  canvasUI: {fileID: 8422693296398636691}
-  healthBar: {fileID: 4664935417779671178}
-  agent: {fileID: 2234612995548690625}
-  AttackSpherePoint: {fileID: 5064822757577252070}
-  unitState: 2
-  target: {fileID: 0}
-  ShouldAttack: 0
-  attackCooldown: 0
+  speedMax: 5
+  speedMin: -5
+  acceleration: 10
+  brakeSpeed: 100
+  reverseSpeed: 30
+  idleSlowdown: 10
+  turnSpeedMax: 75
+  turnSpeedAcceleration: 75
+  turnIdleSlowdown: 500
+  attackCooldown: 2
+  attackPause: 0.37
   weaponAnim: {fileID: 9189813938590716612}
+  attackDistance: 5
 --- !u!1 &3276421659915355880
 GameObject:
   m_ObjectHideFlags: 0
@@ -596,7 +600,7 @@ Animation:
   m_PlayAutomatically: 1
   m_AnimatePhysics: 0
   m_CullingType: 0
---- !u!1 &4838824503659763999
+--- !u!1 &5906153447516765281
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -604,23 +608,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5064822757577252070}
-  m_Layer: 8
-  m_Name: AttackCollider
+  - component: {fileID: 1099235966008137272}
+  m_Layer: 7
+  m_Name: TargetPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5064822757577252070
+--- !u!4 &1099235966008137272
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4838824503659763999}
-  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1.44, z: 2.07}
+  m_GameObject: {fileID: 5906153447516765281}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3276421659754879403}
@@ -900,7 +904,7 @@ GameObject:
   - component: {fileID: 5749316508734946066}
   - component: {fileID: 4664935417779671178}
   m_Layer: 11
-  m_Name: Slider
+  m_Name: HPSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
