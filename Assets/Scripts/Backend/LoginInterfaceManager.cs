@@ -7,25 +7,20 @@ using TMPro;
 #if !UNITY_SERVER 
 public class LoginInterfaceManager : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject Lobby;
-    [SerializeField]
-    private GameObject LoginMenu;
-    [SerializeField]
-    private Button RegisterButton;
-    [SerializeField]
-    private Button LoginButton;
-    [SerializeField]
-    private GameObject Menu;
-    [SerializeField]
-    private TMP_InputField emailField;
-    [SerializeField]
-    private TMP_InputField passwordField;
-    [SerializeField]
-    private TMP_Text userPanel;
+    [SerializeField] private GameObject Lobby;
+    [SerializeField] private GameObject LoginMenu;
+    [SerializeField] private Button RegisterButton;
+    [SerializeField] private Button LoginButton;
+    [SerializeField] private GameObject Menu;
+    [SerializeField] private TMP_InputField emailField;
+    [SerializeField] private TMP_InputField passwordField;
+    [SerializeField] private TMP_Text userLevelTMP;
+    [SerializeField] private TMP_Text userNameTMP;
+    [SerializeField] private Slider userXPBar;
 
 
     public static LoginInterfaceManager instance;
+
     
     private void Awake()
     {
@@ -38,6 +33,17 @@ public class LoginInterfaceManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    public string getUserName()
+    {
+        return userNameTMP.text;
+    }
+    public void setPlayerProfileValues()
+    {
+        userNameTMP.text = $"{FirebaseManager.instance.GetUserName()}";
+        userLevelTMP.text = Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20) + 1).ToString();
+        userXPBar.value = (Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20) + 1 - (Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20)) + 1));
+    }
     public void toLobby()
     {
         Lobby.SetActive(true);
@@ -47,10 +53,11 @@ public class LoginInterfaceManager : MonoBehaviour
 
     public void toMainMenu()
     {
+        setPlayerProfileValues();
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
-        userPanel.text = $"{FirebaseManager.instance.GetUserName()}{Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp()/20)) + 1}";
+        
     }
     public void toRegisterMenu()
     {

@@ -1555,7 +1555,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e90b87cf2f55a594bab0acc899533602, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _userName: User1942039483253
+  _userName: Guest
   _userNameChangeTMP: {fileID: 1015254516}
   _userNameProfileTMP: {fileID: 1743166411}
   _userNameInputField: {fileID: 710491332}
@@ -6909,7 +6909,9 @@ MonoBehaviour:
   Menu: {fileID: 1055076859}
   emailField: {fileID: 1460894260}
   passwordField: {fileID: 2026106077}
-  userPanel: {fileID: 1915967918}
+  userLevelTMP: {fileID: 1915967918}
+  userNameTMP: {fileID: 1319941624}
+  userXPBar: {fileID: 1856090880}
 --- !u!4 &1333359399
 Transform:
   m_ObjectHideFlags: 0
@@ -9614,7 +9616,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 0}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 100
+  m_MaxValue: 1
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:

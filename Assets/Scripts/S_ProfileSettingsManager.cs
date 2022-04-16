@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
-    [SerializeField] private string _userName;
+    [SerializeField] public string _userName;
     [SerializeField] TextMeshProUGUI _userNameChangeTMP;
     [SerializeField] TextMeshProUGUI _userNameProfileTMP;
     [SerializeField] TMP_InputField _userNameInputField;
@@ -16,9 +16,11 @@ public class S_ProfileSettingsManager : MonoBehaviour
     [SerializeField] public TextMeshProUGUI _userNameInMenu;
     private void Start()
     {
-        _userNameProfileTMP.text = _userName;
-        _userNameInMenu.text = _userName;
+        LoginInterfaceManager.instance.setPlayerProfileValues();
+        _userName = LoginInterfaceManager.instance.getUserName();
         _userNameInputField.onValueChanged.AddListener(delegate { RemoveSpaces(); });
+        
+
     }
     void RemoveSpaces()
     {
