@@ -57,11 +57,13 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(false);
         LoginMenu.SetActive(true);
         LoginButton.gameObject.SetActive(false);
+        RegisterButton.gameObject.SetActive(true);
     }
     public void toLoginMenu()
     {
         Lobby.SetActive(false);
         LoginMenu.SetActive(true);
+        LoginButton.gameObject.SetActive(true);
         RegisterButton.gameObject.SetActive(false);
     }
     public void VerifyInputs() //TODO: PROBABLY rewrite this code to add more restrictions in the password.

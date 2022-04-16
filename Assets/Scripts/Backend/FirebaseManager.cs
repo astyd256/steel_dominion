@@ -13,14 +13,7 @@ using Firebase.Extensions;
 public class FirebaseManager : MonoBehaviour
 {
     public static FirebaseManager instance;
-    private FirebaseAuth auth;
-    public FirebaseUser user;
     private DatabaseReference dbReference;
-    #if !UNITY_SERVER 
-    private int xp = 0;
-    [Header("Temporary log")]
-    [SerializeField]
-    private TMP_Text logField;
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -34,6 +27,34 @@ public class FirebaseManager : MonoBehaviour
             instance = this;
         }
     }
+    
+    #if UNITY_SERVER
+    
+    void AddExp(string winnerPlayerToken, string loserPlayerToken)
+    {
+        var winnerExp = await dbReference.Child(winnerPlayerToken).Child("_xp").GetValueAsync();
+        await dbReference.Child(winnerPlayerToken).Child("_xp").SetValueAsync(winnerExp + 100);
+        var loserExp = await dbReference.Child(loserPlayerToken).Child("_xp").GetValueAsync();
+        await dbReference.Child(loserPlayerToken).Child("_xp").SetValueAsync(loserExp + 50);
+    }
+
+    public string GetCurInventory(string PlayerToken)
+    {
+        return await dbReference.Child(PlayerToken).Child("_cur_inventory
+        ").GetValueAsync();
+    }
+    
+    #endif
+    
+    #if !UNITY_SERVER 
+    private FirebaseAuth auth;
+    public FirebaseUser user;
+    private int _xp = 0;
+    private string _inventory = "";
+    private string _cur_inventory
+     = "";
+    [SerializeField]
+    private TMP_Text logField;
     void Start()
     {
         auth = FirebaseAuth.DefaultInstance;
@@ -45,15 +66,10 @@ public class FirebaseManager : MonoBehaviour
     async void AsyncStart()
     {
         await FirebaseApp.CheckAndFixDependenciesAsync();
-
-
         if (user != null) 
         {
-            logField.text = $"first await";
             await user.ReloadAsync();
-            logField.text = $"second await";
             await retriveUserData();
-            logField.text = $"Autologin";
             AutoLogin();
         }
     }
@@ -61,9 +77,6 @@ public class FirebaseManager : MonoBehaviour
     {
         if(user != null)
         {
-            logField.text = $"Successfuy Autologin as {user.UserId}";
- 
-            //TODO: Email Verification
             LoginInterfaceManager.instance.toMainMenu();
         }
         else
@@ -71,19 +84,18 @@ public class FirebaseManager : MonoBehaviour
             LoginInterfaceManager.instance.toLobby();
         }
     }
-    public void Registration(string email, string password)
-    {   
-        StartCoroutine(RegisterLogic(email, password));
-    }   
-    private IEnumerator RegisterLogic(string _email, string _password)
+    public async void Registration(string email, string password)
     {
-        var registerTask = auth.CreateUserWithEmailAndPasswordAsync(_email, _password);
-
-        yield return new WaitUntil(predicate: () => registerTask.IsCompleted);
+        await RegisterUser(email, password);
+    }   
+    private async Task RegisterUser(string _email, string _password)
+    {
+        var registerTask =  auth.CreateUserWithEmailAndPasswordAsync(_email, _password);
+        await registerTask;
 
         if(registerTask.Exception != null)
         {
-            user.DeleteAsync();
+            await user.DeleteAsync();
             FirebaseException firebaseException = (FirebaseException)registerTask.Exception.GetBaseException();
             AuthError authError = (AuthError)firebaseException.ErrorCode;
 
@@ -110,10 +122,10 @@ public class FirebaseManager : MonoBehaviour
                     break;
             }
             logField.text = output;
-            yield break;
         }
         else
         {
+            AddDefaultAccountIntoDatabase();
             if (user.IsEmailVerified) // TODO: Add email verification
             {
                 LoginInterfaceManager.instance.toMainMenu();
@@ -124,7 +136,12 @@ public class FirebaseManager : MonoBehaviour
             } 
             //TODO: Send verification Email
         }
-
+    }
+    private async void AddDefaultAccountIntoDatabase()
+    {
+        await dbReference.Child(user.UserId).Child("xp").SetValueAsync(0);
+        await dbReference.Child(user.UserId).Child("inventory").SetValueAsync("000100000000020201010100");
+        await dbReference.Child(user.UserId).Child("cur_inventory").SetValueAsync("");
     }
     public void Login(string email, string password)
     {
@@ -165,23 +182,24 @@ public class FirebaseManager : MonoBehaviour
         });
     }
     public void LoginAnonymous()
-        {
-            auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(task => {
-                if (task.IsCanceled) {
-                    logField.text = "Sign as Guest canceled.";
-                    return;
-                }
-                if (task.IsFaulted) {
-                    logField.text = "Sign as Guest encounterd an error: " + task.Exception;
-                    return;
-                }
-
-                user = task.Result;
-                logField.text = $"Loged as {user.UserId}"; //TODO: Clear Debug
-                Debug.Log(user);
-                LoginInterfaceManager.instance.toMainMenu();
-            });
-        } 
+    {
+        auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(async task => {
+            if (task.IsCanceled) {
+                logField.text = "Sign as Guest canceled.";
+                return;
+            }
+            if (task.IsFaulted) {
+                logField.text = "Sign as Guest encounterd an error: " + task.Exception;
+                return;
+            }
+            //TODO: add default inventory
+            user = task.Result;
+            AddDefaultAccountIntoDatabase();
+            await ChangeUsername("Guest");
+            Debug.Log(user);
+            LoginInterfaceManager.instance.toMainMenu();
+        });
+    } 
     private void AuthStateChanged(object sender, System.EventArgs e)
     {
         bool signedIn = user == auth.CurrentUser && auth.CurrentUser != null;
@@ -202,11 +220,14 @@ public class FirebaseManager : MonoBehaviour
     {
         if (auth.CurrentUser != null) {
             auth.SignOut();
-            xp = 0;
+            _xp = 0;
+            _inventory = "";
+            _cur_inventory
+             = "";
         }
         else logField.text = "User not logged";
     }
-	private async Task<int> retriveUserData()
+	private async Task retriveUserData()
 	{
         if (user != null)
         {            
@@ -219,21 +240,22 @@ public class FirebaseManager : MonoBehaviour
             else
             {
                 //Data has been retrieved
-                xp = Convert.ToInt32(task.Child("xp").Value);
+                _xp = Convert.ToInt32(task.Child("_xp").Value);
+                _inventory = task.Child("_inventory").ToString();
+                _cur_inventory = task.Child("cur_inventory").ToString();
             }
 
         }
         else Debug.LogWarning(message: "Can't retrieve data from Firebase. User does not exist");
-		return 0;
     }
-    public void ChangeUsername (string newUsername)
+    public async Task ChangeUsername (string newUsername)
     {
         user = auth.CurrentUser;
         if (user != null) {
         Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
             DisplayName = newUsername
         };
-        user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
+        await user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
             if (task.IsCanceled) {
             Debug.LogError("UpdateUserProfileAsync was canceled.");
             return;
@@ -246,11 +268,17 @@ public class FirebaseManager : MonoBehaviour
         });
         }
     }
-    public int GetUserXp(){
-        if (user == null) logField.text = "Error! User is null!";
-        return xp;
+    public int GetUserXp()
+    {
+        if (user == null)
+        {
+            logField.text = "Error! User is null!";
+            return 0;
+        }
+        return _xp;
     }
-    public string GetUserName(){
+    public string GetUserName()
+    {
         if (user == null) 
         {
             logField.text = "Error fetching name! User is null!";
@@ -258,5 +286,36 @@ public class FirebaseManager : MonoBehaviour
         }
         else return user.DisplayName;
     }
+    public async void SaveCurInventory(string inventory)
+    {
+        await dbReference.Child(user.UserId).Child("cur_inventory").SetValueAsync(inventory);
+    }
+    public string GetCurInventory()
+    {
+        return _cur_inventory;
+    }
+    public string GetInventory()
+    {
+        return _inventory;
+    }
+    public void ChangeEmail(string newEmail)
+    {
+        user = auth.CurrentUser;
+        if (user != null) {
+            user.UpdateEmailAsync(newEmail).ContinueWith(task => {
+                if (task.IsCanceled) {
+                Debug.LogError("UpdateEmailAsync was canceled.");
+                return;
+                }
+                if (task.IsFaulted) {
+                Debug.LogError("UpdateEmailAsync encountered an error: " + task.Exception);
+                return;
+                }
+
+                Debug.Log("User email updated successfully.");
+            });
+        }
+
+    }    
     #endif
 }
