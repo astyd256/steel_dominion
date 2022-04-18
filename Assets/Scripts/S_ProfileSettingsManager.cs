@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
-    [SerializeField] public string _userName;
+    [SerializeField] public string userName;
     [SerializeField] TextMeshProUGUI _userNameChangeTMP;
     [SerializeField] TextMeshProUGUI _userNameProfileTMP;
     [SerializeField] TMP_InputField _userNameInputField;
@@ -17,7 +17,11 @@ public class S_ProfileSettingsManager : MonoBehaviour
     private void Start()
     {
         LoginInterfaceManager.instance.setPlayerProfileValues();
-        _userName = LoginInterfaceManager.instance.getUserName();
+
+        userName = FirebaseManager.instance.GetUserName();
+        _userNameProfileTMP.text = userName;
+        _userNameInputField.text = userName;
+
         _userNameInputField.onValueChanged.AddListener(delegate { RemoveSpaces(); });
         
 
@@ -31,10 +35,10 @@ public class S_ProfileSettingsManager : MonoBehaviour
     {
         if (_userNameInputField.text != "")
         {
-            _userName = _userNameChangeTMP.text;
-            _userNameProfileTMP.text = _userName;
-            _userNameInMenu.text = _userName;
-            await FirebaseManager.instance.ChangeUsername(_userName);
+            userName = _userNameChangeTMP.text;
+            _userNameProfileTMP.text = userName;
+            _userNameInMenu.text = userName;
+            await FirebaseManager.instance.ChangeUsername(userName);
 
             // Menu close:
             changeNamePanel.SetActive(false);
