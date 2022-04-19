@@ -17,6 +17,7 @@ public class LoginInterfaceManager : MonoBehaviour
     [SerializeField] private TMP_Text userLevelTMP;
     [SerializeField] private TMP_Text userNameTMP;
     [SerializeField] private Slider userXPBar;
+    [SerializeField] private GameObject MainMenuManager;
 
 
     public static LoginInterfaceManager instance;
@@ -33,11 +34,6 @@ public class LoginInterfaceManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    public string getUserName()
-    {
-        return userNameTMP.text;
-    }
     public void setPlayerProfileValues()
     {
         userNameTMP.text = $"{FirebaseManager.instance.GetUserName()}";
@@ -49,11 +45,15 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(true);
         LoginMenu.SetActive(false);
         Menu.SetActive(false);
+        MainMenuManager.SetActive(false);
     }
 
     public void toMainMenu()
     {
+        //Set name and XP to profile in menu and settings
         setPlayerProfileValues();
+        MainMenuManager.SetActive(true);
+
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
