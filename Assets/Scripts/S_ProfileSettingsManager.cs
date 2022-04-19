@@ -7,37 +7,26 @@ using UnityEngine.UI;
 public class S_ProfileSettingsManager : MonoBehaviour
 {
     [SerializeField] public string userName;
-    [SerializeField] TextMeshProUGUI _userNameChangeTMP;
-    [SerializeField] TextMeshProUGUI _userNameProfileTMP;
-    [SerializeField] TMP_InputField _userNameInputField;
+    [SerializeField] public TextMeshProUGUI userNameChangeTMP;
+    [SerializeField] public TextMeshProUGUI userNameProfileTMP;
+    [SerializeField] public TMP_InputField userNameInputField;
     [SerializeField] public GameObject profileSettingsPanel;
     [SerializeField] public GameObject changeNamePanel;
     [SerializeField] public Button clickScreenButton;
-    [SerializeField] public TextMeshProUGUI _userNameInMenu;
-    private void Start()
+    [SerializeField] public TextMeshProUGUI userNameInMenu;
+ 
+    public void RemoveSpaces()
     {
-        LoginInterfaceManager.instance.setPlayerProfileValues();
-
-        userName = FirebaseManager.instance.GetUserName();
-        _userNameProfileTMP.text = userName;
-        _userNameInputField.text = userName;
-
-        _userNameInputField.onValueChanged.AddListener(delegate { RemoveSpaces(); });
-        
-
-    }
-    void RemoveSpaces()
-    {
-        _userNameInputField.text = _userNameInputField.text.Replace(" ", "");
+        userNameInputField.text = userNameInputField.text.Replace(" ", "");
     }
 
     public async void ChangeName()
     {
-        if (_userNameInputField.text != "")
+        if (userNameInputField.text != "")
         {
-            userName = _userNameChangeTMP.text;
-            _userNameProfileTMP.text = userName;
-            _userNameInMenu.text = userName;
+            userName = userNameChangeTMP.text;
+            userNameProfileTMP.text = userName;
+            userNameInMenu.text = userName;
             await FirebaseManager.instance.ChangeUsername(userName);
 
             // Menu close:

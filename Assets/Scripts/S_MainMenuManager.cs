@@ -21,6 +21,20 @@ public class S_MainMenuManager : MonoBehaviour
 
     [SerializeField] public bool interactive = true;
 
+
+    private void Start()
+    {
+        //userName = FirebaseManager.instance.GetUserName();
+        profileSettingsManager.userName = profileSettingsManager.userNameInMenu.text;
+        profileSettingsManager.userNameProfileTMP.text = profileSettingsManager.userName;
+        profileSettingsManager.userNameInputField.text = profileSettingsManager.userName;
+        Debug.Log(profileSettingsManager.userName);
+
+        profileSettingsManager.userNameInputField.onValueChanged.AddListener(delegate { profileSettingsManager.RemoveSpaces(); });
+
+
+    }
+
     public void SavePlayer()
     {
         List<int> unitsIds = new List<int>();
