@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
@@ -17,7 +17,6 @@ namespace Mirror
         protected NavMeshAgent agent = null;
         protected Rigidbody unitRB = null;
         
-
         //Unit stats
         protected int Teamid = 0;
         private float maxHealth = 0f;
@@ -26,8 +25,9 @@ namespace Mirror
         protected int minDamage = 1;
 
         //Target info
-        protected float distTotarget;
         protected GameObject target = null;
+        public Action<Transform> _targetChanged;
+        public Action _behaviourStarting;
 
         //Unit movement stats
         protected NavMeshPath path;
@@ -71,6 +71,11 @@ namespace Mirror
             }
         }
 
+        public S_NetworkManagerSteel GetGameRoom()
+        {
+            return GameRoom;
+        }
+
         [Server]
         public void SetData(int teamid, int maxhealth, int miDamage, int maDamage)
         {
@@ -101,6 +106,7 @@ namespace Mirror
 
             ShowHealth(Teamid);
 
+            _behaviourStarting.Invoke();
             isAlive = true;
             //this.transform.LookAt(target.transform.position);
             //this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
@@ -138,7 +144,9 @@ namespace Mirror
         [Server]
         public virtual void CalcDistances()
         {
+            GameObject _oldTarget = (target == null) ? null : target;
             target = null;
+
             float minDistance = 1000000;
             List<GameObject> unitlists = new List<GameObject>();
 
@@ -151,10 +159,11 @@ namespace Mirror
                 if (dist < minDistance)
                 {
                     minDistance = dist;
-                    distTotarget = minDistance;
                     target = unit;
                 }
             }
+
+            if (target != _oldTarget) _targetChanged.Invoke(target.transform);
         }
 
         [ServerCallback]

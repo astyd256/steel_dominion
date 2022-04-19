@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class S_TankProjectile : MonoBehaviour
@@ -13,17 +11,6 @@ public class S_TankProjectile : MonoBehaviour
     private bool dead = false;
 #endif
 
-    private Mirror.S_NetworkManagerSteel gameroom;
-
-    protected Mirror.S_NetworkManagerSteel GameRoom
-    {
-        get
-        {
-            if (gameroom != null) { return gameroom; }
-            return gameroom = Mirror.NetworkManager.singleton as Mirror.S_NetworkManagerSteel;
-        }
-    }
-
     public void SetData(int Damage, int TeamId, Vector3 ShootDir, float MoveSpeed)
     {
         damage = Damage;
@@ -36,7 +23,10 @@ public class S_TankProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.layer == LayerMask.NameToLayer("Default"))
+#if !UNITY_SERVER
+        if (dead) return;
+#endif
+        if (other.gameObject.layer == LayerMask.NameToLayer("Default"))
         {
 #if !UNITY_SERVER
             dead = true;

@@ -36,6 +36,7 @@ namespace Mirror
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
+        [SerializeField] private TMP_Text[] playerLevelTexts = new TMP_Text[2];
         [SerializeField] private TMP_Text timerText = null;
         [SerializeField] private GameObject unitsInventory = null;
         [SerializeField] private Button passButton = null;
@@ -53,6 +54,8 @@ namespace Mirror
         public string DisplayName = "Loading...";
         [SyncVar(hook = nameof(HandlereadyStatusChanged))]
         public bool IsReady = false;
+
+        public int Level = 1;
 
         //
         private S_NetworkManagerSteel gameroom;
@@ -78,8 +81,26 @@ namespace Mirror
 
             transform.parent = GameObject.Find("CameraRotator").transform;
             origZloc = this.transform.position.z;
-            CmdSetDisplayName(data.playername);
-            CmdGetUnits(data.unitData, netId);
+
+            //CmdSetDisplayName(data.playername);
+            //CmdGetUnits(data.unitData, netId);
+            //0200 0001 0102 0203 0104 0007 (24)
+            //string curInventory = FirebaseManager.instance.GetCurInventory();
+            string curInventory = "020000010102020301040007";
+            int curLength = curInventory.Length-1;
+
+            List<int> curUnitsList = new List<int>();
+
+            for(int i = 0; i < curLength; i+=4)
+            {
+                string tempStr = "";
+                tempStr += curInventory[i];
+                tempStr += curInventory[i+1];
+                curUnitsList.Add(System.Convert.ToInt32(tempStr));
+            }
+
+            CmdSetDisplayNameLevel(FirebaseManager.instance.GetUserName(), FirebaseManager.instance.GetUserXp());
+            CmdGetUnits(curUnitsList, netId);
   
             ListUnits();
 
@@ -129,9 +150,8 @@ namespace Mirror
             if(idToPlace == index)
             {
                 unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
-                placeState = false;
                 idToPlace = -1;
-                placeState = !placeState;
+                placeState = false;
                 return;
             }
 
@@ -195,6 +215,7 @@ namespace Mirror
             {
                 playerNameTexts[i].text = "Waiting...";
                 playerReadyTexts[i].text = string.Empty;
+                playerLevelTexts[i].text = "0";
             }
 
             for(int i = 0; i<GameRoom.InGamePlayers.Count;i++)
@@ -203,6 +224,7 @@ namespace Mirror
                 playerReadyTexts[i].text = GameRoom.InGamePlayers[i].IsReady ?
                     "<color=green>Ready</color>" :
                     "<color=red>Not Ready</color>";
+                playerLevelTexts[i].text = GameRoom.InGamePlayers[i].Level.ToString();
             }
         }
 
@@ -232,19 +254,16 @@ namespace Mirror
 
             if(Input.GetMouseButtonDown(0) && placeState)
             {
+
                 if (EventSystem.current.IsPointerOverGameObject()) return;
-                
-                var ray = playercamera.ScreenPointToRay(Input.mousePosition);
 
-                LayerMask mask = LayerMask.GetMask("OnlyRaycast");
-                if(Physics.Raycast(ray, out RaycastHit hit, mask))
+                Ray ray = playercamera.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hit, 500f, 1 << 6))
                 {
-                    if (hit.transform.gameObject.layer == LayerMask.NameToLayer("OnlyRaycast"))
-                    {
-                        placeState = false;
+                    placeState = false;
 
-                        if (currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
-                    }
+                    if (currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
                     //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
                     //unitBtns.RemoveAt(idToPlace);
                     //ListUnits();
@@ -254,12 +273,13 @@ namespace Mirror
                 //ray.GetType
                 // ray = playercamera.ScreenPointToRay(Input.mousePosition);
             }
-            else if(Input.GetMouseButton(0) && !placeState)
+            
+            if(Input.GetMouseButton(0) && !placeState)
             {
                 if(netId == 1) cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -10f, 40f);
                 else cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -40f, 10f);
 
-                transform.localPosition = new Vector3(0f, 35f, origZloc + cameraMoveForward);
+                transform.localPosition = new Vector3(0f, this.transform.position.y, origZloc + cameraMoveForward);
 
                 GameObject camera = GameObject.Find("CameraRotator");
                 camera.transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
@@ -385,9 +405,10 @@ namespace Mirror
         }
 
         [Command]
-        private void CmdSetDisplayName(string displayName)
+        private void CmdSetDisplayNameLevel(string displayName, int exp)
         {
-            DisplayName = displayName;
+            Level = (int)Mathf.Floor(Mathf.Sqrt(exp / 20) + 1);
+            DisplayName = displayName;  
         }
 
         [Command]

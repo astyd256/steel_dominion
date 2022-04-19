@@ -19,8 +19,6 @@ public class S_ProfileSettingsManager : MonoBehaviour
         LoginInterfaceManager.instance.setPlayerProfileValues();
         _userName = LoginInterfaceManager.instance.getUserName();
         _userNameInputField.onValueChanged.AddListener(delegate { RemoveSpaces(); });
-        
-
     }
     void RemoveSpaces()
     {

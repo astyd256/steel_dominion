@@ -11,6 +11,9 @@ namespace Mirror
     [AddComponentMenu("")]
     public class S_NetworkManagerSteel : NetworkManager
     {
+        [Header("Server settings")]
+        [Scene] public List<string> onlineScenes;
+
         [Header("Game settings")]
         public float GameTime = 180f;
         public float PreMatchPlacementTime = 15f;
@@ -58,7 +61,25 @@ namespace Mirror
         }
 
         private MatchState matchState = MatchState.PlayerWaitingState;
-        
+
+        public override void Start()
+        {
+
+            System.Random random = new System.Random();
+            onlineScene = onlineScenes[random.Next(0, onlineScenes.Count)];
+            // headless mode? then start the server
+            // can't do this in Awake because Awake is for initialization.
+            // some transports might not be ready until Start.
+            //
+            // (tick rate is applied in StartServer!)
+#if UNITY_SERVER
+            if (autoStartServerBuild)
+            {
+                StartServer();
+            }
+#endif
+        }
+
         //Server start, stop, add player, connect client, disconnect client
         public override void OnStartServer()
         {
