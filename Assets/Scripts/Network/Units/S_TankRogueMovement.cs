@@ -216,6 +216,8 @@ namespace Mirror
                                 targetposition = hit.position;
                             }
                         }
+
+                        break;
                     }
                 }
             }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mirror
@@ -27,11 +25,14 @@ namespace Mirror
         [SerializeField] protected Transform AttackSpherePoint = null;
         [SerializeField] private Animation weaponAnim = null;
         [SerializeField] private float fireRate = 1.25f;
-        [SerializeField] private float currentFireCooldown = 0;
+        private float currentFireCooldown = 0;
+
         [SerializeField] private float pauseBetweenAttack = 6.5f;
-        [SerializeField] private float currentPauseBetweenAttack = 0;
+        private float currentPauseBetweenAttack = 0;
+
         [SerializeField] private int shotsAmount = 6;
-        [SerializeField] private int currentShot = 0;
+        private int currentShot = 0;
+
         [SerializeField] private float barrelRotateRate = 150f;
         
 
@@ -43,11 +44,33 @@ namespace Mirror
             TargetLooking
         }
 
-        [SerializeField] private TowerState towerState = TowerState.Idle;
+        private TowerState towerState = TowerState.Idle;
 
-        public void Start()
+        public override void OnStartClient()
         {
             tankMainScript = transform.GetComponent<S_TankRogueMovement>();
+        }
+
+        public override void OnStartServer()
+        {
+            tankMainScript = transform.GetComponent<S_TankRogueMovement>();
+            tankMainScript._targetChanged += SetTarget;
+        }
+
+        public override void OnStopServer()
+        {
+            tankMainScript._targetChanged -= SetTarget;
+        }
+
+        [Server]
+        private void SetTarget(Transform newTarget)
+        {
+            Transform oldTarget = curTarget;
+            curTarget = newTarget;
+
+            if (curTarget == null) return;
+            if (oldTarget != curTarget) ClientSetTarget(curTarget);
+            else if (curTarget == null) ClientSetTarget(null);
         }
 
         public void Update()
@@ -59,12 +82,7 @@ namespace Mirror
         [ServerCallback]
         public void ServerUpdate()
         {
-            Transform oldTarget = curTarget;
-            curTarget = tankMainScript.GetTarget();
-
             if (curTarget == null) return;
-            if (oldTarget != curTarget) ClientSetTarget(curTarget);
-            else if (curTarget == null) ClientSetTarget(null);
 
             if (towerState != TowerState.Shooting && towerState != TowerState.Reloading) towerState = TowerState.TargetLooking;
 
@@ -210,8 +228,6 @@ namespace Mirror
         private void ClientMakeShot(Vector3 shootDir)
         {
             Transform bulletTransform = Instantiate(projectilePrefab, AttackSpherePoint.position, Quaternion.identity);
-
-            System.Random rand = new System.Random();
 
             bulletTransform.GetComponent<S_TankProjectile>().SetData(0, tankMainScript.GetTeam(), shootDir, 100f);
 
