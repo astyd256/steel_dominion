@@ -24,9 +24,6 @@ namespace Mirror
         [SerializeField]
         private Animation weaponAnim = null;
 
-        [SerializeField]
-        private float attackDistance = 5f;
-
         public override void OnStartServer()
         {
             base.OnStartServer();

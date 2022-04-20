@@ -34,9 +34,9 @@ namespace Mirror
         
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
-        [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
-        [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
-        [SerializeField] private TMP_Text[] playerLevelTexts = new TMP_Text[2];
+        [SerializeField] private TMP_Text _enemyName = null;
+        [SerializeField] private TMP_Text _enemyReady = null;
+        [SerializeField] private TMP_Text _enemyLevel = null;
         [SerializeField] private TMP_Text timerText = null;
         [SerializeField] private GameObject unitsInventory = null;
         [SerializeField] private Button passButton = null;
@@ -212,20 +212,22 @@ namespace Mirror
                 return;
             }
             //Can be optimized to one loop
-            for(int i = 0; i < playerNameTexts.Length; i++)
-            {
-                playerNameTexts[i].text = "Waiting...";
-                playerReadyTexts[i].text = string.Empty;
-                playerLevelTexts[i].text = "0";
-            }
 
-            for(int i = 0; i<GameRoom.InGamePlayers.Count;i++)
+            _enemyName.text = "Waiting...";
+            _enemyReady.text = "Loading...";
+            _enemyLevel.text = "Level 0";
+
+            foreach(S_GamePlayer player in GameRoom.InGamePlayers)
             {
-                playerNameTexts[i].text = GameRoom.InGamePlayers[i].DisplayName;
-                playerReadyTexts[i].text = GameRoom.InGamePlayers[i].IsReady ?
-                    "<color=green>Ready</color>" :
-                    "<color=red>Not Ready</color>";
-                playerLevelTexts[i].text = GameRoom.InGamePlayers[i].Level.ToString();
+                if(player.netId != this.netId)
+                {
+                    _enemyName.text = (player.DisplayName == "") ? "Unknown" : player.DisplayName;
+                    _enemyReady.text = player.IsReady ?
+                        "<color=green>Ready</color>" :
+                        "<color=red>Not Ready</color>";
+                    _enemyLevel.text = "Level " + player.Level.ToString();
+                    break;
+                }
             }
         }
 
