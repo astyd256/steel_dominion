@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
@@ -14,7 +15,38 @@ public class S_ProfileSettingsManager : MonoBehaviour
     [SerializeField] public GameObject changeNamePanel;
     [SerializeField] public Button clickScreenButton;
     [SerializeField] public TextMeshProUGUI userNameInMenu;
+
+    [SerializeField] public GameObject changeIconButton;
+    [SerializeField] public GameObject iconChoicePanel;
+    [SerializeField] public Image userIcon;
+    [SerializeField] public GameObject userIconInMenu;
+    [SerializeField] public GameObject userIconInProfile;
  
+
+    public void setChosenIcon()
+    {
+        userIcon = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Image>();
+        userIconInMenu.GetComponent<Image>().sprite = userIcon.sprite;
+        userIconInProfile.GetComponent<Image>().sprite = userIcon.sprite;
+        closeIconChangeMenu();
+    }
+
+    public void switchIconChangeMenu()
+    {
+        if (iconChoicePanel.activeSelf)
+        {
+            iconChoicePanel.SetActive(false);
+        }
+        else
+        {
+            iconChoicePanel.SetActive(true);
+        }
+    }
+    public void closeIconChangeMenu()
+    {
+        iconChoicePanel?.SetActive(false);
+    }
+
     public void RemoveSpaces()
     {
         userNameInputField.text = userNameInputField.text.Replace(" ", "");
