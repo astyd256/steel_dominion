@@ -373,6 +373,36 @@ Transform:
   m_Father: {fileID: 5134630462308171411}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4227261989184775242
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1147739089890769976}
+  m_Layer: 7
+  m_Name: artilleryAttackPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1147739089890769976
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4227261989184775242}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.44, y: 0, z: 3.15}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5134630461791880893}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5119867680701798062
 GameObject:
   m_ObjectHideFlags: 0
@@ -658,6 +688,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5134630461234329488}
+  - {fileID: 1147739089890769976}
   m_Father: {fileID: 5134630462308171411}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 90}
@@ -728,6 +759,7 @@ GameObject:
   - component: {fileID: 1240474559673399686}
   - component: {fileID: 3606507606733234580}
   - component: {fileID: 5878083701987364402}
+  - component: {fileID: 6492779990448899854}
   m_Layer: 7
   m_Name: Tank(Rogue)
   m_TagString: Untagged
@@ -932,6 +964,27 @@ MonoBehaviour:
   pauseBetweenAttack: 6.5
   shotsAmount: 6
   barrelRotateRate: 150
+--- !u!114 &6492779990448899854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5134630462308171412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf847107f250cfb478cafab78e56ee3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  _shootingDistance: 60
+  _projectilePrefab: {fileID: 3253351812485030255, guid: 21e3e9c8292c1064da7ec3e30d7094b9,
+    type: 3}
+  _AttackSpherePoint: {fileID: 1147739089890769976}
+  _fireRate: 10
+  _minDistanceToShoot: 10
+  _mediumDamage: 35
 --- !u!1 &7800094441553012254
 GameObject:
   m_ObjectHideFlags: 0

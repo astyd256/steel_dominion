@@ -45,19 +45,22 @@ public class S_InventoryMenuManager : MonoBehaviour
     // On open inventory
     public void InitInventory()
     {
+        int _slotID = 0;
         // INITIALIZE INVENTORY EXISTING BUTTONS
         foreach (SO_UnitItemData unit in InventoryUnits)
         {
-            CreateSlot(unit);
+            CreateSlot(unit, _slotID);
+            _slotID++;
         }
     }
 
     //Sending unit's data to slot visualizer to create a proper slot image
-    public void CreateSlot(SO_UnitItemData unit)
+    public void CreateSlot(SO_UnitItemData unit, int slotID)
     {
         S_InventoryUnitSlot slot = Instantiate(unitInventorySlotPrefab, inventoryContainer);
         slot.InitSlotVisualisation(unit.GetWeight(), unit.GetName(), unit.GetSprite(), unit, slotSize);
         slot.AssignSlotButtonCallback(() => OpenItemMenu(slot));
+        slot.name = slotID.ToString();
         unitInventorySlots.Add(slot);
         
     }

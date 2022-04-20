@@ -11,17 +11,18 @@ namespace Mirror
     [AddComponentMenu("")]
     public class S_NetworkManagerSteel : NetworkManager
     {
+        [Header("Server settings")]
+        [Scene] [SerializeField] private List<string> onlineScenes;
+
         [Header("Game settings")]
-        public float GameTime = 180f;
-        public float PreMatchPlacementTime = 15f;
-        public int InGameWeightMax = 15;
+        [SerializeField] private float GameTime = 180f;
+        [SerializeField] private float PreMatchPlacementTime = 15f;
+        [SerializeField] private int InGameWeightMax = 15;
         private float RemainingTime = 0f;
         private bool timerisRunning = false;
-        [SerializeField]
-        private SO_UnitsToPlay unitsData;
+        [SerializeField] private SO_UnitsToPlay unitsData;
 
         [Header("Game process")]
-
         [SerializeField]
         private List<GameObject> firstPlayerBattleUnits = new List<GameObject>();
         private int firstPlayerWeight = 0;
@@ -45,7 +46,7 @@ namespace Mirror
         public static event Action OnClientConnected;
         public static event Action OnClientDisconnected;
 
-        public List<S_GamePlayer> InGamePlayers { get; } = new List<S_GamePlayer>();
+        public List<S_GamePlayer> InGamePlayers { get; private set; } = new List<S_GamePlayer>();
 
         private enum MatchState
         { 
@@ -58,7 +59,22 @@ namespace Mirror
         }
 
         private MatchState matchState = MatchState.PlayerWaitingState;
-        
+
+        public override void Start()
+        {
+            if (onlineScenes.Count == 0) throw new ArgumentNullException("Online scenes count is zero!");
+
+            System.Random random = new System.Random();
+            onlineScene = onlineScenes[random.Next(0, onlineScenes.Count)];
+
+#if UNITY_SERVER
+            if (autoStartServerBuild)
+            {
+                StartServer();
+            }
+#endif
+        }
+
         //Server start, stop, add player, connect client, disconnect client
         public override void OnStartServer()
         {
@@ -88,11 +104,6 @@ namespace Mirror
             OnClientDisconnected?.Invoke();
         }
 
-        //public override void OnServerConnect(NetworkConnection conn)
-        //{
-            
-        //}
-
         public override void OnServerDisconnect(NetworkConnection conn)
         {
             if(conn.identity != null)
@@ -111,14 +122,11 @@ namespace Mirror
 
         public override void OnServerAddPlayer(NetworkConnection conn)
         {
-            //Debug.Log("AddPlayer");
             Transform startPos = GetStartPosition();
             GameObject player = startPos != null
                 ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(playerPrefab);
 
-            // instantiating a "Player" prefab gives it the name "Player(clone)"
-            // => appending the connectionId is WAY more useful for debugging!
             player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
             NetworkServer.AddPlayerForConnection(conn, player);
             var playerpref = player.GetComponent<S_GamePlayer>();
@@ -134,14 +142,6 @@ namespace Mirror
         
         //Lobby functions
 
-        //public void NotifyPlayersofReadyState()
-        //{
-        //   // foreach (var player in InGamePlayers)
-        //   // {
-        //        //player.HandleReadyToStart(IsReadyToStart());
-        //   // }
-        //}
-
         private bool IsReadyToStart()
         {
             //Check for number of players to be ready
@@ -152,7 +152,6 @@ namespace Mirror
             foreach (var player in InGamePlayers)
                 if (!player.IsReady) return false;
             
-
             return true;
         }
 
@@ -184,8 +183,6 @@ namespace Mirror
             unitsToSend = SecondPlayerUnits.ToList();
             InGamePlayers[1].StartPreMatchStep(RemainingTime, true, unitsToSend, false, InGameWeightMax, true);
             unitsToSend.Clear();
-
-            Debug.Log("Match started! Place phase!");
         }
         //Game functions
 
@@ -199,7 +196,7 @@ namespace Mirror
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
 
-                unitObj.GetComponent<S_Unit>().SetData(0, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
+                unitObj.GetComponent<S_Unit>().SetData(0, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage(), unitsData.UnitsData[unitid].GetSizeType());
                 unitObj.name = "FirstPlayerUnit" + firstPlayerBattleUnits.Count;
                 InGamePlayers[0].TargetRpcRemoveUnitFromHand(Unitid);
                 firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
@@ -218,7 +215,7 @@ namespace Mirror
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, rot);
                 NetworkServer.Spawn(unitObj);
 
-                unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
+                unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage(), unitsData.UnitsData[unitid].GetSizeType());
                 unitObj.name = "SecondPlayerUnit" + secondPlayerBattleUnits.Count;
                 InGamePlayers[1].TargetRpcRemoveUnitFromHand(Unitid);
                 SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
@@ -227,7 +224,7 @@ namespace Mirror
                 secondPlayerBattleUnits.Add(unitObj);
             }
         }
-
+        //
         [Server]
         public void ServerPlaceUnit(NetworkConnection conn, int idToPlace, Vector3 placeToSpawn)
         {
@@ -239,7 +236,7 @@ namespace Mirror
               
             CalcTurnOrder();
         }
-
+        //
         [Server]
         public void ServerPlaceUnitSelf(int playerid)
         {

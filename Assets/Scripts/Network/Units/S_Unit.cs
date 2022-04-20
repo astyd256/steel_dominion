@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
@@ -17,23 +17,24 @@ namespace Mirror
         protected NavMeshAgent agent = null;
         protected Rigidbody unitRB = null;
         
-
         //Unit stats
         protected int Teamid = 0;
         private float maxHealth = 0f;
         private float health = 0f;
         protected int maxDamage = 2;
         protected int minDamage = 1;
+        protected SO_UnitItemData.UnitType _unitSize = SO_UnitItemData.UnitType.small;
 
         //Target info
-        protected float distTotarget;
-        protected GameObject target = null;
+        [SerializeField] protected GameObject target = null;
+        public Action<Transform> _targetChanged;
+        public Action _behaviourStarting;
 
         //Unit movement stats
         protected NavMeshPath path;
 
-        protected float forwardAmount = 0;
-        protected float turnAmount = 0;
+        [SerializeField]  protected float forwardAmount = 0;
+        [SerializeField]  protected float turnAmount = 0;
 
         
         protected float speed;
@@ -55,9 +56,10 @@ namespace Mirror
         protected enum State
         {
             Moving,
-            Idle
+            Idle,
+            Hovering
         }
-        protected State unitState = State.Idle;
+        [SerializeField] protected State unitState = State.Idle;
 
         //Network object info
         private S_NetworkManagerSteel gameroom;
@@ -71,8 +73,18 @@ namespace Mirror
             }
         }
 
+        public S_NetworkManagerSteel GetGameRoom()
+        {
+            return GameRoom;
+        }
+
+        public SO_UnitItemData.UnitType GetUnitType()
+        {
+            return _unitSize;
+        }
+
         [Server]
-        public void SetData(int teamid, int maxhealth, int miDamage, int maDamage)
+        public void SetData(int teamid, int maxhealth, int miDamage, int maDamage, SO_UnitItemData.UnitType type)
         {
             maxHealth = maxhealth;
             health = maxHealth;
@@ -80,6 +92,9 @@ namespace Mirror
 
             minDamage = miDamage;
             maxDamage = maDamage;
+
+            _unitSize = type;
+
             ClientSetData(teamid);
         }
 
@@ -100,6 +115,8 @@ namespace Mirror
             CalcDistances();
 
             ShowHealth(Teamid);
+
+            if(_behaviourStarting != null) _behaviourStarting.Invoke();
 
             isAlive = true;
             //this.transform.LookAt(target.transform.position);
@@ -138,7 +155,9 @@ namespace Mirror
         [Server]
         public virtual void CalcDistances()
         {
+            GameObject _oldTarget = (target == null) ? null : target;
             target = null;
+
             float minDistance = 1000000;
             List<GameObject> unitlists = new List<GameObject>();
 
@@ -151,10 +170,11 @@ namespace Mirror
                 if (dist < minDistance)
                 {
                     minDistance = dist;
-                    distTotarget = minDistance;
                     target = unit;
                 }
             }
+            
+            if (target != _oldTarget && _targetChanged != null && target != null) _targetChanged.Invoke(target.transform);
         }
 
         [ServerCallback]

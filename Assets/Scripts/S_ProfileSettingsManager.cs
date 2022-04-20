@@ -3,38 +3,71 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
-    [SerializeField] public string _userName;
-    [SerializeField] TextMeshProUGUI _userNameChangeTMP;
-    [SerializeField] TextMeshProUGUI _userNameProfileTMP;
-    [SerializeField] TMP_InputField _userNameInputField;
+#if !UNITY_SERVER
+    [SerializeField] public string userName;
+    [SerializeField] public TextMeshProUGUI userNameChangeTMP;
+    [SerializeField] public TextMeshProUGUI userNameProfileTMP;
+    [SerializeField] public TMP_InputField userNameInputField;
     [SerializeField] public GameObject profileSettingsPanel;
     [SerializeField] public GameObject changeNamePanel;
     [SerializeField] public Button clickScreenButton;
-    [SerializeField] public TextMeshProUGUI _userNameInMenu;
-    private void Start()
-    {
-        LoginInterfaceManager.instance.setPlayerProfileValues();
-        _userName = LoginInterfaceManager.instance.getUserName();
-        _userNameInputField.onValueChanged.AddListener(delegate { RemoveSpaces(); });
-        
+    [SerializeField] public TextMeshProUGUI userNameInMenu;
 
-    }
-    void RemoveSpaces()
+    [SerializeField] public GameObject changeIconButton;
+    [SerializeField] public GameObject iconChoicePanel;
+    [SerializeField] public Image userIcon;
+    [SerializeField] public GameObject userIconInMenu;
+    [SerializeField] public GameObject userIconInProfile;
+ 
+
+    public void setChosenIcon()
     {
-        _userNameInputField.text = _userNameInputField.text.Replace(" ", "");
+        userIcon = EventSystem.current.currentSelectedGameObject.transform.GetChild(0).GetComponent<Image>();
+        userIconInMenu.GetComponent<Image>().sprite = userIcon.sprite;
+        userIconInProfile.GetComponent<Image>().sprite = userIcon.sprite;
+        closeIconChangeMenu();
+    }
+
+    public void switchIconChangeMenu()
+    {
+        if (iconChoicePanel.activeSelf)
+        {
+            iconChoicePanel.SetActive(false);
+        }
+        else
+        {
+            iconChoicePanel.SetActive(true);
+        }
+    }
+    public void closeIconChangeMenu()
+    {
+        iconChoicePanel?.SetActive(false);
+    }
+
+    public void RemoveSpaces()
+    {
+        userNameInputField.text = userNameInputField.text.Replace(" ", "");
+    }
+
+    public void profileNameSet()
+    {
+        userName = userNameInMenu.text;
+        userNameProfileTMP.text = userName;
+        userNameInputField.text = userName;
     }
 
     public async void ChangeName()
     {
-        if (_userNameInputField.text != "")
+        if (userNameInputField.text != "")
         {
-            _userName = _userNameChangeTMP.text;
-            _userNameProfileTMP.text = _userName;
-            _userNameInMenu.text = _userName;
-            await FirebaseManager.instance.ChangeUsername(_userName);
+            userName = userNameChangeTMP.text;
+            userNameProfileTMP.text = userName;
+            userNameInMenu.text = userName;
+            await FirebaseManager.instance.ChangeUsername(userName);
 
             // Menu close:
             changeNamePanel.SetActive(false);
@@ -50,4 +83,5 @@ public class S_ProfileSettingsManager : MonoBehaviour
         clickScreenButton.interactable = true;
         profileSettingsPanel.GetComponent<CanvasGroup>().interactable = true;
     }
+#endif
 }

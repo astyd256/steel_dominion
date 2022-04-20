@@ -20,3 +20,4 @@ MonoBehaviour:
   maxHealth: 225
   minDamage: 7
   maxDamage: 10
+  unitSize: 2

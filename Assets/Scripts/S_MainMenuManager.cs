@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class S_MainMenuManager : MonoBehaviour
 {
+#if !UNITY_SERVER
     [SerializeField] private S_CurrentUnitsPanel currentUnitsPanel = null;
     [SerializeField] public Color ActiveButtonColor;
     [SerializeField] public Color ButtonColor;
@@ -17,10 +18,22 @@ public class S_MainMenuManager : MonoBehaviour
 
     [SerializeField] private GameObject inventoryPanel;    // Inventory panel
     [SerializeField] private Button inventoryOpenButton;   // Inventory open button
-    [SerializeField] private bool inventoryActive = false;
+    [SerializeField] bool inventoryActive = false;
 
     [SerializeField] public bool interactive = true;
+    [SerializeField] public bool unitsDeckBuildActive = true;
+    [SerializeField] public bool ordersDeckBuildActive = false;
 
+
+    private void Start()
+    {
+        //userName = FirebaseManager.instance.GetUserName();
+        
+
+        profileSettingsManager.userNameInputField.onValueChanged.AddListener(delegate { profileSettingsManager.RemoveSpaces(); });
+
+
+    }
     public void SavePlayer()
     {
         List<int> unitsIds = new List<int>();
@@ -56,6 +69,12 @@ public class S_MainMenuManager : MonoBehaviour
         {
             inventoryOpenButton.GetComponent<Image>().color = ButtonColor;
             //unitInventorySlots.Clear();
+
+            // CODE FOR REVERSING CHANGES BECAUSE SAVE WASNT PRESSED:
+            if (currentUnitsPanel.SaveInventoryButton.activeSelf == true)
+                currentUnitsPanel.ReverseSlots();
+
+            currentUnitsPanel.SaveInventoryButton.SetActive(false);
         }
         inventoryPanel.SetActive(!inventoryPanel.activeSelf);
         inventoryActive = !inventoryActive;
@@ -106,5 +125,9 @@ public class S_MainMenuManager : MonoBehaviour
         profileSettingsManager.profileSettingsPanel.GetComponent<CanvasGroup>().interactable = false;
     }
 
-
+    public bool getInventoryActive()
+    {
+        return inventoryActive;
+    }
+#endif
 }

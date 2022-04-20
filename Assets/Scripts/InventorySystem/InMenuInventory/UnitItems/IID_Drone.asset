@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ad0b180f6e5b859499bc70a6feb223a7, type: 3}
-  m_Name: IID_Triangle
+  m_Name: IID_Drone
   m_EditorClassIdentifier: Assembly-CSharp::S_MenuItemData
   id: 0
   displayName: Drone
-  prefab: {fileID: 4092620352590196477, guid: 2ee28e2eba464a441bff9ac2d43cda7d, type: 3}
+  prefab: {fileID: 921116769953135926, guid: bb1ecef76cd8deb4b97118627ec9a4ad, type: 3}
   UnitWeight: 3
   unitSprite: {fileID: 21300000, guid: fd3c1db159b747b43805104235ca727a, type: 3}
   maxHealth: 65

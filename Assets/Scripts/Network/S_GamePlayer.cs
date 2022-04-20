@@ -34,8 +34,9 @@ namespace Mirror
         
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
-        [SerializeField] private TMP_Text[] playerNameTexts = new TMP_Text[2];
-        [SerializeField] private TMP_Text[] playerReadyTexts = new TMP_Text[2];
+        [SerializeField] private TMP_Text _enemyName = null;
+        [SerializeField] private TMP_Text _enemyReady = null;
+        [SerializeField] private TMP_Text _enemyLevel = null;
         [SerializeField] private TMP_Text timerText = null;
         [SerializeField] private GameObject unitsInventory = null;
         [SerializeField] private Button passButton = null;
@@ -43,8 +44,9 @@ namespace Mirror
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
         [SerializeField] private Camera playercameraUI = null;
-        [SerializeField] private GameObject spawnArea = null;
-        
+        private GameObject spawnArea = null;
+        private GameObject _enemySpawnArea = null;
+
 
         private bool timerState = false;
         private float timerRemaining = 0f;
@@ -53,6 +55,8 @@ namespace Mirror
         public string DisplayName = "Loading...";
         [SyncVar(hook = nameof(HandlereadyStatusChanged))]
         public bool IsReady = false;
+
+        public int Level = 1;
 
         //
         private S_NetworkManagerSteel gameroom;
@@ -67,7 +71,7 @@ namespace Mirror
         }
         //
         //Network functions
-
+#if !UNITY_SERVER
         public override void OnStartAuthority()
         {
             //SendPlayerNameToServer
@@ -78,14 +82,33 @@ namespace Mirror
 
             transform.parent = GameObject.Find("CameraRotator").transform;
             origZloc = this.transform.position.z;
-            CmdSetDisplayName(data.playername);
-            CmdGetUnits(data.unitData, netId);
+
+            //CmdSetDisplayName(data.playername);
+            //CmdGetUnits(data.unitData, netId);
+            //0200 0001 0102 0203 0104 0007 (24)
+            //string curInventory = FirebaseManager.instance.GetCurInventory();
+            string curInventory = "020000010102020301040007";
+            int curLength = curInventory.Length-1;
+
+            List<int> curUnitsList = new List<int>();
+
+            for(int i = 0; i < curLength; i+=4)
+            {
+                string tempStr = "";
+                tempStr += curInventory[i];
+                tempStr += curInventory[i+1];
+                curUnitsList.Add(System.Convert.ToInt32(tempStr));
+            }
+
+            //CmdGetPlayerToken(FirebaseManager.instance.user.TokenAsync());
+            CmdSetDisplayNameLevel(FirebaseManager.instance.GetUserName(), FirebaseManager.instance.GetUserXp());
+            CmdGetUnits(curUnitsList, netId);
   
             ListUnits();
 
             this.CallWithDelay(CmdReadyUp, 3f);
         }
-
+#endif
         public override void OnStartServer()
         {
             GameRoom.InGamePlayers.Add(this);
@@ -121,7 +144,7 @@ namespace Mirror
         {
             Units.Add(unit);
         }
-
+#if !UNITY_SERVER
         public void ToggleToPlaceUnit(int index)
         {
             if (idToPlace != -1) unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
@@ -129,9 +152,8 @@ namespace Mirror
             if(idToPlace == index)
             {
                 unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
-                placeState = false;
                 idToPlace = -1;
-                placeState = !placeState;
+                placeState = false;
                 return;
             }
 
@@ -171,7 +193,7 @@ namespace Mirror
                 
             }
         }
-       
+#endif
         public void HandlereadyStatusChanged(bool oldValue, bool newValue) => UpdateDisplay();
         public void HandleDisplayPlayerNameChanged(string oldValue, string newValue) => UpdateDisplay();
 
@@ -191,18 +213,22 @@ namespace Mirror
                 return;
             }
             //Can be optimized to one loop
-            for(int i = 0; i < playerNameTexts.Length; i++)
-            {
-                playerNameTexts[i].text = "Waiting...";
-                playerReadyTexts[i].text = string.Empty;
-            }
 
-            for(int i = 0; i<GameRoom.InGamePlayers.Count;i++)
+            _enemyName.text = "Waiting...";
+            _enemyReady.text = "Loading...";
+            _enemyLevel.text = "Level 0";
+
+            foreach(S_GamePlayer player in GameRoom.InGamePlayers)
             {
-                playerNameTexts[i].text = GameRoom.InGamePlayers[i].DisplayName;
-                playerReadyTexts[i].text = GameRoom.InGamePlayers[i].IsReady ?
-                    "<color=green>Ready</color>" :
-                    "<color=red>Not Ready</color>";
+                if(player.netId != this.netId)
+                {
+                    _enemyName.text = (player.DisplayName == "") ? "Unknown" : player.DisplayName;
+                    _enemyReady.text = player.IsReady ?
+                        "<color=green>Ready</color>" :
+                        "<color=red>Not Ready</color>";
+                    _enemyLevel.text = "Level " + player.Level.ToString();
+                    break;
+                }
             }
         }
 
@@ -232,19 +258,16 @@ namespace Mirror
 
             if(Input.GetMouseButtonDown(0) && placeState)
             {
+
                 if (EventSystem.current.IsPointerOverGameObject()) return;
-                
-                var ray = playercamera.ScreenPointToRay(Input.mousePosition);
 
-                LayerMask mask = LayerMask.GetMask("OnlyRaycast");
-                if(Physics.Raycast(ray, out RaycastHit hit, mask))
+                Ray ray = playercamera.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hit, 500f, 1 << 6))
                 {
-                    if (hit.transform.gameObject.layer == LayerMask.NameToLayer("OnlyRaycast"))
-                    {
-                        placeState = false;
+                    placeState = false;
 
-                        if (currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
-                    }
+                    if (currentWeight + Units[idToPlace].GetWeight() <= maxWeight) CmdPlaceUnit(idToPlace, hit.point);
                     //Debug.Log("Place id = " + idToPlace + "To vector3 = " + hit.point);
                     //unitBtns.RemoveAt(idToPlace);
                     //ListUnits();
@@ -254,12 +277,13 @@ namespace Mirror
                 //ray.GetType
                 // ray = playercamera.ScreenPointToRay(Input.mousePosition);
             }
-            else if(Input.GetMouseButton(0) && !placeState)
+            
+            if(Input.GetMouseButton(0) && !placeState)
             {
                 if(netId == 1) cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -10f, 40f);
                 else cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -40f, 10f);
 
-                transform.localPosition = new Vector3(0f, 35f, origZloc + cameraMoveForward);
+                transform.localPosition = new Vector3(0f, this.transform.position.y, origZloc + cameraMoveForward);
 
                 GameObject camera = GameObject.Find("CameraRotator");
                 camera.transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
@@ -274,6 +298,7 @@ namespace Mirror
         [TargetRpc]
         public void TargetRpcRemoveUnitFromHand(int idToRemove)
         {
+#if !UNITY_SERVER
             currentWeight += Units[idToRemove].GetWeight();
 
             weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
@@ -281,6 +306,7 @@ namespace Mirror
             Units.RemoveAt(idToRemove);
 
             ListUnits();
+#endif
         }
         [TargetRpc]
         public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI, bool ShowResult, bool win)
@@ -291,7 +317,9 @@ namespace Mirror
             unitsInventory.SetActive(showInventoryUI);
             weightText.gameObject.SetActive(showInventoryUI);
 
-            if(currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
+            if (newValue == 3f) _enemySpawnArea.SetActive(false);
+
+            if (currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
             else passButton.gameObject.SetActive(false);
 
             if(ShowResult)
@@ -304,6 +332,7 @@ namespace Mirror
         [TargetRpc]
         public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits, bool CanPlace, int maxWeightToPlace, bool resetWeight)
         {
+#if !UNITY_SERVER
             timerRemaining = newTimerValue;
             timerState = startTimer;
 
@@ -319,6 +348,7 @@ namespace Mirror
             {
                 weightText.gameObject.SetActive(true);
                 spawnArea.SetActive(true);
+                _enemySpawnArea.SetActive(false);
                 unitsInventory.SetActive(true);
 
                 if (currentWeight > 0) passButton.gameObject.SetActive(true);
@@ -328,6 +358,7 @@ namespace Mirror
             {
                 weightText.gameObject.SetActive(false);
                 spawnArea.SetActive(false);
+                _enemySpawnArea.SetActive(true);
                 unitsInventory.SetActive(false);
                 passButton.gameObject.SetActive(false);
             }
@@ -340,6 +371,7 @@ namespace Mirror
             }
 
             ListUnits();
+#endif
         }
 
         [TargetRpc]
@@ -348,25 +380,30 @@ namespace Mirror
             if (areaindex == 1)
             {
                 spawnArea = GameObject.FindWithTag("FirstSpawnArea");
-                Destroy(GameObject.FindWithTag("SecondSpawnArea"));
+                _enemySpawnArea = GameObject.FindWithTag("SecondSpawnArea");
             }
             else
             {
                 spawnArea = GameObject.FindWithTag("SecondSpawnArea");
-                Destroy(GameObject.FindWithTag("FirstSpawnArea"));
+                _enemySpawnArea = GameObject.FindWithTag("FirstSpawnArea");
             }
             spawnArea.SetActive(false);
+
+            _enemySpawnArea.transform.GetChild(0).GetComponent<Image>().color = Color.red;
+            _enemySpawnArea.SetActive(false);
         }
 
         [TargetRpc]
         public void TargetRpcGetUnitsToHand(List<int> unitsIds)
         {
+#if !UNITY_SERVER
             foreach (int id in unitsIds)
             {
                 Units.Add(unitsData.UnitsData[id]);
             }
 
             ListUnits();
+#endif
         }
 
         public void btnPass()
@@ -385,9 +422,10 @@ namespace Mirror
         }
 
         [Command]
-        private void CmdSetDisplayName(string displayName)
+        private void CmdSetDisplayNameLevel(string displayName, int exp)
         {
-            DisplayName = displayName;
+            Level = (int)Mathf.Floor(Mathf.Sqrt(exp / 20) + 1);
+            DisplayName = displayName;  
         }
 
         [Command]
@@ -403,6 +441,12 @@ namespace Mirror
         public void CmdGetUnits(List<int> unitsids, uint id)
         {
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
+        }
+
+        [Command]
+        public void CmdGetPlayerToken(string playerToken)
+        {
+           //GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }
 
         [Command]
