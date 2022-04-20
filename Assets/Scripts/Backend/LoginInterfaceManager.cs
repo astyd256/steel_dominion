@@ -76,6 +76,7 @@ public class LoginInterfaceManager : MonoBehaviour
     public void VerifyInputs() //TODO: PROBABLY rewrite this code to add more restrictions in the password.
     {
         RegisterButton.interactable = (emailField.text.Length >= 8 && passwordField.text.Length >= 8);
+        LoginButton.interactable = (emailField.text.Length >= 8 && passwordField.text.Length >= 8);
     }
     public void Register()
     {

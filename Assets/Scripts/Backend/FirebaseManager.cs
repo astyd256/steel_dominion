@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
@@ -38,7 +34,7 @@ public class FirebaseManager : MonoBehaviour
         await dbReference.Child(loserPlayerToken).Child("_xp").SetValueAsync(loserExp + 50);
     }
 
-    public string GetCurInventory(string PlayerToken)
+    string GetCurInventory(string PlayerToken)
     {
         return await dbReference.Child(PlayerToken).Child("_cur_inventory
         ").GetValueAsync();
@@ -48,13 +44,10 @@ public class FirebaseManager : MonoBehaviour
     
     #if !UNITY_SERVER 
     private FirebaseAuth auth;
-    public FirebaseUser user;
+    private FirebaseUser user;
     private int _xp = 0;
     private string _inventory = "";
-    private string _cur_inventory
-     = "";
-    [SerializeField]
-    private TMP_Text logField;
+    private string _cur_inventory= "";
     void Start()
     {
         auth = FirebaseAuth.DefaultInstance;
@@ -96,32 +89,7 @@ public class FirebaseManager : MonoBehaviour
         if(registerTask.Exception != null)
         {
             await user.DeleteAsync();
-            FirebaseException firebaseException = (FirebaseException)registerTask.Exception.GetBaseException();
-            AuthError authError = (AuthError)firebaseException.ErrorCode;
-
-            string output = "Unknown error, please try again.";
-            switch (authError)
-            {
-                case AuthError.InvalidEmail:
-                    output = "Invalid Email";
-                    break;
-                case AuthError.EmailAlreadyInUse:
-                    output = "Email already in use";
-                    break;
-                case AuthError.WeakPassword:
-                    output = "Weak Password";
-                    break;
-                case AuthError.MissingEmail:
-                    output = "Please enter your Email";
-                    break;
-                case AuthError.MissingPassword:
-                    output = "Please enter your password";
-                    break;
-                case AuthError.SessionExpired:
-                    output = "Session Expired";
-                    break;
-            }
-            logField.text = output;
+            //TODO: Add error message
         }
         else
         {
@@ -134,7 +102,6 @@ public class FirebaseManager : MonoBehaviour
             {
                 LoginInterfaceManager.instance.toMainMenu();
             } 
-            //TODO: Send verification Email
         }
     }
     private async void AddDefaultAccountIntoDatabase()
@@ -150,33 +117,7 @@ public class FirebaseManager : MonoBehaviour
             if (task.Exception != null)
             {
                 FirebaseException firebaseException = (FirebaseException)task.Exception.GetBaseException();
-                AuthError authError = (AuthError)firebaseException.ErrorCode;
-
-                logField.text = authError.ToString();
-                string output = "Unknown error, please try again.";
-                switch (authError)
-                {
-                    case AuthError.MissingEmail:
-                        output = "Please enter your email";
-                        break;
-                    case AuthError.MissingPassword:
-                        output = "Please enter your password";
-                        break;
-                    case AuthError.InvalidEmail:
-                        output = "Please enter a valid email";
-                        break;
-                    case AuthError.WrongPassword:
-                        output = "Please enter your password";
-                        break;
-                    case AuthError.UserNotFound:
-                        output = "User not found";
-                        break;
-                    case AuthError.Failure:
-                        output = "No internet connection";
-                        break;
-                }
-                logField.text = authError + '\n' + output;
-
+                //TODO: Add error message
             }
             else LoginInterfaceManager.instance.toMainMenu();   
         });
@@ -185,14 +126,13 @@ public class FirebaseManager : MonoBehaviour
     {
         auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(async task => {
             if (task.IsCanceled) {
-                logField.text = "Sign as Guest canceled.";
+                //TODO: Add error message here
                 return;
             }
             if (task.IsFaulted) {
-                logField.text = "Sign as Guest encounterd an error: " + task.Exception;
+                //TODO: Add error message here
                 return;
             }
-            //TODO: add default inventory
             user = task.Result;
             AddDefaultAccountIntoDatabase();
             await ChangeUsername("Guest");
@@ -206,15 +146,9 @@ public class FirebaseManager : MonoBehaviour
         if (!signedIn && user != null)
         {
             LoginInterfaceManager.instance.toLobby();
-            logField.text = "Signed Out";
             user = null;
         }
         user = auth.CurrentUser;
-        if (signedIn) //TODO: Add display name to users
-        {
-            if (user.DisplayName == null)
-            logField.text = $"Signed in as {user.UserId}";
-        }
     }
     public void LogOut() 
     {
@@ -225,7 +159,6 @@ public class FirebaseManager : MonoBehaviour
             _cur_inventory
              = "";
         }
-        else logField.text = "User not logged";
     }
 	private async Task retriveUserData()
 	{
@@ -272,18 +205,13 @@ public class FirebaseManager : MonoBehaviour
     {
         if (user == null)
         {
-            logField.text = "Error! User is null!";
             return 0;
         }
         return _xp;
     }
     public string GetUserName()
     {
-        if (user == null) 
-        {
-            logField.text = "Error fetching name! User is null!";
-            return "";    
-        }
+        if (user == null) return "";
         else return user.DisplayName;
     }
     public async void SaveCurInventory(string inventory)
