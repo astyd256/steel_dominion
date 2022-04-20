@@ -24,30 +24,46 @@ public class FirebaseManager : MonoBehaviour
         }
     }
     
-    //#if UNITY_SERVER
+    #if UNITY_SERVER
     
-    //async void AddExp(string winnerPlayerToken, string loserPlayerToken)
-    //{
-    //    var winnerExp = await dbReference.Child(winnerPlayerToken).Child("_xp").GetValueAsync();
-    //    await dbReference.Child(winnerPlayerToken).Child("_xp").SetValueAsync(winnerExp + 100);
-    //    var loserExp = await dbReference.Child(loserPlayerToken).Child("_xp").GetValueAsync();
-    //    await dbReference.Child(loserPlayerToken).Child("_xp").SetValueAsync(loserExp + 50);
-    //}
+    async void AddExp(string playerToken, int xp)
+    {
+        var task = await dbReference.Child(playerToken).Child("xp").GetValueAsync();
+        if (task.ChildrenCount == 0)
+        {
+            Debug.LogWarning(message: $"No data was found on given user");
+        }
+        else
+        {
+            int curExp = Convert.ToInt32(task.Value);
+            await dbReference.Child(playerToken).Child("xp").SetValueAsync(curExp + xp);
+        }
+    }
 
 
-    //public string GetCurInventory(string PlayerToken)
-    //{
-    //    return await dbReference.Child(PlayerToken).Child("_cur_inventory").GetValueAsync();
-    //}
+    async Task<string> GetCurInventory(string playerToken)
+    {
+        var task = await dbReference.Child(playerToken).Child("cur_inventory").GetValueAsync();
+        if (task.ChildrenCount == 0)
+        {
+            Debug.LogWarning(message: $"No data was found on given user");
+        }
+        else
+        {
+            return task.ToString();
+        }
+        return null; 
+    }
     
-    //#endif
+    #endif
     
     #if !UNITY_SERVER 
     private FirebaseAuth auth;
     private FirebaseUser user;
     private int _xp = 0;
     private string _inventory = "";
-    private string _cur_inventory= "";
+    private string _cur_inventory = "";
+    private int _picture_id = 0;
     void Start()
     {
         auth = FirebaseAuth.DefaultInstance;
@@ -109,6 +125,7 @@ public class FirebaseManager : MonoBehaviour
         await dbReference.Child(user.UserId).Child("xp").SetValueAsync(0);
         await dbReference.Child(user.UserId).Child("inventory").SetValueAsync("000100000000020201010100");
         await dbReference.Child(user.UserId).Child("cur_inventory").SetValueAsync("");
+        await dbReference.Child(user.UserId).Child("picture_id").SetValueAsync(0);
     }
     public void Login(string email, string password)
     {
@@ -173,9 +190,10 @@ public class FirebaseManager : MonoBehaviour
             else
             {
                 //Data has been retrieved
-                _xp = Convert.ToInt32(task.Child("_xp").Value);
+                _xp = Convert.ToInt32(task.Child("xp").Value);
                 _inventory = task.Child("_inventory").ToString();
                 _cur_inventory = task.Child("cur_inventory").ToString();
+                _picture_id = Convert.ToInt32(task.Child("picture_id").Value);
             }
 
         }
@@ -185,20 +203,20 @@ public class FirebaseManager : MonoBehaviour
     {
         user = auth.CurrentUser;
         if (user != null) {
-        Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
-            DisplayName = newUsername
-        };
-        await user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
-            if (task.IsCanceled) {
-            Debug.LogError("UpdateUserProfileAsync was canceled.");
-            return;
-            }
-            if (task.IsFaulted) {
-            Debug.LogError("UpdateUserProfileAsync encountered an error: " + task.Exception);
-            return;
-            }
-            Debug.Log("User profile updated successfully.");
-        });
+            Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
+                DisplayName = newUsername
+            };
+            await user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
+                if (task.IsCanceled) {
+                Debug.LogError("UpdateUserProfileAsync was canceled.");
+                return;
+                }
+                if (task.IsFaulted) {
+                Debug.LogError("UpdateUserProfileAsync encountered an error: " + task.Exception);
+                return;
+                }
+                Debug.Log("User profile updated successfully.");
+            });
         }
     }
     public int GetUserXp()
@@ -245,5 +263,29 @@ public class FirebaseManager : MonoBehaviour
         }
 
     }    
+    public string GetUserToken()
+    {
+        return user.UserId;
+    }
+    async void ChangeProfilePicture(int pictureId)
+    {
+        //TODO: Add error messege here
+        await dbReference.Child(user.UserId).Child("picture_id").SetValueAsync(pictureId);
+        _picture_id = pictureId;
+    }      
+    async Task<int> GetProfilePictureId()
+    {
+        var task = await dbReference.Child(user.UserId).Child("picture_id").GetValueAsync();
+        if (task.ChildrenCount == 0)
+        {
+            Debug.LogWarning(message: $"No data was found on given user");
+        }
+        else
+        {
+            return Convert.ToInt32(task.Value);
+        }
+        return 0;
+           
+    }
     #endif
 }
