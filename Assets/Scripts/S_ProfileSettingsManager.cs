@@ -20,6 +20,13 @@ public class S_ProfileSettingsManager : MonoBehaviour
         userNameInputField.text = userNameInputField.text.Replace(" ", "");
     }
 
+    public void profileNameSet()
+    {
+        userName = userNameInMenu.text;
+        userNameProfileTMP.text = userName;
+        userNameInputField.text = userName;
+    }
+
     public async void ChangeName()
     {
         if (userNameInputField.text != "")
