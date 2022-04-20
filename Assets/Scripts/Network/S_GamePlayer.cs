@@ -99,6 +99,7 @@ namespace Mirror
                 curUnitsList.Add(System.Convert.ToInt32(tempStr));
             }
 
+            //CmdGetPlayerToken(FirebaseManager.instance.user.TokenAsync());
             CmdSetDisplayNameLevel(FirebaseManager.instance.GetUserName(), FirebaseManager.instance.GetUserXp());
             CmdGetUnits(curUnitsList, netId);
   
@@ -424,6 +425,12 @@ namespace Mirror
         public void CmdGetUnits(List<int> unitsids, uint id)
         {
             GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
+        }
+
+        [Command]
+        public void CmdGetPlayerToken(string playerToken)
+        {
+           //GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
         }
 
         [Command]

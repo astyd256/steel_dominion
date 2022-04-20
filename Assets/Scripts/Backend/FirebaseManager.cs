@@ -40,8 +40,7 @@ public class FirebaseManager : MonoBehaviour
 
     public string GetCurInventory(string PlayerToken)
     {
-        return await dbReference.Child(PlayerToken).Child("_cur_inventory
-        ").GetValueAsync();
+        return await dbReference.Child(PlayerToken).Child("_cur_inventory").GetValueAsync();
     }
     
     #endif

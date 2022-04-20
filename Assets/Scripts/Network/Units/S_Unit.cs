@@ -23,9 +23,10 @@ namespace Mirror
         private float health = 0f;
         protected int maxDamage = 2;
         protected int minDamage = 1;
+        protected SO_UnitItemData.UnitType _unitSize = SO_UnitItemData.UnitType.small;
 
         //Target info
-        protected GameObject target = null;
+        [SerializeField] protected GameObject target = null;
         public Action<Transform> _targetChanged;
         public Action _behaviourStarting;
 
@@ -55,7 +56,8 @@ namespace Mirror
         protected enum State
         {
             Moving,
-            Idle
+            Idle,
+            Hovering
         }
         protected State unitState = State.Idle;
 
@@ -76,8 +78,13 @@ namespace Mirror
             return GameRoom;
         }
 
+        public SO_UnitItemData.UnitType GetUnitType()
+        {
+            return _unitSize;
+        }
+
         [Server]
-        public void SetData(int teamid, int maxhealth, int miDamage, int maDamage)
+        public void SetData(int teamid, int maxhealth, int miDamage, int maDamage, SO_UnitItemData.UnitType type)
         {
             maxHealth = maxhealth;
             health = maxHealth;
@@ -85,6 +92,9 @@ namespace Mirror
 
             minDamage = miDamage;
             maxDamage = maDamage;
+
+            _unitSize = type;
+
             ClientSetData(teamid);
         }
 
@@ -106,7 +116,8 @@ namespace Mirror
 
             ShowHealth(Teamid);
 
-            _behaviourStarting.Invoke();
+            if(_behaviourStarting != null) _behaviourStarting.Invoke();
+
             isAlive = true;
             //this.transform.LookAt(target.transform.position);
             //this.transform.rotation = Quaternion.Euler(-90, this.transform.rotation.eulerAngles.y, this.transform.rotation.eulerAngles.z);
@@ -162,8 +173,8 @@ namespace Mirror
                     target = unit;
                 }
             }
-
-            if (target != _oldTarget) _targetChanged.Invoke(target.transform);
+            
+            if (target != _oldTarget && _targetChanged != null && target != null) _targetChanged.Invoke(target.transform);
         }
 
         [ServerCallback]

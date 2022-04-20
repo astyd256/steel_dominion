@@ -39,7 +39,27 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         SaveInventoryButton.SetActive(false);
         previousSlots = slots.ToList();
         // SAVE INVENTORY CODE:
+        string _saveString = "";
+        foreach (S_InventoryUnitSlot slot in slots)
+        {
+            int _unitID = slot.GetUnitData().id;
+            int _unitInventoryPosition = int.Parse(slot.name);
 
+            if(_unitID < 10)
+            {
+                _saveString += "0";
+                _saveString += _unitID.ToString();
+            }
+            else _saveString += _unitID.ToString();
+
+            if (_unitInventoryPosition < 10)
+            {
+                _saveString += "0";
+                _saveString += _unitInventoryPosition.ToString();
+            }
+            else _saveString += _unitInventoryPosition.ToString();
+        }
+        FirebaseManager.instance.SaveCurInventory(_saveString);
     }
 
     public void ReverseSlots()

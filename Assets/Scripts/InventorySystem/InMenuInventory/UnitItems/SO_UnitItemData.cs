@@ -12,7 +12,21 @@ public class SO_UnitItemData : ScriptableObject
     public int minDamage = 1;
     public int maxDamage = 2;
 
+    public enum UnitType
+    {
+        small,
+        medium,
+        big
+    }
+
+    public UnitType unitSize = UnitType.small;
+
     // INVENTORY ITEM
+    public UnitType GetSizeType()
+    {
+        return unitSize;
+    }
+
     public string GetName()
     {
         return displayName;

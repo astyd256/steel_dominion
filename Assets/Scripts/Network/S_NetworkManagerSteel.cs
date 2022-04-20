@@ -220,7 +220,7 @@ namespace Mirror
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, Quaternion.identity);
                 NetworkServer.Spawn(unitObj);
 
-                unitObj.GetComponent<S_Unit>().SetData(0, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
+                unitObj.GetComponent<S_Unit>().SetData(0, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage(), unitsData.UnitsData[unitid].GetSizeType());
                 unitObj.name = "FirstPlayerUnit" + firstPlayerBattleUnits.Count;
                 InGamePlayers[0].TargetRpcRemoveUnitFromHand(Unitid);
                 firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
@@ -239,7 +239,7 @@ namespace Mirror
                 GameObject unitObj = Instantiate(unitsData.UnitsData[unitid].prefab, spawnplace, rot);
                 NetworkServer.Spawn(unitObj);
 
-                unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage());
+                unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage(), unitsData.UnitsData[unitid].GetSizeType());
                 unitObj.name = "SecondPlayerUnit" + secondPlayerBattleUnits.Count;
                 InGamePlayers[1].TargetRpcRemoveUnitFromHand(Unitid);
                 SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
