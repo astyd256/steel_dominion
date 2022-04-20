@@ -33,8 +33,8 @@ namespace Mirror
         //Unit movement stats
         protected NavMeshPath path;
 
-        protected float forwardAmount = 0;
-        protected float turnAmount = 0;
+        [SerializeField]  protected float forwardAmount = 0;
+        [SerializeField]  protected float turnAmount = 0;
 
         
         protected float speed;
@@ -59,7 +59,7 @@ namespace Mirror
             Idle,
             Hovering
         }
-        protected State unitState = State.Idle;
+        [SerializeField] protected State unitState = State.Idle;
 
         //Network object info
         private S_NetworkManagerSteel gameroom;

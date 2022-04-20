@@ -44,8 +44,9 @@ namespace Mirror
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
         [SerializeField] private Camera playercameraUI = null;
-        [SerializeField] private GameObject spawnArea = null;
-        
+        private GameObject spawnArea = null;
+        private GameObject _enemySpawnArea = null;
+
 
         private bool timerState = false;
         private float timerRemaining = 0f;
@@ -314,7 +315,9 @@ namespace Mirror
             unitsInventory.SetActive(showInventoryUI);
             weightText.gameObject.SetActive(showInventoryUI);
 
-            if(currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
+            if (newValue == 3f) _enemySpawnArea.SetActive(false);
+
+            if (currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
             else passButton.gameObject.SetActive(false);
 
             if(ShowResult)
@@ -342,6 +345,7 @@ namespace Mirror
             {
                 weightText.gameObject.SetActive(true);
                 spawnArea.SetActive(true);
+                _enemySpawnArea.SetActive(false);
                 unitsInventory.SetActive(true);
 
                 if (currentWeight > 0) passButton.gameObject.SetActive(true);
@@ -351,6 +355,7 @@ namespace Mirror
             {
                 weightText.gameObject.SetActive(false);
                 spawnArea.SetActive(false);
+                _enemySpawnArea.SetActive(true);
                 unitsInventory.SetActive(false);
                 passButton.gameObject.SetActive(false);
             }
@@ -371,14 +376,17 @@ namespace Mirror
             if (areaindex == 1)
             {
                 spawnArea = GameObject.FindWithTag("FirstSpawnArea");
-                Destroy(GameObject.FindWithTag("SecondSpawnArea"));
+                _enemySpawnArea = GameObject.FindWithTag("SecondSpawnArea");
             }
             else
             {
                 spawnArea = GameObject.FindWithTag("SecondSpawnArea");
-                Destroy(GameObject.FindWithTag("FirstSpawnArea"));
+                _enemySpawnArea = GameObject.FindWithTag("FirstSpawnArea");
             }
             spawnArea.SetActive(false);
+
+            _enemySpawnArea.transform.GetChild(0).GetComponent<Image>().color = Color.red;
+            _enemySpawnArea.SetActive(false);
         }
 
         [TargetRpc]
