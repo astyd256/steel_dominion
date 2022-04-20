@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 
 public class S_ProfileSettingsManager : MonoBehaviour
 {
+#if !UNITY_SERVER
     [SerializeField] public string userName;
     [SerializeField] public TextMeshProUGUI userNameChangeTMP;
     [SerializeField] public TextMeshProUGUI userNameProfileTMP;
@@ -82,4 +83,5 @@ public class S_ProfileSettingsManager : MonoBehaviour
         clickScreenButton.interactable = true;
         profileSettingsPanel.GetComponent<CanvasGroup>().interactable = true;
     }
+#endif
 }

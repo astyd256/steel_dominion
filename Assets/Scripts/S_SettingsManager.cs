@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class S_SettingsManager : MonoBehaviour
 {
+#if !UNITY_SERVER
     [SerializeField] private float _musicVolume;
     [SerializeField] private float _effectsVolume;
 
@@ -32,5 +33,5 @@ public class S_SettingsManager : MonoBehaviour
     }
 
 
-
+#endif
 }

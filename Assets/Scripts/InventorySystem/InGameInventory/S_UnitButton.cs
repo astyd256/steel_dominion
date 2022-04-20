@@ -6,6 +6,7 @@ using TMPro;
 
 public class S_UnitButton : MonoBehaviour
 {
+#if !UNITY_SERVER
     public event Action<int> ClientUnitClicked;
     private Button btn;
     [SerializeField] private Image unitSpriteGUI;
@@ -60,5 +61,5 @@ public class S_UnitButton : MonoBehaviour
             btn.colors = colors;
         }
     }
-
+#endif
 }

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class S_MainMenuManager : MonoBehaviour
 {
+#if !UNITY_SERVER
     [SerializeField] private S_CurrentUnitsPanel currentUnitsPanel = null;
     [SerializeField] public Color ActiveButtonColor;
     [SerializeField] public Color ButtonColor;
@@ -128,5 +129,5 @@ public class S_MainMenuManager : MonoBehaviour
     {
         return inventoryActive;
     }
-
+#endif
 }
