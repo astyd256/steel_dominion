@@ -70,7 +70,7 @@ namespace Mirror
         }
         //
         //Network functions
-
+#if !UNITY_SERVER
         public override void OnStartAuthority()
         {
             //SendPlayerNameToServer
@@ -107,7 +107,7 @@ namespace Mirror
 
             this.CallWithDelay(CmdReadyUp, 3f);
         }
-
+#endif
         public override void OnStartServer()
         {
             GameRoom.InGamePlayers.Add(this);
@@ -143,7 +143,7 @@ namespace Mirror
         {
             Units.Add(unit);
         }
-
+#if !UNITY_SERVER
         public void ToggleToPlaceUnit(int index)
         {
             if (idToPlace != -1) unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
@@ -192,7 +192,7 @@ namespace Mirror
                 
             }
         }
-       
+#endif
         public void HandlereadyStatusChanged(bool oldValue, bool newValue) => UpdateDisplay();
         public void HandleDisplayPlayerNameChanged(string oldValue, string newValue) => UpdateDisplay();
 
@@ -295,6 +295,7 @@ namespace Mirror
         [TargetRpc]
         public void TargetRpcRemoveUnitFromHand(int idToRemove)
         {
+#if !UNITY_SERVER
             currentWeight += Units[idToRemove].GetWeight();
 
             weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
@@ -302,6 +303,7 @@ namespace Mirror
             Units.RemoveAt(idToRemove);
 
             ListUnits();
+#endif
         }
         [TargetRpc]
         public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI, bool ShowResult, bool win)
@@ -325,6 +327,7 @@ namespace Mirror
         [TargetRpc]
         public void StartPreMatchStep(float newTimerValue, bool startTimer, List<int> startUnits, bool CanPlace, int maxWeightToPlace, bool resetWeight)
         {
+#if !UNITY_SERVER
             timerRemaining = newTimerValue;
             timerState = startTimer;
 
@@ -361,6 +364,7 @@ namespace Mirror
             }
 
             ListUnits();
+#endif
         }
 
         [TargetRpc]
@@ -382,12 +386,14 @@ namespace Mirror
         [TargetRpc]
         public void TargetRpcGetUnitsToHand(List<int> unitsIds)
         {
+#if !UNITY_SERVER
             foreach (int id in unitsIds)
             {
                 Units.Add(unitsData.UnitsData[id]);
             }
 
             ListUnits();
+#endif
         }
 
         public void btnPass()

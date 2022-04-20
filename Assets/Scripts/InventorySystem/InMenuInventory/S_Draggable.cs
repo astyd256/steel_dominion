@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class S_Draggable : MonoBehaviour
 {
+#if !UNITY_SERVER
     [SerializeField] private string type;
     [SerializeField] private string place;
 
@@ -145,4 +146,5 @@ public class S_Draggable : MonoBehaviour
         return panelRemoveReady;
     }
 
+#endif
 }

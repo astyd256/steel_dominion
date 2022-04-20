@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class S_DragController : MonoBehaviour
 {
-
+#if !UNITY_SERVER
     private bool _isDragActive = false;
 
     private Vector2 _screenPosition;
@@ -225,5 +225,5 @@ public class S_DragController : MonoBehaviour
         }
 
     }
-
+#endif
 }

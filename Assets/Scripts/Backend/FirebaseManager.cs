@@ -28,22 +28,22 @@ public class FirebaseManager : MonoBehaviour
         }
     }
     
-    #if UNITY_SERVER
+    //#if UNITY_SERVER
     
-    void AddExp(string winnerPlayerToken, string loserPlayerToken)
-    {
-        var winnerExp = await dbReference.Child(winnerPlayerToken).Child("_xp").GetValueAsync();
-        await dbReference.Child(winnerPlayerToken).Child("_xp").SetValueAsync(winnerExp + 100);
-        var loserExp = await dbReference.Child(loserPlayerToken).Child("_xp").GetValueAsync();
-        await dbReference.Child(loserPlayerToken).Child("_xp").SetValueAsync(loserExp + 50);
-    }
+    //async void AddExp(string winnerPlayerToken, string loserPlayerToken)
+    //{
+    //    var winnerExp = await dbReference.Child(winnerPlayerToken).Child("_xp").GetValueAsync();
+    //    await dbReference.Child(winnerPlayerToken).Child("_xp").SetValueAsync(winnerExp + 100);
+    //    var loserExp = await dbReference.Child(loserPlayerToken).Child("_xp").GetValueAsync();
+    //    await dbReference.Child(loserPlayerToken).Child("_xp").SetValueAsync(loserExp + 50);
+    //}
 
-    public string GetCurInventory(string PlayerToken)
-    {
-        return await dbReference.Child(PlayerToken).Child("_cur_inventory").GetValueAsync();
-    }
+    //public string GetCurInventory(string PlayerToken)
+    //{
+    //    return await dbReference.Child(PlayerToken).Child("_cur_inventory").GetValueAsync();
+    //}
     
-    #endif
+    //#endif
     
     #if !UNITY_SERVER 
     private FirebaseAuth auth;

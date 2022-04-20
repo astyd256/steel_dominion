@@ -7,6 +7,7 @@ using TMPro;
 
 public class S_CurrentUnitsPanel : MonoBehaviour
 {
+#if !UNITY_SERVER
     [SerializeField] public int panelWidth;
     [SerializeField] public int panelHeight;
     [SerializeField] private GameObject panelParent;
@@ -303,4 +304,5 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     {
         return shuffleReady;
     }
+#endif
 }
