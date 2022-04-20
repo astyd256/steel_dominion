@@ -17,9 +17,11 @@ public class S_MainMenuManager : MonoBehaviour
 
     [SerializeField] private GameObject inventoryPanel;    // Inventory panel
     [SerializeField] private Button inventoryOpenButton;   // Inventory open button
-    [SerializeField] private bool inventoryActive = false;
+    [SerializeField] bool inventoryActive = false;
 
     [SerializeField] public bool interactive = true;
+    [SerializeField] public bool unitsDeckBuildActive = true;
+    [SerializeField] public bool ordersDeckBuildActive = false;
 
 
     private void Start()
@@ -70,6 +72,12 @@ public class S_MainMenuManager : MonoBehaviour
         {
             inventoryOpenButton.GetComponent<Image>().color = ButtonColor;
             //unitInventorySlots.Clear();
+
+            // CODE FOR REVERSING CHANGES BECAUSE SAVE WASNT PRESSED:
+            if (currentUnitsPanel.SaveInventoryButton.activeSelf == true)
+                currentUnitsPanel.ReverseSlots();
+
+            currentUnitsPanel.SaveInventoryButton.SetActive(false);
         }
         inventoryPanel.SetActive(!inventoryPanel.activeSelf);
         inventoryActive = !inventoryActive;
@@ -120,5 +128,9 @@ public class S_MainMenuManager : MonoBehaviour
         profileSettingsManager.profileSettingsPanel.GetComponent<CanvasGroup>().interactable = false;
     }
 
+    public bool getInventoryActive()
+    {
+        return inventoryActive;
+    }
 
 }

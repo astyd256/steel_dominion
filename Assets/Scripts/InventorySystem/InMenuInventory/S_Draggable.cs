@@ -87,7 +87,7 @@ public class S_Draggable : MonoBehaviour
         {
             // From Panel Slot drag over panel
             panelRemoveReady = false;
-            this.GetComponent<Image>().color = GameObject.Find("MainMenuManager").gameObject.GetComponent<S_MainMenuManager>().ButtonColor;
+            this.GetComponent<Image>().color = GameObject.Find("MainMenuManager").gameObject.GetComponent<S_InventoryMenuManager>().ButtonColor;
             // Logic For shuffle change
             // Shuffle change means new position for preview
             // FOR FUTURE

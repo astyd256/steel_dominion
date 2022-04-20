@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,9 +12,11 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] private GameObject panelParent;
 
     [SerializeField] private List<S_InventoryUnitSlot> slots = new List<S_InventoryUnitSlot>();
+    [SerializeField] private List<S_InventoryUnitSlot> previousSlots = new List<S_InventoryUnitSlot>();
     [SerializeField] public int RosterWeight = 0;
     [SerializeField] public int MaxRosterWeight = 30;
     [SerializeField] public bool OverWeight = false;
+    [SerializeField] public Color addedColor;
 
     private int slotscount = 0;
 
@@ -29,7 +32,41 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     private int indexForShuffle = 0;
 
     [SerializeField] private S_InventoryUnitSlot slotInstance; // Blank
+    [SerializeField] public GameObject SaveInventoryButton;
 
+    public void SaveUnitsPanel()
+    {
+        SaveInventoryButton.SetActive(false);
+        previousSlots = slots.ToList();
+        // SAVE INVENTORY CODE:
+
+    }
+
+    public void ReverseSlots()
+    {
+        foreach(Transform child in transform)
+        {
+            AddingSlotPreviewEnd(child.GetComponent<S_InventoryUnitSlot>());
+            RemoveUnitFromPanel(child.GetComponent<S_InventoryUnitSlot>());
+        }
+
+        for (int i = 0; i < previousSlots.Count; i++)
+        {
+            previousSlots[i].name = i.ToString();
+            AddingSlotPreviewStart(previousSlots[i]);  
+            AddUnitSLot(previousSlots[i]);
+            previousSlots[i].GetComponent<Image>().color = addedColor;
+        }
+
+        slots = previousSlots.ToList();
+
+        RosterWeight = 0;
+        foreach (S_InventoryUnitSlot slot in slots)
+        {
+            RosterWeight += slot.GetUnitWeight();
+        }
+        UpdateRosterWeight();
+    }
 
     public void UpdateRosterWeight()
     {
@@ -66,6 +103,8 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             slot.GetComponent<BoxCollider2D>().size = slotSize;
         }
         */
+        addedColor = GameObject.Find("DragController").GetComponent<S_DragController>().addedColor;
+
         panelHeight = Mathf.FloorToInt(GetComponent<RectTransform>().rect.height);
         panelWidth = Mathf.FloorToInt(GetComponent<RectTransform>().rect.width);
         placingSlot = false;
@@ -74,7 +113,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             RosterWeight += slot.GetUnitWeight();
         }
         UpdateRosterWeight();
-
+        previousSlots = slots.ToList();
     }
 
     private void UpdateColliderSize()
@@ -138,7 +177,10 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         addedSlot.SetCanDrag(false);
 
         // Size set:
-        SetLayoutGroupSize((panelWidth / slotscount), panelHeight);
+        if (slotscount > 0)
+        {
+            SetLayoutGroupSize((panelWidth / slotscount), panelHeight);
+        }
 
         previewActive = false;
         shuffleReady = true;

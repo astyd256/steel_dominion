@@ -23,7 +23,7 @@ public class S_DragController : MonoBehaviour
     [SerializeField] private Color normalColor;
     [SerializeField] private Color dragColor;
     [SerializeField] private Color holdColor;
-    [SerializeField] private Color addedColor;
+    [SerializeField] public Color addedColor;
     [SerializeField] private Vector2 draggableColliderSize;
     [SerializeField] private S_MainMenuManager mainMenuManager;
 
@@ -33,7 +33,7 @@ public class S_DragController : MonoBehaviour
 
     void Update()
     {
-        if (mainMenuManager.interactive)
+        if (mainMenuManager.getInventoryActive())
         {
             // Drop on mouseUp or touch.end
             if (_isDragActive && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
@@ -182,6 +182,9 @@ public class S_DragController : MonoBehaviour
                 // Roster weight control (Because drop triggers OnTriggerExit, we need to add the value)
                 currentUnitsPanel.RosterWeight += _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
                 currentUnitsPanel.UpdateRosterWeight();
+
+                // SAVE BUTTON ACTIVE:
+                GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SaveInventoryButton.SetActive(true);
             }
 
         }
@@ -194,6 +197,9 @@ public class S_DragController : MonoBehaviour
             // Roster weight change
             currentUnitsPanel.ChangePlace(_lastDragged.GetComponent<S_InventoryUnitSlot>());
             // RosterWeightChange at Draggable Trigger2D
+
+            // SAVE BUTTON ACTIVE:
+            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SaveInventoryButton.SetActive(true);
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady() == false)
         {
