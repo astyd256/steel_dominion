@@ -342,6 +342,29 @@ namespace Mirror
         }
 
         [Server]
+        public async void ServerGetPlayerUnitsFromDataBase(NetworkConnection conn, string userToken)
+        {
+            string _playerUnits = await FirebaseManager.instance.GetCurInventory(userToken);
+            Debug.Log("Inventory to unload = "+_playerUnits);
+            int curLength = _playerUnits.Length - 1;
+
+            List<int> curUnitsList = new List<int>();
+
+            for (int i = 0; i < curLength; i += 4)
+            {
+                string tempStr = "";
+                tempStr += _playerUnits[i];
+                tempStr += _playerUnits[i + 1];
+                curUnitsList.Add(System.Convert.ToInt32(tempStr));
+            }
+
+            if (InGamePlayers[0].connectionToClient == conn)
+                firstPlayerUnits = curUnitsList.ToList();
+            else if (InGamePlayers[1].connectionToClient == conn)
+                SecondPlayerUnits = curUnitsList.ToList();
+        }
+
+        [Server]
         public void passTurnPlayer(NetworkConnection conn)
         {
             if (InGamePlayers[0].connectionToClient == conn)

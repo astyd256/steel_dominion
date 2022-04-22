@@ -87,24 +87,24 @@ namespace Mirror
             //CmdGetUnits(data.unitData, netId);
             //0200 0001 0102 0203 0104 0007 (24)
             //string curInventory = FirebaseManager.instance.GetCurInventory();
-            string curInventory = "020000010102020301040007";
-            int curLength = curInventory.Length-1;
+            //string curInventory = "020000010102020301040007";
+            //int curLength = curInventory.Length-1;
 
-            List<int> curUnitsList = new List<int>();
+            //List<int> curUnitsList = new List<int>();
 
-            for(int i = 0; i < curLength; i+=4)
-            {
-                string tempStr = "";
-                tempStr += curInventory[i];
-                tempStr += curInventory[i+1];
-                curUnitsList.Add(System.Convert.ToInt32(tempStr));
-            }
+            //for(int i = 0; i < curLength; i+=4)
+            //{
+            //    string tempStr = "";
+            //    tempStr += curInventory[i];
+            //    tempStr += curInventory[i+1];
+            //    curUnitsList.Add(System.Convert.ToInt32(tempStr));
+            //}
 
-            //CmdGetPlayerToken(FirebaseManager.instance.user.TokenAsync());
+            CmdGetPlayerToken(FirebaseManager.instance.GetUserToken());
             CmdSetDisplayNameLevel(FirebaseManager.instance.GetUserName(), FirebaseManager.instance.GetUserXp());
-            CmdGetUnits(curUnitsList, netId);
+           // CmdGetUnits(curUnitsList, netId);
   
-            ListUnits();
+           // ListUnits();
 
             this.CallWithDelay(CmdReadyUp, 3f);
         }
@@ -446,7 +446,7 @@ namespace Mirror
         [Command]
         public void CmdGetPlayerToken(string playerToken)
         {
-           //GameRoom.ServerGetPlayerUnits(connectionToClient, unitsids);
+           GameRoom.ServerGetPlayerUnitsFromDataBase(connectionToClient, playerToken);
         }
 
         [Command]
