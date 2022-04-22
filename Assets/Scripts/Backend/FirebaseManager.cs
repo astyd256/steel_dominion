@@ -29,29 +29,17 @@ public class FirebaseManager : MonoBehaviour
     async void AddExp(string playerToken, int xp)
     {
         var task = await dbReference.Child(playerToken).Child("xp").GetValueAsync();
-        if (task.ChildrenCount == 0)
-        {
-            Debug.LogWarning(message: $"No data was found on given user");
-        }
-        else
-        {
-            int curExp = Convert.ToInt32(task.Value);
-            await dbReference.Child(playerToken).Child("xp").SetValueAsync(curExp + xp);
-        }
+        //TODO: Add error message
+        int curExp = Convert.ToInt32(task.Value);
+        await dbReference.Child(playerToken).Child("xp").SetValueAsync(curExp + xp);
     }
 
 
     async Task<string> GetCurInventory(string playerToken)
     {
         var task = await dbReference.Child(playerToken).Child("cur_inventory").GetValueAsync();
-        if (task.ChildrenCount == 0)
-        {
-            Debug.LogWarning(message: $"No data was found on given user");
-        }
-        else
-        {
+        //TODO: Add error message
             return task.ToString();
-        }
         return null; 
     }
     
