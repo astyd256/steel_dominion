@@ -180,7 +180,7 @@ public class FirebaseManager : MonoBehaviour
                 //Data has been retrieved
                 _xp = Convert.ToInt32(task.Child("xp").Value);
                 _inventory = task.Child("_inventory").ToString();
-                _cur_inventory = task.Child("cur_inventory").ToString();
+                _cur_inventory = task.Child("cur_inventory").Value.ToString();
                 _picture_id = Convert.ToInt32(task.Child("picture_id").Value);
             }
 

@@ -34,6 +34,11 @@ public class S_MainMenuManager : MonoBehaviour
 
 
     }
+
+    public S_CurrentUnitsPanel GetUnitsPanel()
+    {
+        return currentUnitsPanel;
+    }
     public void SavePlayer()
     {
         List<int> unitsIds = new List<int>();

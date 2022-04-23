@@ -345,7 +345,7 @@ namespace Mirror
         public async void ServerGetPlayerUnitsFromDataBase(NetworkConnection conn, string userToken)
         {
             string _playerUnits = await FirebaseManager.instance.GetCurInventory(userToken);
-            Debug.Log("Inventory to unload = "+_playerUnits);
+
             int curLength = _playerUnits.Length - 1;
 
             List<int> curUnitsList = new List<int>();

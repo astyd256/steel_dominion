@@ -39,7 +39,7 @@ public class LoginInterfaceManager : MonoBehaviour
         userNameTMP.text = $"{FirebaseManager.instance.GetUserName()}";
         userLevelTMP.text = Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20) + 1).ToString();
         userXPBar.value = (Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20) + 1 - (Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20)) + 1));
-
+        MainMenuManager.GetComponent<S_MainMenuManager>().GetUnitsPanel().LoadSlotsFromString(FirebaseManager.instance.GetCurInventory());
         MainMenuManager.GetComponent<S_ProfileSettingsManager>().profileNameSet();
     }
     public void toLobby()
@@ -53,14 +53,15 @@ public class LoginInterfaceManager : MonoBehaviour
     public void toMainMenu()
     {
         //Set name and XP to profile in menu and settings
-        setPlayerProfileValues();
+        
 
         MainMenuManager.SetActive(true);
 
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
-        
+
+        setPlayerProfileValues();
     }
     public void toRegisterMenu()
     {

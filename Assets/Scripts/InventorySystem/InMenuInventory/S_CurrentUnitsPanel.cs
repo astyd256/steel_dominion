@@ -60,6 +60,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             }
             else _saveString += _unitInventoryPosition.ToString();
         }
+        Debug.Log("String to save = " + _saveString);
         FirebaseManager.instance.SaveCurInventory(_saveString);
     }
 
@@ -87,6 +88,60 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             RosterWeight += slot.GetUnitWeight();
         }
         UpdateRosterWeight();
+    }
+
+    public void LoadSlotsFromString(string unitsString)
+    {
+        Debug.Log("String to load = " + unitsString);
+        int curLength = unitsString.Length - 1;
+
+        List<int> curUnitsList = new List<int>();
+        List<int> curUnitsInventoryIDList = new List<int>();
+
+        for (int i = 0; i < curLength; i += 4)
+        {
+            string tempStr = "";
+            tempStr += unitsString[i];
+            tempStr += unitsString[i + 1];
+            curUnitsList.Add(System.Convert.ToInt32(tempStr));
+            tempStr = "";
+            tempStr += unitsString[i + 2];
+            tempStr += unitsString[i + 3];
+            curUnitsInventoryIDList.Add(System.Convert.ToInt32(tempStr));
+        }
+
+        foreach (Transform child in transform)
+        {
+            AddingSlotPreviewEnd(child.GetComponent<S_InventoryUnitSlot>());
+            RemoveUnitFromPanel(child.GetComponent<S_InventoryUnitSlot>());
+        }
+
+        Transform _inventoryUnitsParent = GameObject.FindGameObjectWithTag("InventoryUnits").transform;
+
+        for (int i = 0; i < curUnitsList.Count; i++)
+        {
+            AddingSlotPreviewStart(_inventoryUnitsParent.GetChild(curUnitsInventoryIDList[curUnitsList.Count - 1 - i]).GetComponent<S_InventoryUnitSlot>());
+            AddUnitSLot(_inventoryUnitsParent.GetChild(curUnitsInventoryIDList[i]).GetComponent<S_InventoryUnitSlot>());
+            _inventoryUnitsParent.GetChild(curUnitsInventoryIDList[i]).GetComponent<Image>().color = addedColor;
+        }
+
+        int j = 0;
+
+        foreach (Transform child in transform)
+        {
+            child.name = j.ToString();
+            j++;
+        }
+        // slots = previousSlots.ToList();
+
+        RosterWeight = 0;
+        foreach (S_InventoryUnitSlot slot in slots)
+        {
+            RosterWeight += slot.GetUnitWeight();
+        }
+        UpdateRosterWeight();
+
+        previousSlots = slots.ToList();
     }
 
     public void UpdateRosterWeight()
