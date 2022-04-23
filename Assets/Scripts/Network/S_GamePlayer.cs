@@ -78,33 +78,11 @@ namespace Mirror
             
             gameUI.SetActive(true);
 
-            S_PlayerData data = S_SavePlayerData.LoadPlayer();
-
             transform.parent = GameObject.Find("CameraRotator").transform;
             origZloc = this.transform.position.z;
 
-            //CmdSetDisplayName(data.playername);
-            //CmdGetUnits(data.unitData, netId);
-            //0200 0001 0102 0203 0104 0007 (24)
-            //string curInventory = FirebaseManager.instance.GetCurInventory();
-            //string curInventory = "020000010102020301040007";
-            //int curLength = curInventory.Length-1;
-
-            //List<int> curUnitsList = new List<int>();
-
-            //for(int i = 0; i < curLength; i+=4)
-            //{
-            //    string tempStr = "";
-            //    tempStr += curInventory[i];
-            //    tempStr += curInventory[i+1];
-            //    curUnitsList.Add(System.Convert.ToInt32(tempStr));
-            //}
-
             CmdGetPlayerToken(FirebaseManager.instance.GetUserToken());
             CmdSetDisplayNameLevel(FirebaseManager.instance.GetUserName(), FirebaseManager.instance.GetUserXp());
-           // CmdGetUnits(curUnitsList, netId);
-  
-           // ListUnits();
 
             this.CallWithDelay(CmdReadyUp, 3f);
         }

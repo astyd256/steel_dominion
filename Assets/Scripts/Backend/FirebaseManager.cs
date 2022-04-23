@@ -24,7 +24,7 @@ public class FirebaseManager : MonoBehaviour
         }
     }
     
-    #if UNITY_SERVER
+    #if !UNITY_SERVER
     
     async void AddExp(string playerToken, int xp)
     {
@@ -35,12 +35,12 @@ public class FirebaseManager : MonoBehaviour
     }
 
 
-    async Task<string> GetCurInventory(string playerToken)
+    public async Task<string> GetCurInventory(string playerToken)
     {
         var task = await dbReference.Child(playerToken).Child("cur_inventory").GetValueAsync();
         //TODO: Add error message
-            return task.ToString();
-        return null; 
+            return task.Value.ToString();
+       // return null; 
     }
     
     #endif
