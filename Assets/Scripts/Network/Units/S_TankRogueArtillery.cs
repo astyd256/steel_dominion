@@ -43,7 +43,7 @@ namespace Mirror
             _teamid = _tankMainScript.GetTeam();
             _isAlive = true;
         }
-
+        [ServerCallback]
         public void Update()
         {
             if (isServer) ServerUpdate();
