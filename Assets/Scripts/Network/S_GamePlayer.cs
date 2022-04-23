@@ -25,13 +25,13 @@ namespace Mirror
         public int currentWeight = 0;
         public float cameraMoveForward = 0f;
         [SerializeField]
-        public float origZloc; 
+        public float origZloc;
 
         private List<GameObject> unitBtns = new List<GameObject>();
 
         private bool placeState = false;
         private int idToPlace = -1;
-        
+
         [Header("UI")]
         [SerializeField] private GameObject gameUI = null;
         [SerializeField] private TMP_Text _enemyName = null;
@@ -75,7 +75,7 @@ namespace Mirror
         public override void OnStartAuthority()
         {
             //SendPlayerNameToServer
-            
+
             gameUI.SetActive(true);
 
             transform.parent = GameObject.Find("CameraRotator").transform;
@@ -127,7 +127,7 @@ namespace Mirror
         {
             if (idToPlace != -1) unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
 
-            if(idToPlace == index)
+            if (idToPlace == index)
             {
                 unitBtns[idToPlace].GetComponent<S_UnitButton>().ToggleButtonLight(false);
                 idToPlace = -1;
@@ -146,14 +146,14 @@ namespace Mirror
 
             unitBtns.Clear();
 
-            foreach(Transform unit in ItemContent)
+            foreach (Transform unit in ItemContent)
             {
                 Destroy(unit.gameObject);
             }
 
             int i = 0;
 
-            foreach(var unit in Units)
+            foreach (var unit in Units)
             {
                 //Debug.Log("Inventory draw - " + unit.id);
                 GameObject obj = Instantiate(InventoryItem, ItemContent);
@@ -168,7 +168,7 @@ namespace Mirror
 
                 if (currentWeight + unit.GetWeight() > maxWeight)
                     obj.GetComponent<Button>().interactable = false;
-                
+
             }
         }
 #endif
@@ -178,11 +178,11 @@ namespace Mirror
         private void UpdateDisplay()
         {
             //find the local player to update ui
-            if(!hasAuthority)
+            if (!hasAuthority)
             {
-                foreach(var player in GameRoom.InGamePlayers)
+                foreach (var player in GameRoom.InGamePlayers)
                 {
-                    if(player.hasAuthority)
+                    if (player.hasAuthority)
                     {
                         player.UpdateDisplay();
                         break;
@@ -196,9 +196,9 @@ namespace Mirror
             _enemyReady.text = "Loading...";
             _enemyLevel.text = "Level 0";
 
-            foreach(S_GamePlayer player in GameRoom.InGamePlayers)
+            foreach (S_GamePlayer player in GameRoom.InGamePlayers)
             {
-                if(player.netId != this.netId)
+                if (player.netId != this.netId)
                 {
                     _enemyName.text = (player.DisplayName == "") ? "Unknown" : player.DisplayName;
                     _enemyReady.text = player.IsReady ?
@@ -210,7 +210,7 @@ namespace Mirror
             }
         }
 
-        public void UpdateTimer (float timeToDisplay)
+        public void UpdateTimer(float timeToDisplay)
         {
             timeToDisplay += 1;
             float minutes = Mathf.FloorToInt(timeToDisplay / 60);
@@ -221,8 +221,8 @@ namespace Mirror
         [ClientCallback]
         void Update()
         {
-            if(timerState)
-                if(timerRemaining > 0)
+            if (timerState)
+                if (timerRemaining > 0)
                 {
                     timerRemaining -= Time.deltaTime;
                     UpdateTimer(timerRemaining);
@@ -234,7 +234,7 @@ namespace Mirror
                     timerState = false;
                 }
 
-            if(Input.GetMouseButtonDown(0) && placeState)
+            if (Input.GetMouseButtonDown(0) && placeState)
             {
 
                 if (EventSystem.current.IsPointerOverGameObject()) return;
@@ -255,10 +255,10 @@ namespace Mirror
                 //ray.GetType
                 // ray = playercamera.ScreenPointToRay(Input.mousePosition);
             }
-            
-            if(Input.GetMouseButton(0) && !placeState)
+
+            if (Input.GetMouseButton(0) && !placeState)
             {
-                if(netId == 1) cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -10f, 40f);
+                if (netId == 1) cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -10f, 40f);
                 else cameraMoveForward = Mathf.Clamp(cameraMoveForward + Input.GetAxis("Mouse Y"), -40f, 10f);
 
                 transform.localPosition = new Vector3(0f, this.transform.position.y, origZloc + cameraMoveForward);
@@ -266,10 +266,10 @@ namespace Mirror
                 GameObject camera = GameObject.Find("CameraRotator");
                 camera.transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X"), 0));
 
-                
-               // this.transform.position.z = origZloc + cameraMoveForward;
-               // camera
-                
+
+                // this.transform.position.z = origZloc + cameraMoveForward;
+                // camera
+
             }
         }
 
@@ -342,7 +342,7 @@ namespace Mirror
             if (resetWeight)
             {
                 currentWeight = 0;
-                weightText.text = "0/"+maxWeight.ToString();
+                weightText.text = "0/" + maxWeight.ToString();
             }
 
             if (CanPlace)
@@ -426,7 +426,7 @@ namespace Mirror
         private void CmdSetDisplayNameLevel(string displayName, int exp)
         {
             Level = (int)Mathf.Floor(Mathf.Sqrt(exp / 20) + 1);
-            DisplayName = displayName;  
+            DisplayName = displayName;
         }
 
         [Command]
@@ -447,7 +447,9 @@ namespace Mirror
         [Command]
         public void CmdGetPlayerToken(string playerToken)
         {
+//#if UNITY_SERVER
            GameRoom.ServerGetPlayerUnitsFromDataBase(connectionToClient, playerToken);
+//#endif
         }
 
         [Command]

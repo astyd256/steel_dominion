@@ -23,8 +23,14 @@ public class FirebaseManager : MonoBehaviour
             instance = this;
         }
     }
-    
-    #if !UNITY_SERVER
+
+#if UNITY_SERVER
+    void Start()
+    {
+        dbReference = FirebaseDatabase.DefaultInstance.RootReference;
+    }
+#endif
+   // #if UNITY_SERVER
     
     async void AddExp(string playerToken, int xp)
     {
@@ -35,7 +41,7 @@ public class FirebaseManager : MonoBehaviour
     }
 
 
-    public async Task<string> GetCurInventory(string playerToken)
+    public async Task<string> GetCurInventoryServer(string playerToken)
     {
         var task = await dbReference.Child(playerToken).Child("cur_inventory").GetValueAsync();
         //TODO: Add error message
@@ -43,9 +49,9 @@ public class FirebaseManager : MonoBehaviour
        // return null; 
     }
     
-    #endif
+   // #endif
     
-    #if !UNITY_SERVER 
+#if !UNITY_SERVER
     private FirebaseAuth auth;
     private FirebaseUser user;
     private int _xp = 0;
@@ -224,10 +230,12 @@ public class FirebaseManager : MonoBehaviour
     {
         await dbReference.Child(user.UserId).Child("cur_inventory").SetValueAsync(inventory);
     }
+#if !UNITY_SERVER
     public string GetCurInventory()
     {
         return _cur_inventory;
     }
+#endif
     public string GetInventory()
     {
         return _inventory;
@@ -275,5 +283,5 @@ public class FirebaseManager : MonoBehaviour
         return 0;
            
     }
-    #endif
+#endif
 }

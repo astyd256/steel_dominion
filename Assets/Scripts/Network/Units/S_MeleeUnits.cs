@@ -192,7 +192,9 @@ namespace Mirror
         [ClientRpc]
         private void ClientMakeAttack()
         {
-            if(weaponAnim != null) weaponAnim.Play("ArmsAttack");
+#if !UNITY_SERVER
+            if (weaponAnim != null) weaponAnim.Play("ArmsAttack");
+#endif
         }
     }
 }
