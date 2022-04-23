@@ -287,7 +287,7 @@ namespace Mirror
 #endif
         }
         [TargetRpc]
-        public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI, bool ShowResult, bool win)
+        public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI, bool hideEnemyArea)
         {
             timerRemaining = newValue;
             timerState = startTimer;
@@ -295,16 +295,39 @@ namespace Mirror
             unitsInventory.SetActive(showInventoryUI);
             weightText.gameObject.SetActive(showInventoryUI);
 
-            if (newValue == 3f) _enemySpawnArea.SetActive(false);
-
             if (currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
             else passButton.gameObject.SetActive(false);
 
-            if(ShowResult)
-            {
-                weightText.gameObject.SetActive(true);
-                weightText.text = (win) ? "You win!" : "You lose!";
-            }
+            _enemySpawnArea.SetActive(!hideEnemyArea);
+
+        }
+
+        [TargetRpc]
+        public void UpdateGameDisplayUIWinLose(float newValue, bool win)
+        {
+            timerRemaining = newValue;
+            timerState = true;
+
+            unitsInventory.SetActive(false);
+            _enemySpawnArea.SetActive(false);
+            passButton.gameObject.SetActive(false);
+
+            weightText.gameObject.SetActive(true);
+            weightText.text = (win) ? "You win!" : "You lose!";
+        }
+
+        [TargetRpc]
+        public void UpdateGameDisplayUIDraw(float newValue)
+        {
+            timerRemaining = newValue;
+            timerState = true;
+
+            unitsInventory.SetActive(false);
+            _enemySpawnArea.SetActive(false);
+            passButton.gameObject.SetActive(false);
+
+            weightText.gameObject.SetActive(true);
+            weightText.text = "Draw !";
         }
 
         [TargetRpc]

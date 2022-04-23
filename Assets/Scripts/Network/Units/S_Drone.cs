@@ -290,7 +290,7 @@ namespace Mirror
 
                     if (target != null)
                     {
-                        target.GetComponent<S_Unit>().CalcDamage(dmg);
+                        target.GetComponent<S_Unit>().CalcDamage(dmg,1);
                         _laserHitPoint = hit.point;
                     }
 

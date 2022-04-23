@@ -185,7 +185,7 @@ Transform:
   - {fileID: 3276421659915355883}
   m_Father: {fileID: 3276421658963516710}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -3.5000002, y: 0, z: 0}
 --- !u!33 &3276421658911868202
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -489,6 +489,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  target: {fileID: 0}
+  forwardAmount: 0
+  turnAmount: 0
   speedMax: 5
   speedMin: -5
   acceleration: 10
@@ -498,6 +501,7 @@ MonoBehaviour:
   turnSpeedMax: 75
   turnSpeedAcceleration: 75
   turnIdleSlowdown: 500
+  unitState: 1
   attackCooldown: 2
   attackPause: 0.37
   weaponAnim: {fileID: 9189813938590716612}
