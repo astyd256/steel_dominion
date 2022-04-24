@@ -37,6 +37,13 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] private S_InventoryUnitSlot slotInstance; // Blank
     [SerializeField] public GameObject SaveInventoryButton;
 
+    public void SetSizes()
+    {
+        foreach(Transform slot in transform)
+        {
+            slot.GetComponent<S_Draggable>().SetSize();
+        }
+    }
     public void SaveUnitsPanel()
     {
         SaveInventoryButton.SetActive(false);
