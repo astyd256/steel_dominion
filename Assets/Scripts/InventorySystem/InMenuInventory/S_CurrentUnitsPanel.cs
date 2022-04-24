@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 using TMPro;
 
 public class S_CurrentUnitsPanel : MonoBehaviour
@@ -11,6 +12,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] public int panelWidth;
     [SerializeField] public int panelHeight;
     [SerializeField] private GameObject panelParent;
+    [SerializeField] private Transform _inventoryUnitsParent;
 
     [SerializeField] private List<S_InventoryUnitSlot> slots = new List<S_InventoryUnitSlot>();
     [SerializeField] private List<S_InventoryUnitSlot> previousSlots = new List<S_InventoryUnitSlot>();
@@ -64,18 +66,28 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         FirebaseManager.instance.SaveCurInventory(_saveString);
     }
 
-    public void ReverseSlots()
+    public async Task RemoveUnitsFromPanel()
     {
-        foreach(Transform child in transform)
+        foreach (Transform child in transform)
         {
             AddingSlotPreviewEnd(child.GetComponent<S_InventoryUnitSlot>());
             RemoveUnitFromPanel(child.GetComponent<S_InventoryUnitSlot>());
+            
         }
+        await Task.Yield();
+    }
+
+    public async void ReverseSlots()
+    {
+
+        await RemoveUnitsFromPanel();
+        
+        // NEED FINE ARRANGEMENT OF PREVIOUS SLOTS IN A STRING
 
         for (int i = 0; i < previousSlots.Count; i++)
         {
-            previousSlots[i].name = i.ToString();
-            AddingSlotPreviewStart(previousSlots[i]);  
+            //previousSlots[i].name = i.ToString(); // PSB
+            AddingSlotPreviewStart(previousSlots[previousSlots.Count - 1 - i]); 
             AddUnitSLot(previousSlots[i]);
             previousSlots[i].GetComponent<Image>().color = addedColor;
         }
@@ -88,6 +100,14 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             RosterWeight += slot.GetUnitWeight();
         }
         UpdateRosterWeight();
+
+        int k = 0;
+        foreach (Transform child in transform)
+        {
+            child.name = k.ToString();
+            child.GetComponent<S_InventoryUnitSlot>().SetCanDrag(true);
+            k++;
+        }
     }
 
     public void LoadSlotsFromString(string unitsString)
@@ -116,7 +136,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             RemoveUnitFromPanel(child.GetComponent<S_InventoryUnitSlot>());
         }
 
-        Transform _inventoryUnitsParent = GameObject.FindGameObjectWithTag("InventoryUnits").transform;
+       
 
         for (int i = 0; i < curUnitsList.Count; i++)
         {
@@ -130,6 +150,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         foreach (Transform child in transform)
         {
             child.name = j.ToString();
+            child.GetComponent<S_InventoryUnitSlot>().SetCanDrag(true);
             j++;
         }
         // slots = previousSlots.ToList();
@@ -306,7 +327,8 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     {
         slotscount--;
 
-        int toRemove = int.Parse(slotToRemove.name);
+        int toRemove = int.Parse(slotToRemove.name); // 
+        // Names change after deletion of 1st element, from 0 to last
         int removedID = toRemove; // For ignoring
 
         slots[toRemove].SetBelongsToUnitsPanel(false);
@@ -324,13 +346,13 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         toRemove = 0;
 
         // Names from 0 to last in panel for slots
+        
         foreach(Transform slot in transform)
         {
             if (int.Parse(slot.gameObject.name) == removedID) continue; // Ignore
             slot.gameObject.name = toRemove.ToString();
             toRemove++;
         }
-
         UpdateColliderSize();
 
     }
