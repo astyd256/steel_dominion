@@ -36,11 +36,14 @@ public class LoginInterfaceManager : MonoBehaviour
     }
     public void setPlayerProfileValues()
     {
+        // Texts and values
         userNameTMP.text = $"{FirebaseManager.instance.GetUserName()}";
         userLevelTMP.text = Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20) + 1).ToString();
         userXPBar.value = (Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20) + 1 - (Mathf.Floor(Mathf.Sqrt(FirebaseManager.instance.GetUserXp() / 20)) + 1));
-        MainMenuManager.GetComponent<S_MainMenuManager>().GetUnitsPanel().LoadSlotsFromString(FirebaseManager.instance.GetCurInventory());
         MainMenuManager.GetComponent<S_ProfileSettingsManager>().profileNameSet();
+        // Inventory and curUnitsPanel
+        MainMenuManager.GetComponent<S_InventoryMenuManager>().LoadUnitsFromString(FirebaseManager.instance.GetInventory());
+        MainMenuManager.GetComponent<S_MainMenuManager>().GetUnitsPanel().LoadSlotsFromString(FirebaseManager.instance.GetCurInventory());
     }
     public void toLobby()
     {

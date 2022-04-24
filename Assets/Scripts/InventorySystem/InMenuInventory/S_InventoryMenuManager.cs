@@ -7,6 +7,7 @@ using TMPro;
 public class S_InventoryMenuManager : MonoBehaviour
 {
     // All units player has in inventory
+    [SerializeField] private SO_UnitsToPlay unitsData = null;
     [SerializeField] private List<SO_UnitItemData> InventoryUnits = new List<SO_UnitItemData>();
 
     [SerializeField] private List<S_InventoryUnitSlot> unitInventorySlots = new List<S_InventoryUnitSlot>();
@@ -22,15 +23,27 @@ public class S_InventoryMenuManager : MonoBehaviour
     
     private bool itemMenuOpened = false;
 
-    public static Transform Clear(Transform transform)
+    public void LoadUnitsFromString(string inventoryString)
     {
-        foreach(Transform child in transform)
-        {
-            GameObject.Destroy(child.gameObject);
-        }
-        return transform;
-    }
+        Debug.Log("Inventory to load = " + inventoryString);
+        int curLength = inventoryString.Length - 1;
 
+        List<int> curItemsListID = new List<int>();
+
+        for (int i = 0; i < curLength; i += 2)
+        {
+            string tempStr = "";
+            tempStr += inventoryString[i];
+            tempStr += inventoryString[i + 1];
+            curItemsListID.Add(System.Convert.ToInt32(tempStr));
+        }
+
+        for (int i = 0; i < curItemsListID.Count; i++)
+        {
+            InventoryUnits.Add(unitsData.UnitsData[curItemsListID[i]]);
+        }
+        InitInventory();
+    }
 
     // INVENTORY
     public void AddUnitsToPanel()
@@ -89,7 +102,7 @@ public class S_InventoryMenuManager : MonoBehaviour
 
     public void Start()
     {
-        InitInventory();
+        //InitInventory();
     }
 
     ////////////////////////////////////

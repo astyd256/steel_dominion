@@ -119,7 +119,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
 
     public void LoadSlotsFromString(string unitsString)
     {
-        Debug.Log("String to load = " + unitsString);
+        Debug.Log("CurrentUnits to load = " + unitsString);
         int curLength = unitsString.Length - 1;
 
         List<int> curUnitsList = new List<int>();
