@@ -178,7 +178,7 @@ namespace Mirror
         }
 
         [ServerCallback]
-        public void CalcDamage(float dmg)
+        public void CalcDamage(float dmg, int particlesId)
         {
             health = health - dmg;
             if (health < 0) health = 0;
@@ -191,14 +191,16 @@ namespace Mirror
                 //Destroy(this.gameObject);
             }
 
-            SetHealthBarValue(health / maxHealth, Mathf.FloorToInt(dmg));
+            SetHealthBarValue(health / maxHealth, Mathf.FloorToInt(dmg), particlesId);
         }
 
         [ClientRpc]
-        public void SetHealthBarValue(float newVal, int damage)
+        public void SetHealthBarValue(float newVal, int damage, int particlesId)
         {
             healthBar.value = newVal;
             S_DamageText.Create(this.transform.position, damage);
+
+            if (particlesId == 0) Instantiate(S_GameAssets.i.pfGreasleyHitPS, this.transform.position, Quaternion.identity);
         }
     }
 }

@@ -16,10 +16,10 @@ namespace Mirror
         [SerializeField] private float _minDistanceToShoot = 10f;
         [SerializeField] private int _mediumDamage = 35;
 
-        [SerializeField] private Transform _curTarget = null;
+        private Transform _curTarget = null;
 
-        [SerializeField] private float _currentFireCooldown = 0;
-        [SerializeField] private int _teamid = -1;
+        private float _currentFireCooldown = 0;
+        private int _teamid = -1;
 
         [SerializeField] private bool _isAlive =false;
         public override void OnStartServer()
@@ -43,7 +43,7 @@ namespace Mirror
             _teamid = _tankMainScript.GetTeam();
             _isAlive = true;
         }
-
+        [ServerCallback]
         public void Update()
         {
             if (isServer) ServerUpdate();
@@ -81,7 +81,6 @@ namespace Mirror
             else return false;
         }
 
-        //TODO: add lient barrel rotation and stopping and shooting
         //#if !UNITY_SERVER //// server update
         //        void Update()
         //        {
@@ -122,7 +121,7 @@ namespace Mirror
             System.Random rand = new System.Random();
 
             float distanceToTarget = Vector3.Distance(transform.position, _curTarget.position);
-            float _timeTofly = Mathf.Clamp(distanceToTarget / 60f * 5f,3f,10f);
+            float _timeTofly = Mathf.Clamp(distanceToTarget / 60f * 5f,3.5f,8f);
             
             Debug.Log("Time to fly = " + _timeTofly);
 

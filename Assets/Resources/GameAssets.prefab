@@ -45,3 +45,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pfDamagePopup: {fileID: 5651448014067438537, guid: f88052bd3086a8247bee0849a04a9399,
     type: 3}
+  pfGreasleyHitPS: {fileID: 869102648512824997, guid: 8cf0feb7954693a458c7519f993ce2e6,
+    type: 3}

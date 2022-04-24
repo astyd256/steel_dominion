@@ -17,6 +17,8 @@ public class S_GameAssets : MonoBehaviour
 
     public Transform pfDamagePopup;
 
+    public Transform pfGreasleyHitPS;
+
 #if UNITY_SERVER
     public void Start()
     {

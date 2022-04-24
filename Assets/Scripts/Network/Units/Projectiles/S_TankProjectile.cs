@@ -41,7 +41,7 @@ public class S_TankProjectile : MonoBehaviour
 
         if (other.GetComponent<Mirror.S_Unit>().GetTeam() != teamId)
         {
-           other.GetComponent<Mirror.S_Unit>().CalcDamage(damage);
+           other.GetComponent<Mirror.S_Unit>().CalcDamage(damage,1);
 
 #if !UNITY_SERVER
             dead = true;
