@@ -97,6 +97,8 @@ public class S_MainMenuManager : MonoBehaviour
         settingsManager.settingsPanel.SetActive(true);
         interactive = false;
         clickScreenButton.gameObject.SetActive(true);
+        // Make it uninteractive
+        inventoryActive = false;
     }
 
     public void CloseSettings()
@@ -104,6 +106,8 @@ public class S_MainMenuManager : MonoBehaviour
         settingsManager.settingsPanel.SetActive(false);
         interactive = true;
         clickScreenButton.gameObject.SetActive(false);
+        // Make it interactive
+        inventoryActive = true;
     }
 
     // Profile settings
@@ -112,6 +116,8 @@ public class S_MainMenuManager : MonoBehaviour
         profileSettingsManager.profileSettingsPanel.SetActive(true);
         interactive = false;
         clickScreenButton.gameObject.SetActive(true);
+        // Make it uninteractive
+        inventoryActive = false;
     }
 
     public void CloseProfileSettings()
@@ -119,6 +125,8 @@ public class S_MainMenuManager : MonoBehaviour
         profileSettingsManager.profileSettingsPanel.SetActive(false);
         interactive = true;
         clickScreenButton.gameObject.SetActive(false);
+        // Make it interactive
+        inventoryActive = true;
     }
 
     public void OpenNameChangeMenu()

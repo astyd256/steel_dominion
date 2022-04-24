@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 public class S_Draggable : MonoBehaviour
 {
@@ -12,11 +13,16 @@ public class S_Draggable : MonoBehaviour
     [SerializeField] private bool panelRemoveReady;
 
     private bool weightFromPanelRemoveFlag = false;
+    private bool FrameCheck = false;
     private Color _color;
     [SerializeField] private Vector2 _size;
 
     //private float _movementTime = 15f;
 
+    public bool GetFrameCheck()
+    {
+        return FrameCheck;
+    }
     public Vector2 GetSize()
     {
         return _size;
@@ -59,6 +65,7 @@ public class S_Draggable : MonoBehaviour
     private void Start()
     {
         panelRemoveReady = false;
+        FrameCheck = false;
         // Initialize PLACE variable
         _color = this.GetComponent<Image>().color;
         if (this.transform.parent.CompareTag("InventoryUnits"))
@@ -82,6 +89,7 @@ public class S_Draggable : MonoBehaviour
             {
                 GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().RosterWeight += this.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
                 GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().UpdateRosterWeight();
+                weightFromPanelRemoveFlag = false;
             }
 
             if (type == "InventoryUnitSlot" &&
@@ -115,6 +123,8 @@ public class S_Draggable : MonoBehaviour
                 // Preview active == true
                 GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
             }
+
+            FrameCheck = true;
         }
         
     }
@@ -147,8 +157,9 @@ public class S_Draggable : MonoBehaviour
 
                 // Shuffle within panel preview end:
                 other.GetComponent<S_CurrentUnitsPanel>().ShuffleFromWithinPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
+                
             }
-
+            // First frame doesn't run this somehow
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().RosterWeight -= this.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().UpdateRosterWeight();
         }

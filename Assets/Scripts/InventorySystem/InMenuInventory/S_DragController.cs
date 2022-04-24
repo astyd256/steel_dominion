@@ -175,7 +175,7 @@ public class S_DragController : MonoBehaviour
             // If from unitpanel and left boundaries (collision box) then remove
             _currentDragged.SetPlaceInventoryUnits();
             currentUnitsPanel.RemoveUnitFromPanel(_lastDragged.GetComponent<S_InventoryUnitSlot>());
-            // RosterWeightChange at Draggable Trigger2D
+            // RosterWeightChange is at Draggable Trigger2D
 
             // SAVE BUTTON ACTIVE:
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SaveInventoryButton.SetActive(true);
@@ -184,8 +184,11 @@ public class S_DragController : MonoBehaviour
         {
             // TOOK FROM PANEL, DROP ON PANEL
             // Because it leaves Trigger2D in S_Draggable it subtracts weight so we add it back and then update:
-            currentUnitsPanel.RosterWeight += _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
-            currentUnitsPanel.UpdateRosterWeight();
+            if (_currentDragged.GetComponent<S_Draggable>().GetFrameCheck())
+            {
+                currentUnitsPanel.RosterWeight += _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
+                currentUnitsPanel.UpdateRosterWeight();
+            }
         }
 
         currentUnitsPanel.SetSizes(); // Experimental Code
