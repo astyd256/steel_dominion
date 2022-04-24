@@ -32,7 +32,7 @@ public class FirebaseManager : MonoBehaviour
 #endif
    // #if UNITY_SERVER
     
-    async void AddExp(string playerToken, int xp)
+    public async void AddExp(string playerToken, int xp)
     {
         var task = await dbReference.Child(playerToken).Child("xp").GetValueAsync();
         //TODO: Add error message
