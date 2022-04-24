@@ -58,7 +58,7 @@ public class S_Draggable : MonoBehaviour
 
     private void Start()
     {
-        panelRemoveReady = true;
+        panelRemoveReady = false;
         // Initialize PLACE variable
         _color = this.GetComponent<Image>().color;
         if (this.transform.parent.CompareTag("InventoryUnits"))

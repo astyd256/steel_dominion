@@ -182,15 +182,8 @@ public class S_DragController : MonoBehaviour
         }
         else if (_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady() == false)
         {
-            // REMAKE PANEL DROP OFF
-            Destroy(_currentDragged.gameObject);
-            //Size adjust on panel
-            if (currentUnitsPanel.GetSlotsCount() > 0)
-            {
-                currentUnitsPanel.SetLayoutGroupSize(currentUnitsPanel.panelWidth / currentUnitsPanel.GetSlotsCount(), currentUnitsPanel.panelHeight);
-            }
-            hit.transform.gameObject.GetComponent<BoxCollider2D>().size = currentUnitsPanel.GetComponent<GridLayoutGroup>().cellSize;
-            //
+            // TOOK FROM PANEL, DROP ON PANEL
+            // Because it leaves Trigger2D in S_Draggable it subtracts weight so we add it back and then update:
             currentUnitsPanel.RosterWeight += _currentDragged.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
             currentUnitsPanel.UpdateRosterWeight();
         }
@@ -198,7 +191,7 @@ public class S_DragController : MonoBehaviour
         currentUnitsPanel.SetSizes(); // Experimental Code
 
 
-        if ((_currentDragged.GetPlace() == "UnitPanel" && _currentDragged.GetComponent<S_Draggable>().GetPanelRemoveReady())
+        if ((_currentDragged.GetPlace() == "UnitPanel")
             || (_currentDragged.GetDraggableType() == "InventoryUnitSlot" && _currentDragged.GetPlace() == "InventoryUnits"))
         {
             // Took from Panel, drop off
