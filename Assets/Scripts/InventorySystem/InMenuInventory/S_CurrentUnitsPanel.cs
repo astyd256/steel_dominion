@@ -35,7 +35,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] private S_InventoryUnitSlot slotInstance; // Blank
     [SerializeField] public GameObject SaveInventoryButton;
 
-    public void SaveUnitsPanel()
+    public async void SaveUnitsPanel()
     {
         SaveInventoryButton.SetActive(false);
         previousSlots = slots.ToList();
@@ -60,7 +60,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             }
             else _saveString += _unitInventoryPosition.ToString();
         }
-        FirebaseManager.instance.SaveCurInventory(_saveString);
+        await FirebaseManager.instance.SaveCurInventory(_saveString);
     }
 
     public void ReverseSlots()

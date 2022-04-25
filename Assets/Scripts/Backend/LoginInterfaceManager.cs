@@ -10,6 +10,7 @@ public class LoginInterfaceManager : MonoBehaviour
     [SerializeField] private GameObject Lobby;
     [SerializeField] private GameObject LoginMenu;
     [SerializeField] private Button RegisterButton;
+    [SerializeField] private Button VerifyEmailButton;
     [SerializeField] private Button LoginButton;
     [SerializeField] private GameObject Menu;
     [SerializeField] private TMP_InputField emailField;
@@ -19,7 +20,7 @@ public class LoginInterfaceManager : MonoBehaviour
     [SerializeField] private Slider userXPBar;
     [SerializeField] private GameObject MainMenuManager;
 
-
+    private bool IsEmailVerified;
     public static LoginInterfaceManager instance;
 
     
@@ -60,7 +61,6 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
-        
     }
     public void toRegisterMenu()
     {
@@ -68,6 +68,7 @@ public class LoginInterfaceManager : MonoBehaviour
         LoginMenu.SetActive(true);
         LoginButton.gameObject.SetActive(false);
         RegisterButton.gameObject.SetActive(true);
+        VerifyEmailButton.gameObject.SetActive(true);
     }
     public void toLoginMenu()
     {
@@ -75,23 +76,30 @@ public class LoginInterfaceManager : MonoBehaviour
         LoginMenu.SetActive(true);
         LoginButton.gameObject.SetActive(true);
         RegisterButton.gameObject.SetActive(false);
+        VerifyEmailButton.gameObject.SetActive(false);
     }
     public void VerifyInputs() //TODO: PROBABLY rewrite this code to add more restrictions in the password.
     {
         RegisterButton.interactable = (emailField.text.Length >= 8 && passwordField.text.Length >= 8);
         LoginButton.interactable = (emailField.text.Length >= 8 && passwordField.text.Length >= 8);
     }
-    public void Register()
+    public async void Register()
     {
-        FirebaseManager.instance.Registration(emailField.text, passwordField.text);
+        await FirebaseManager.instance.RegistrationFromGuest(emailField.text, passwordField.text);
     }
-    public void Login()
+    public async void Login()
     {
-        FirebaseManager.instance.Login(emailField.text, passwordField.text);
+        await FirebaseManager.instance.Login(emailField.text, passwordField.text);
     }
-    public void LoginAnonymous()
+    public async void LoginAnonymous()
     {
-        FirebaseManager.instance.LoginAnonymous();
+        await FirebaseManager.instance.LoginAnonymous();
+    }
+    public async void SendEmailVerification()
+    {
+        Debug.LogWarning(emailField.text);
+        await FirebaseManager.instance.VerifyEmail(emailField.text);
+        // TODO: Change code here to change output about email sent
     }
 }
 #endif
