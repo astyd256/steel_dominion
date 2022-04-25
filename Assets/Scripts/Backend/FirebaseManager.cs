@@ -69,7 +69,7 @@ public class FirebaseManager : MonoBehaviour
         {
             await _user.ReloadAsync();
             await retriveUserData();
-            if (_registration) AutoLogin();
+            if (!_registration) AutoLogin();
         }
     }
     private void AutoLogin()
@@ -121,18 +121,9 @@ public class FirebaseManager : MonoBehaviour
                 await DeleteCurrentUser();
             }
         }
-        var loginTask = _auth.SignInAnonymouslyAsync();
-        if(loginTask.Exception != null)
-        {
-            await _user.DeleteAsync();
-            //TODO: Add error message
-        }
-        else
-        {
-            _user = loginTask.Result;
-            await AddDefaultAccountIntoDatabase();
-            await ChangeUsername("Guest");
-        }
+        _user = await _auth.SignInAnonymouslyAsync();
+        await AddDefaultAccountIntoDatabase();
+        await ChangeUsername("Guest");
     } 
     private void AuthStateChanged(object sender, System.EventArgs e)
     {
@@ -181,7 +172,7 @@ public class FirebaseManager : MonoBehaviour
             Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
                 DisplayName = newUsername
             };
-            await _user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
+            await _user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => { // TODO: Add error message
                 if (task.IsCanceled) {
                     Debug.LogError("UpdateUserProfileAsync was canceled.");
                     return;
@@ -239,7 +230,6 @@ public class FirebaseManager : MonoBehaviour
                 Debug.Log("User email updated successfully.");
             });
         }
-
     }    
     public async Task VerifyEmail(string email)
     {
