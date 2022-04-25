@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -314,6 +313,9 @@ namespace Mirror
 
             weightText.gameObject.SetActive(true);
             weightText.text = (win) ? "You win!" : "You lose!";
+
+            S_GameManager.singleton.SetEndingPopup((win) ? 2 : 1);
+
         }
 
         [TargetRpc]
@@ -328,6 +330,8 @@ namespace Mirror
 
             weightText.gameObject.SetActive(true);
             weightText.text = "Draw !";
+
+            S_GameManager.singleton.SetEndingPopup(0);
         }
 
         [TargetRpc]
