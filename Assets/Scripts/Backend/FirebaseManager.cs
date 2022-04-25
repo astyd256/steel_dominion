@@ -23,7 +23,13 @@ public class FirebaseManager : MonoBehaviour
             instance = this;
         }
     }
-    
+
+#if UNITY_SERVER
+    void Start()
+    {
+        dbReference = FirebaseDatabase.DefaultInstance.RootReference;
+    }
+#endif
     // #if UNITY_SERVER   
     public async Task AddExp(string playerToken, int xp)
     {
@@ -38,7 +44,6 @@ public class FirebaseManager : MonoBehaviour
         //TODO: Add error message
         return task.Value.ToString(); 
     }
-    
     // #endif
     
     #if !UNITY_SERVER 
@@ -162,7 +167,7 @@ public class FirebaseManager : MonoBehaviour
             {
                 //Data has been retrieved
                 _xp = Convert.ToInt32(task.Child("xp").Value);
-                _inventory = task.Child("_inventory").Value.ToString();
+                _inventory = task.Child("inventory").Value.ToString();
                 _cur_inventory = task.Child("cur_inventory").Value.ToString();
                 _picture_id = Convert.ToInt32(task.Child("picture_id").Value);
             }
@@ -206,10 +211,12 @@ public class FirebaseManager : MonoBehaviour
     {
         await dbReference.Child(_user.UserId).Child("cur_inventory").SetValueAsync(inventory);
     }
+#if !UNITY_SERVER
     public string GetCurInventory()
     {
         return _cur_inventory;
     }
+#endif
     public string GetInventory()
     {
         return _inventory;

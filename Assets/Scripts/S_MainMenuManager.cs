@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,6 +32,11 @@ public class S_MainMenuManager : MonoBehaviour
         profileSettingsManager.userNameInputField.onValueChanged.AddListener(delegate { profileSettingsManager.RemoveSpaces(); });
 
 
+    }
+
+    public S_CurrentUnitsPanel GetUnitsPanel()
+    {
+        return currentUnitsPanel;
     }
     public void SavePlayer()
     {

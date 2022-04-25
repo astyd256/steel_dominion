@@ -13,8 +13,9 @@ namespace Mirror
         [SerializeField] private float attackPause = 0.37f;
         private float curAttackPause = 0;
 
-        [SerializeField]
-        private Animation weaponAnim = null;
+#if !UNITY_SERVER
+        [SerializeField] private Animation weaponAnim = null;
+#endif
 
         [SerializeField]
         private float attackDistance = 5f;
@@ -179,7 +180,7 @@ namespace Mirror
 
                     int dmg = rand.Next(minDamage, maxDamage);
 
-                    if (target != null) target.GetComponent<S_Unit>().CalcDamage(dmg);
+                    if (target != null) target.GetComponent<S_Unit>().CalcDamage(dmg,0);
 
                     break;
                 }
@@ -191,7 +192,9 @@ namespace Mirror
         [ClientRpc]
         private void ClientMakeAttack()
         {
-            if(weaponAnim != null) weaponAnim.Play("ArmsAttack");
+#if !UNITY_SERVER
+            if (weaponAnim != null) weaponAnim.Play("ArmsAttack");
+#endif
         }
     }
 }

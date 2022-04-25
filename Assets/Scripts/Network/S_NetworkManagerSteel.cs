@@ -1,7 +1,5 @@
-using Mirror;
 using System;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -47,6 +45,7 @@ namespace Mirror
         public static event Action OnClientDisconnected;
 
         public List<S_GamePlayer> InGamePlayers { get; private set; } = new List<S_GamePlayer>();
+        private string[] _playersTokens = new string[2];
 
         private enum MatchState
         { 
@@ -62,12 +61,16 @@ namespace Mirror
 
         public override void Start()
         {
+#if UNITY_SERVER
             if (onlineScenes.Count == 0) throw new ArgumentNullException("Online scenes count is zero!");
 
             System.Random random = new System.Random();
             onlineScene = onlineScenes[random.Next(0, onlineScenes.Count)];
 
-#if UNITY_SERVER
+            _playersTokens[0] = "";
+            _playersTokens[1] = "";
+
+
             if (autoStartServerBuild)
             {
                 StartServer();
@@ -276,7 +279,6 @@ namespace Mirror
                 else if(RemainingTime <= 0)
                 {
                     //Timer end event
-                    Debug.Log("Timer ended!");
                     RemainingTime = 0f;
                     timerisRunning = false;
 
@@ -301,26 +303,29 @@ namespace Mirror
                         {
                             matchState = MatchState.BattleStartingState;
                             RemainingTime = 3f;
-                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
-                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                            timerisRunning = true;
+                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true);
+                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true);
                         }
                     }
                     else if (matchState == MatchState.BattleStartingState)
                     {
                         matchState = MatchState.BattleState;
 
-                        InGamePlayers[0].UpdateGameDisplayUI(GameTime, true, false, false ,false);
-                        InGamePlayers[1].UpdateGameDisplayUI(GameTime, true, false, false, false);
-
                         RemainingTime = GameTime;
                         timerisRunning = true;
+
+                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true);
+                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true);
 
                         foreach (GameObject unit in firstPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
                         foreach (GameObject unit in secondPlayerBattleUnits) unit.GetComponent<S_Unit>().StartBehaviour();
                     }
                     else if(matchState == MatchState.BattleEndingState)
                     {
-                        StartMatch();
+                       // StartMatch();
+
+                        CheckRoundEnding();
                     }
                     else if(matchState == MatchState.AfterMatchState)
                     {
@@ -341,11 +346,12 @@ namespace Mirror
                 SecondPlayerUnits = UnitsIds.ToList();
         }
 
+//#if UNITY_SERVER
         [Server]
         public async void ServerGetPlayerUnitsFromDataBase(NetworkConnection conn, string userToken)
         {
-            string _playerUnits = await FirebaseManager.instance.GetCurInventory(userToken);
-            Debug.Log("Inventory to unload = "+_playerUnits);
+            string _playerUnits = await FirebaseManager.instance.GetCurInventoryServer(userToken);
+
             int curLength = _playerUnits.Length - 1;
 
             List<int> curUnitsList = new List<int>();
@@ -359,10 +365,17 @@ namespace Mirror
             }
 
             if (InGamePlayers[0].connectionToClient == conn)
+            {
                 firstPlayerUnits = curUnitsList.ToList();
+                _playersTokens[0] = userToken;
+            }
             else if (InGamePlayers[1].connectionToClient == conn)
+            {
                 SecondPlayerUnits = curUnitsList.ToList();
+                _playersTokens[1] = userToken;
+            }
         }
+//#endif
 
         [Server]
         public void passTurnPlayer(NetworkConnection conn)
@@ -421,8 +434,8 @@ namespace Mirror
             {
                 matchState = MatchState.BattleStartingState;
                 RemainingTime = 3f;
-                InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
-                InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
+                InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true);
+                InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true);
             }
         }
 
@@ -439,7 +452,6 @@ namespace Mirror
         [Server]
         public void RemoveBattleUnit(int teamId, GameObject unit)
         {
-            Debug.Log("Killed = " + unit.name);
             if (teamId == 0)
             {
                 firstPlayerBattleUnits.Remove(unit);
@@ -451,74 +463,194 @@ namespace Mirror
                 Destroy(unit);
             }
 
+            if(firstPlayerBattleUnits.Count == 0 || secondPlayerBattleUnits.Count == 0)
+            {
+                //Someone lost all units in round
+                matchState = MatchState.BattleEndingState;
+                RemainingTime = 3f;
+                timerisRunning = true;
+                InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true);
+                InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true);
+            }
+
+        }
+
+        [Server]
+        public void CheckRoundEnding()
+        {
             int firstLeftUnits = firstPlayerBattleUnits.Count;
             int secondLeftUnits = secondPlayerBattleUnits.Count;
 
-            if (firstLeftUnits == 0 || secondLeftUnits == 0)
+            if (firstLeftUnits == 0 && secondLeftUnits == 0)
             {
-                Debug.Log("Round ended!");
-                if (firstLeftUnits == 0) secondPlayerWins++;
-                else if (secondLeftUnits == 0) firstPlayerWins++;
+                //If no units alive from both players (DRAW)
+                CheckMatchEndConditions(0);
+            }
+            else if(firstLeftUnits > 0 && secondLeftUnits == 0)
+            {
+                DestroyAllUnits();
+                firstPlayerWins++;
+                CheckMatchEndConditions(-1);
+            }
+            else
+            {
+                DestroyAllUnits();
+                secondPlayerWins++;
+                CheckMatchEndConditions(1);
+            }
+        }
 
-                if (secondPlayerWins == 2 || firstPlayerWins == 2)
+        [Server]
+        public void CheckMatchEndConditions(int unitsDiferrences)
+        {
+            Debug.Log("Checking win conditions! fw= " + firstPlayerWins + " sw= " + secondPlayerWins + " ud= " + unitsDiferrences);
+            if (unitsDiferrences == 0) //Draw round
+            {
+                if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count > 0)
                 {
-                    timerisRunning = true;
-                    RemainingTime = 30f;
-                    matchState = MatchState.AfterMatchState;
-                    this.CallWithDelay(DestroyAllUnits, 2.5f);
+                    //Both players still have units in inventory (0 0 next round) (1 0 next round) (0 1 next round) (1 1 next round)
 
-                    if (secondPlayerWins == 2)
-                    {
-                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
-                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
-                    }
-                    else if(firstPlayerWins == 2)
-                    {
-                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
-                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
-                    }
+                    //Next round
+                    StartMatch();
+                }
+                else if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count == 0)
+                {
+                    //Second player lost all units in inventory (0 0 first player win) (0 1 draw) (1 0 first player wins) (1 1 first player wins) 
+                    if (firstPlayerWins == 0 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 1) AnounceMatchEnding(false, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else AnounceMatchEnding(true, false);
+                }
+                else if (firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count > 0)
+                {
+                    //First player lost all units in inventory (0 0 second player win) (0 1 second player win) (1 0 draw) (1 1 second player win) 
+                    if (firstPlayerWins == 0 && secondPlayerWins == 0) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 1) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 0) AnounceMatchEnding(false, false);
+                    else AnounceMatchEnding(false, true);
                 }
                 else
                 {
-                    if(firstPlayerUnits.Count == 0 || SecondPlayerUnits.Count == 0)
-                    {
-                        timerisRunning = true;
-                        RemainingTime = 30f;
-                        matchState = MatchState.AfterMatchState;
-                        this.CallWithDelay(DestroyAllUnits, 2.5f);
-
-                        if(firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count == 0)
-                        {
-                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
-                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
-                        }
-                        else if (firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count > 0)
-                        {
-                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
-                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
-                        }
-                        else if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count == 0)
-                        {
-                            InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, true, true);
-                            InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, true, false);
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("Units clearing!");
-                        
-                        timerisRunning = true;
-                        RemainingTime = 3f;
-                        matchState = MatchState.BattleEndingState;
-                        InGamePlayers[0].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
-                        InGamePlayers[1].UpdateGameDisplayUI(RemainingTime, true, false, false, false);
-                        this.CallWithDelay(DestroyAllUnits, 2.5f);
-                    }                  
+                    //All players lost all units in inventory (0 0 draw) (1 0 first win) (0 1 secind win) (1 1 draw)
+                    if (firstPlayerWins == 0 && secondPlayerWins == 0) AnounceMatchEnding(false, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 1) AnounceMatchEnding(false, true);
+                    else AnounceMatchEnding(true, true);
                 }
-                return;
-            }     
-            //Check for round ending
+            }
+            else if (unitsDiferrences == -1) //First player wins round
+            {
+                if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count > 0)
+                {
+                    //Both players still have units in inventory (1 0 next) (1 1 next) (2 1 first win) (2 0 first win)
+
+                    if (firstPlayerWins == 2 && secondPlayerWins == 1) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else StartMatch();
+
+                }
+                else if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count == 0)
+                {
+                    //Second player lost all units in inventory (1 0 first win) (1 1 first win) (2 1 first win) (2 0 first win)
+                    if (firstPlayerWins == 1 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 1) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 1) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else throw new Exception("Win condition after the first player wins round and second player don't have inventory is not found! fw= " + firstPlayerWins + " sw= " + secondPlayerWins);
+                }
+                else if (firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count > 0)
+                {
+                    //First player lost all units in inventory (1 0 draw) (1 1 second win) (2 1 first win) (2 0 first win)
+                    if (firstPlayerWins == 1 && secondPlayerWins == 0) AnounceMatchEnding(false, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 1) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 1) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else throw new Exception("Win condition after the first player wins round and first player don't have inventory is not found! fw= " + firstPlayerWins + " sw= " + secondPlayerWins);
+                }
+                else
+                {
+                    //All players lost all units in inventory (1 0 first win) (1 1 draw) (2 1 first win) (2 0 first win)
+                    if (firstPlayerWins == 1 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 1) AnounceMatchEnding(false, false);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 1) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 2 && secondPlayerWins == 0) AnounceMatchEnding(true, false);
+                    else throw new Exception("Win condition after the first player wins round and all players don't have inventory is not found! fw= " + firstPlayerWins + " sw= " + secondPlayerWins);
+                }
+            }
+            else if (unitsDiferrences == 1) //Second player wins round
+            {
+                if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count > 0)
+                {
+                    //Both players still have units in inventory (0 1 next) (1 1 next) (1 2 second win) (0 2 second win)
+
+                    if (firstPlayerWins == 1 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else StartMatch();
+
+                }
+                else if (firstPlayerUnits.Count > 0 && SecondPlayerUnits.Count == 0)
+                {
+                    //Second player lost all units in inventory (0 1 draw) (1 1 first win) (1 2 second win) (0 2 second win)
+                    if (firstPlayerWins == 0 && secondPlayerWins == 01) AnounceMatchEnding(false, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 1) AnounceMatchEnding(true, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else throw new Exception("Win condition after the second player wins round and second player don't have inventory is not found! fw= " + firstPlayerWins + " sw= " + secondPlayerWins);
+                }
+                else if (firstPlayerUnits.Count == 0 && SecondPlayerUnits.Count > 0)
+                {
+                    //First player lost all units in inventory (0 1 second win) (1 1 second win) (1 2 second win) (0 2 second win)
+                    if (firstPlayerWins == 0 && secondPlayerWins == 1) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 1) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else throw new Exception("Win condition after the second player wins round and first player don't have inventory is not found! fw= " + firstPlayerWins + " sw= " + secondPlayerWins);
+                }
+                else
+                {
+                    //All players lost all units in inventory (0 1 second win) (1 1 draw) (1 2 second win) (0 2 second win)
+                    if (firstPlayerWins == 0 && secondPlayerWins == 1) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 1) AnounceMatchEnding(false, false);
+                    else if (firstPlayerWins == 1 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else if (firstPlayerWins == 0 && secondPlayerWins == 2) AnounceMatchEnding(false, true);
+                    else throw new Exception("Win condition after the second player wins round and all players don't have inventory is not found! fw= " + firstPlayerWins + " sw= " + secondPlayerWins);
+                }
+            }
+            else throw new Exception("Can't check match end conditions Error unitsDif = " + unitsDiferrences);
         }
+
+        [Server]
+        public void AnounceMatchEnding(bool firstPlayerWins, bool secondPlayerWins)
+        {
+            Debug.Log("End anounce fw= "+firstPlayerWins+" sw= "+secondPlayerWins);
+            timerisRunning = true;
+            RemainingTime = 30f;
+            matchState = MatchState.AfterMatchState;
+
+            if (firstPlayerWins == false && secondPlayerWins == false) //Draw
+            {            
+                InGamePlayers[0].UpdateGameDisplayUIDraw(RemainingTime);
+                InGamePlayers[1].UpdateGameDisplayUIDraw(RemainingTime);
+
+                FirebaseManager.instance.AddExp(_playersTokens[0], 75);
+                FirebaseManager.instance.AddExp(_playersTokens[1], 75);
+            }
+            else if(firstPlayerWins == true && secondPlayerWins == false) //First player wins the match
+            {
+                InGamePlayers[0].UpdateGameDisplayUIWinLose(RemainingTime, true);
+                InGamePlayers[1].UpdateGameDisplayUIWinLose(RemainingTime, false);
+                FirebaseManager.instance.AddExp(_playersTokens[0], 100);
+                FirebaseManager.instance.AddExp(_playersTokens[1], 50);
+            }
+            else if(firstPlayerWins == false && secondPlayerWins == true) //Second player wins the match
+            {
+                InGamePlayers[0].UpdateGameDisplayUIWinLose(RemainingTime, false);
+                InGamePlayers[1].UpdateGameDisplayUIWinLose(RemainingTime, true);
+                FirebaseManager.instance.AddExp(_playersTokens[0], 50);
+                FirebaseManager.instance.AddExp(_playersTokens[1], 100);
+            }
+            else throw new Exception("Incorrect match ending!");
+        }     
 
         [Server]
         public void DestroyAllUnits()

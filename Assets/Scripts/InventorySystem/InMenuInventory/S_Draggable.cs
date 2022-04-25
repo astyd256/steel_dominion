@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,11 +9,17 @@ public class S_Draggable : MonoBehaviour
 
     [SerializeField] private bool panelRemoveReady;
 
+    private bool weightFromPanelRemoveFlag = false;
+    private bool FrameCheck = false;
     private Color _color;
-    private Vector2 _size;
+    [SerializeField] private Vector2 _size;
 
     //private float _movementTime = 15f;
 
+    public bool GetFrameCheck()
+    {
+        return FrameCheck;
+    }
     public Vector2 GetSize()
     {
         return _size;
@@ -40,9 +44,25 @@ public class S_Draggable : MonoBehaviour
         return place;
     }
 
+    public void SetSize()
+    {
+        /*
+        if (this.transform.parent.CompareTag("UnitPanel"))
+        {
+            _size = this.GetComponentInParent<S_CurrentUnitsPanel>().GetComponent<GridLayoutGroup>().cellSize;
+        }
+        else if (this.transform.parent.CompareTag("InventoryUnits"))
+        {
+            _size = GameObject.Find("MainMenuManager").GetComponent<S_InventoryMenuManager>().GetSlotSize();
+        }
+        */
+        _size = this.gameObject.GetComponent<BoxCollider2D>().size;
+    }
+
     private void Start()
     {
-        panelRemoveReady = true;
+        panelRemoveReady = false;
+        FrameCheck = false;
         // Initialize PLACE variable
         _color = this.GetComponent<Image>().color;
         if (this.transform.parent.CompareTag("InventoryUnits"))
@@ -60,46 +80,50 @@ public class S_Draggable : MonoBehaviour
     // IT DRAGS ONLY COPY OF AN OBJECT
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot")
-        {
-            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().RosterWeight += this.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
-            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().UpdateRosterWeight();
+        if (other.CompareTag("UnitPanel")){
+            //                                    FROM INVENTORY TO PANEL  OR  FROM PANEL IF NOT FROM FIRST INSTANT ENTER TRIGGER
+            if ((type == "InventoryUnitSlot" && place == "InventoryUnits") || (place == "UnitPanel" && weightFromPanelRemoveFlag == true))
+            {
+                GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().RosterWeight += this.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
+                GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().UpdateRosterWeight();
+                weightFromPanelRemoveFlag = false;
+            }
+
+            if (type == "InventoryUnitSlot" &&
+                this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false && GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().GetPlacingSlotBool() == false)
+            {
+                // From inventory slot drag over panel
+                this.GetComponent<Image>().color = Color.black;
+
+                // Shuffle from outside of panel preview start:
+                other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewShuffle();
+
+                if (other.TryGetComponent<S_CurrentUnitsPanel>(out S_CurrentUnitsPanel panel))
+                {
+                    panel.AddingSlotPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
+                }
+
+                // Placing = potential placement (preview active)
+                GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
+            }
+            else if (type == "InventoryUnitSlot" &&
+                this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true && GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().GetPlacingSlotBool() == false)
+            {
+                // From Panel Slot drag over panel
+                panelRemoveReady = false;
+                this.GetComponent<Image>().color = GameObject.Find("MainMenuManager").gameObject.GetComponent<S_InventoryMenuManager>().ButtonColor;
+
+                //Shuffle within panel:
+                other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewShuffle();
+                other.GetComponent<S_CurrentUnitsPanel>().ShuffleFromWithinPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
+
+                // Preview active == true
+                GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
+            }
+
+            FrameCheck = true;
         }
-    }
-
-    // Shuffle
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
-            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == false && GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().GetPlacingSlotBool() == false)
-        {
-            // From inventory slot drag over panel
-            this.GetComponent<Image>().color = Color.black;
-
-            // Shuffle from outside of panel preview start:
-            other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewShuffle();
-
-            other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
-            // Placing = potential placement (preview active)
-            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
-        }
-        else if (other.CompareTag("UnitPanel") && type == "InventoryUnitSlot" &&
-            this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true && GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().GetPlacingSlotBool() == false)
-        {
-            // From Panel Slot drag over panel
-            panelRemoveReady = false;
-            this.GetComponent<Image>().color = GameObject.Find("MainMenuManager").gameObject.GetComponent<S_InventoryMenuManager>().ButtonColor;
-            // Logic For shuffle change
-            // Shuffle change means new position for preview
-            // FOR FUTURE
-
-            //Shuffle within panel:
-            other.GetComponent<S_CurrentUnitsPanel>().AddingSlotPreviewShuffle();
-            other.GetComponent<S_CurrentUnitsPanel>().ShuffleFromWithinPreviewStart(this.GetComponent<S_InventoryUnitSlot>());
-
-            // Preview active == true
-            GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(true);
-        }
+        
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -120,6 +144,7 @@ public class S_Draggable : MonoBehaviour
             if (this.GetComponent<S_InventoryUnitSlot>().GetBelongsToUnitsPanel() == true)
             {
                 // From Panel exit panel
+                weightFromPanelRemoveFlag = true;
                 GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().SetPlacingSlotBool(false);
 
                 
@@ -129,10 +154,12 @@ public class S_Draggable : MonoBehaviour
 
                 // Shuffle within panel preview end:
                 other.GetComponent<S_CurrentUnitsPanel>().ShuffleFromWithinPreviewEnd(this.GetComponent<S_InventoryUnitSlot>());
+                
             }
-
+            // First frame doesn't run this somehow
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().RosterWeight -= this.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().UpdateRosterWeight();
+            FrameCheck = true;
         }
     }
 
