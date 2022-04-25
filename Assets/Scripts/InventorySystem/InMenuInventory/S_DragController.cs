@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,6 +24,7 @@ public class S_DragController : MonoBehaviour
     [SerializeField] public Color addedColor;
     [SerializeField] private Vector2 draggableColliderSize;
     [SerializeField] private S_MainMenuManager mainMenuManager;
+    [SerializeField] private int dragThreshold;
 
     private void Start()
     {
@@ -33,7 +32,7 @@ public class S_DragController : MonoBehaviour
 
     void Update()
     {
-        if (mainMenuManager.getInventoryActive())
+        if (mainMenuManager.interactive && mainMenuManager.getInventoryActive())
         {
             // Drop on mouseUp or touch.end
             if (_isDragActive && (Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended)))
@@ -90,9 +89,9 @@ public class S_DragController : MonoBehaviour
             else // Try drag start
             {
                 // Here was raycast before
-                if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + 30) ||
-                    (_screenPosition.x <= _initialPosition.x - 30) || (_screenPosition.y >= _initialPosition.y + 30) ||
-                    (_screenPosition.y <= _initialPosition.y - 30)))
+                if (hit.collider != null && hit.collider.tag == "UnitSlot" && ((_screenPosition.x >= _initialPosition.x + dragThreshold) ||
+                    (_screenPosition.x <= _initialPosition.x - dragThreshold) || (_screenPosition.y >= _initialPosition.y + dragThreshold) ||
+                    (_screenPosition.y <= _initialPosition.y - dragThreshold)))
                 {
                     if (hit.transform.gameObject.GetComponent<S_InventoryUnitSlot>().GetCanDrag() == true)
                     {

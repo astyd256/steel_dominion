@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Threading.Tasks;
 
 public class S_Draggable : MonoBehaviour
 {
@@ -162,6 +159,7 @@ public class S_Draggable : MonoBehaviour
             // First frame doesn't run this somehow
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().RosterWeight -= this.GetComponent<S_InventoryUnitSlot>().GetUnitWeight();
             GameObject.Find("CurrentUnitsParent").GetComponent<S_CurrentUnitsPanel>().UpdateRosterWeight();
+            FrameCheck = true;
         }
     }
 

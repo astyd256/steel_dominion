@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 public class S_InventoryMenuManager : MonoBehaviour
 {
@@ -25,6 +22,9 @@ public class S_InventoryMenuManager : MonoBehaviour
 
     public void LoadUnitsFromString(string inventoryString)
     {
+        // Delete previous
+        ClearInventory();
+
         Debug.Log("Inventory to load = " + inventoryString);
         int curLength = inventoryString.Length - 1;
 
@@ -65,6 +65,15 @@ public class S_InventoryMenuManager : MonoBehaviour
             CreateSlot(unit, _slotID);
             _slotID++;
         }
+    }
+    public void ClearInventory()
+    {
+        InventoryUnits.Clear();
+        foreach (S_InventoryUnitSlot slot in inventoryContainer.transform)
+        {
+            Destroy(slot.gameObject);
+        }
+        unitInventorySlots.Clear();
     }
 
     //Sending unit's data to slot visualizer to create a proper slot image
