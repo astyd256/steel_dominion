@@ -38,7 +38,7 @@ public class FirebaseManager : MonoBehaviour
         int curExp = Convert.ToInt32(task.Value);
         await dbReference.Child(playerToken).Child("xp").SetValueAsync(curExp + xp);
     }
-    public async Task<string> GetCurInventory(string playerToken)
+    public async Task<string> GetCurInventoryServer(string playerToken)
     {
         var task = await dbReference.Child(playerToken).Child("cur_inventory").GetValueAsync();
         //TODO: Add error message
