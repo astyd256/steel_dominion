@@ -43,6 +43,8 @@ public class LoginInterfaceManager : MonoBehaviour
         // Inventory and curUnitsPanel
         MainMenuManager.GetComponent<S_InventoryMenuManager>().LoadUnitsFromString(FirebaseManager.instance.GetInventory());
         MainMenuManager.GetComponent<S_MainMenuManager>().GetUnitsPanel().LoadSlotsFromString(FirebaseManager.instance.GetCurInventory());
+
+        S_GameManager.singleton.ShowDialog("Bce HopMaJIHo");
     }
     public void toLobby()
     {

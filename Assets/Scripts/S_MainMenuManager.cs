@@ -162,8 +162,25 @@ public class S_MainMenuManager : MonoBehaviour
         CloseInventory();
 
         CloseProfileSettings();
+    }
 
-        
+    public void screenButtonOn()
+    {
+        interactive = false;
+        clickScreenButton.gameObject.SetActive(true);
+    }
+
+    public void screenButtonOff()
+    {
+        interactive = true;
+        clickScreenButton.gameObject.SetActive(false);
+    }
+
+    public void ClickScreenButtonLogic()
+    {
+        CloseSettings();
+
+        CloseProfileSettings();
     }
 
 #endif
