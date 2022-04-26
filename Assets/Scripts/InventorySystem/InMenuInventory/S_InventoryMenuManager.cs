@@ -69,7 +69,7 @@ public class S_InventoryMenuManager : MonoBehaviour
     public void ClearInventory()
     {
         InventoryUnits.Clear();
-        foreach (S_InventoryUnitSlot slot in inventoryContainer.transform)
+        foreach (Transform slot in inventoryContainer.transform)
         {
             Destroy(slot.gameObject);
         }
