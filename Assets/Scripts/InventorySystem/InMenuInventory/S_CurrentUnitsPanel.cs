@@ -43,7 +43,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             slot.GetComponent<S_Draggable>().SetSize();
         }
     }
-    public void SaveUnitsPanel()
+    public async void SaveUnitsPanel()
     {
         SaveInventoryButton.SetActive(false);
         previousSlots = slots.ToList();
@@ -68,8 +68,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             }
             else _saveString += _unitInventoryPosition.ToString();
         }
-        Debug.Log("String to save = " + _saveString);
-        FirebaseManager.instance.SaveCurInventory(_saveString);
+        await FirebaseManager.instance.SaveCurInventory(_saveString);
     }
 
     public async Task RemoveUnitsFromPanel()

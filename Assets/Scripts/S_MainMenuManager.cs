@@ -17,6 +17,7 @@ public class S_MainMenuManager : MonoBehaviour
 
     [SerializeField] private GameObject inventoryPanel;    // Inventory panel
     [SerializeField] private Button inventoryOpenButton;   // Inventory open button
+    [SerializeField] private GameObject inventoryUnitsParent; 
     [SerializeField] bool inventoryActive = false;
 
     [SerializeField] public bool interactive = true;
@@ -86,7 +87,7 @@ public class S_MainMenuManager : MonoBehaviour
         // SlotSize refresh
         if (inventoryActive)
         {
-            GameObject.Find("InventoryUnitsParent").GetComponent<GridLayoutGroup>().cellSize = inventoryMenuManager.GetSlotSize();
+            inventoryUnitsParent.GetComponent<GridLayoutGroup>().cellSize = inventoryMenuManager.GetSlotSize();
         }
     }
 

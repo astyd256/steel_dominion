@@ -30,155 +30,128 @@ public class FirebaseManager : MonoBehaviour
         dbReference = FirebaseDatabase.DefaultInstance.RootReference;
     }
 #endif
-   // #if UNITY_SERVER
-    
-    public async void AddExp(string playerToken, int xp)
+    // #if UNITY_SERVER   
+    public async Task AddExp(string playerToken, int xp)
     {
         var task = await dbReference.Child(playerToken).Child("xp").GetValueAsync();
         //TODO: Add error message
         int curExp = Convert.ToInt32(task.Value);
         await dbReference.Child(playerToken).Child("xp").SetValueAsync(curExp + xp);
     }
-
-
     public async Task<string> GetCurInventoryServer(string playerToken)
     {
         var task = await dbReference.Child(playerToken).Child("cur_inventory").GetValueAsync();
         //TODO: Add error message
-            return task.Value.ToString();
-       // return null; 
+        return task.Value.ToString(); 
     }
+    // #endif
     
-   // #endif
-    
-#if !UNITY_SERVER
-    private FirebaseAuth auth;
-    private FirebaseUser user;
+    #if !UNITY_SERVER 
+    private FirebaseAuth _auth;
+    private FirebaseUser _user;
     private int _xp = 0;
     private string _inventory = "";
     private string _cur_inventory = "";
     private int _picture_id = 0;
+    private bool _registration = false; // true if user is in registration state
     void Start()
     {
-        auth = FirebaseAuth.DefaultInstance;
+        _auth = FirebaseAuth.DefaultInstance;
         dbReference = FirebaseDatabase.DefaultInstance.RootReference;
-        auth.StateChanged += AuthStateChanged;
+        _auth.StateChanged += AuthStateChanged;
         AuthStateChanged(this, null);
         AsyncStart();
     }
     async void AsyncStart()
     {
         await FirebaseApp.CheckAndFixDependenciesAsync();
-        if (user != null) 
+        if (_user != null) 
         {
-            await user.ReloadAsync();
+            await _user.ReloadAsync();
             await retriveUserData();
-            AutoLogin();
+            if (!_registration) AutoLogin();
         }
     }
     private void AutoLogin()
     {
-        if(user != null)
+        if (_user != null) LoginInterfaceManager.instance.toMainMenu();
+        else LoginInterfaceManager.instance.toLobby();
+    }
+    public async Task RegistrationFromGuest(string email, string password)
+    {
+        /*** HAVE TO USE VERIFY EMAIL FIRST BEFORE TRIGGERING THIS METHOD ***/
+        await _user.ReloadAsync();
+        if (_user != null && _user.Email == email && _user.IsEmailVerified)
         {
+            await _user.UpdatePasswordAsync(password); //TODO: Add error message
+            _registration = false;
             LoginInterfaceManager.instance.toMainMenu();
         }
-        else
-        {
-            LoginInterfaceManager.instance.toLobby();
-        }
-    }
-    public async void Registration(string email, string password)
-    {
-        await RegisterUser(email, password);
     }   
-    private async Task RegisterUser(string _email, string _password)
+    private async Task AddDefaultAccountIntoDatabase()
     {
-        var registerTask =  auth.CreateUserWithEmailAndPasswordAsync(_email, _password);
-        await registerTask;
-
-        if(registerTask.Exception != null)
+        await dbReference.Child(_user.UserId).Child("xp").SetValueAsync(0);
+        await dbReference.Child(_user.UserId).Child("inventory").SetValueAsync("000100000000020201010100");
+        await dbReference.Child(_user.UserId).Child("cur_inventory").SetValueAsync("");
+        await dbReference.Child(_user.UserId).Child("picture_id").SetValueAsync(0);
+    }
+    public async Task Login(string email, string password)
+    {
+        if (_registration)
         {
-            await user.DeleteAsync();
-            //TODO: Add error message
+            _registration = false;
+            if (_user != null)
+            {
+                await DeleteCurrentUserFromDB();
+                await DeleteCurrentUser();
+            }
         }
-        else
+        await _auth.SignInWithEmailAndPasswordAsync(email, password);
+        await retriveUserData(); 
+        LoginInterfaceManager.instance.toMainMenu();
+    }
+    public async Task LoginAnonymous()
+    {
+        if (_registration)
         {
-            AddDefaultAccountIntoDatabase();
-            if (user.IsEmailVerified) // TODO: Add email verification
+            _registration = false;
+            if (_user != null)
             {
-                LoginInterfaceManager.instance.toMainMenu();
+                await DeleteCurrentUserFromDB();
+                await DeleteCurrentUser();
             }
-            else
-            {
-                LoginInterfaceManager.instance.toMainMenu();
-            } 
         }
-    }
-    private async void AddDefaultAccountIntoDatabase()
-    {
-        await dbReference.Child(user.UserId).Child("xp").SetValueAsync(0);
-        await dbReference.Child(user.UserId).Child("inventory").SetValueAsync("000100000000020201010100");
-        await dbReference.Child(user.UserId).Child("cur_inventory").SetValueAsync("");
-        await dbReference.Child(user.UserId).Child("picture_id").SetValueAsync(0);
-    }
-    public void Login(string email, string password)
-    {
-        auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(task => 
-        {
-            if (task.Exception != null)
-            {
-                FirebaseException firebaseException = (FirebaseException)task.Exception.GetBaseException();
-                //TODO: Add error message
-            }
-            else LoginInterfaceManager.instance.toMainMenu();   
-        });
-    }
-    public void LoginAnonymous()
-    {
-        auth.SignInAnonymouslyAsync().ContinueWithOnMainThread(async task => {
-            if (task.IsCanceled) {
-                //TODO: Add error message here
-                return;
-            }
-            if (task.IsFaulted) {
-                //TODO: Add error message here
-                return;
-            }
-            user = task.Result;
-            AddDefaultAccountIntoDatabase();
-            await ChangeUsername("Guest");
-            Debug.Log(user);
-            LoginInterfaceManager.instance.toMainMenu();
-        });
+        _user = await _auth.SignInAnonymouslyAsync();
+        await AddDefaultAccountIntoDatabase();
+        await ChangeUsername("Guest");
     } 
     private void AuthStateChanged(object sender, System.EventArgs e)
     {
-        bool signedIn = user == auth.CurrentUser && auth.CurrentUser != null;
-        if (!signedIn && user != null)
+        bool signedIn = _user == _auth.CurrentUser && _auth.CurrentUser != null;
+        if (!signedIn && _user != null)
         {
             LoginInterfaceManager.instance.toLobby();
-            user = null;
+            //TODO: Add error message
         }
-        user = auth.CurrentUser;
+        _user = _auth.CurrentUser;
     }
     public void LogOut() 
     {
-        if (auth.CurrentUser != null) {
-            auth.SignOut();
+        if (_auth.CurrentUser != null) {
+            _auth.SignOut();
             _xp = 0;
             _inventory = "";
-            _cur_inventory
-             = "";
+            _cur_inventory = "";
         }
     }
 	private async Task retriveUserData()
 	{
-        if (user != null)
+        if (_user != null)
         {            
-            var task = await dbReference.Child(FirebaseManager.instance.user.UserId).GetValueAsync();
+            var task = await dbReference.Child(FirebaseManager.instance._user.UserId).GetValueAsync();
             if (task.ChildrenCount == 0)
             {
-                Debug.LogWarning(message: $"No data was found on given user");
+                Debug.LogWarning(message: $"No data was found on given _user");
 
             }
             else
@@ -189,25 +162,24 @@ public class FirebaseManager : MonoBehaviour
                 _cur_inventory = task.Child("cur_inventory").Value.ToString();
                 _picture_id = Convert.ToInt32(task.Child("picture_id").Value);
             }
-
         }
         else Debug.LogWarning(message: "Can't retrieve data from Firebase. User does not exist");
     }
     public async Task ChangeUsername (string newUsername)
     {
-        user = auth.CurrentUser;
-        if (user != null) {
+        _user = _auth.CurrentUser;
+        if (_user != null) {
             Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
                 DisplayName = newUsername
             };
-            await user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => {
+            await _user.UpdateUserProfileAsync(profile).ContinueWithOnMainThread(task => { // TODO: Add error message
                 if (task.IsCanceled) {
-                Debug.LogError("UpdateUserProfileAsync was canceled.");
-                return;
+                    Debug.LogError("UpdateUserProfileAsync was canceled.");
+                    return;
                 }
                 if (task.IsFaulted) {
-                Debug.LogError("UpdateUserProfileAsync encountered an error: " + task.Exception);
-                return;
+                    Debug.LogError("UpdateUserProfileAsync encountered an error: " + task.Exception);
+                    return;
                 }
                 Debug.Log("User profile updated successfully.");
             });
@@ -215,7 +187,7 @@ public class FirebaseManager : MonoBehaviour
     }
     public int GetUserXp()
     {
-        if (user == null)
+        if (_user == null)
         {
             return 0;
         }
@@ -223,12 +195,12 @@ public class FirebaseManager : MonoBehaviour
     }
     public string GetUserName()
     {
-        if (user == null) return "";
-        else return user.DisplayName;
+        if (_user == null) return "";
+        else return _user.DisplayName;
     }
-    public async void SaveCurInventory(string inventory)
+    public async Task SaveCurInventory(string inventory)
     {
-        await dbReference.Child(user.UserId).Child("cur_inventory").SetValueAsync(inventory);
+        await dbReference.Child(_user.UserId).Child("cur_inventory").SetValueAsync(inventory);
     }
 #if !UNITY_SERVER
     public string GetCurInventory()
@@ -242,46 +214,76 @@ public class FirebaseManager : MonoBehaviour
     }
     public void ChangeEmail(string newEmail)
     {
-        user = auth.CurrentUser;
-        if (user != null) {
-            user.UpdateEmailAsync(newEmail).ContinueWith(task => {
+        //TODO: Add email verification
+        _user = _auth.CurrentUser;
+        if (_user != null) {
+            _user.UpdateEmailAsync(newEmail).ContinueWith(task => {
                 if (task.IsCanceled) {
-                Debug.LogError("UpdateEmailAsync was canceled.");
-                return;
+                    Debug.LogError("UpdateEmailAsync was canceled.");
+                    return;
                 }
                 if (task.IsFaulted) {
-                Debug.LogError("UpdateEmailAsync encountered an error: " + task.Exception);
-                return;
+                    Debug.LogError("UpdateEmailAsync encountered an error: " + task.Exception);
+                    return;
                 }
 
                 Debug.Log("User email updated successfully.");
             });
         }
-
     }    
-    public string GetUserToken()
+    public async Task VerifyEmail(string email)
     {
-        return user.UserId;
-    }
-    async void ChangeProfilePicture(int pictureId)
-    {
-        //TODO: Add error messege here
-        await dbReference.Child(user.UserId).Child("picture_id").SetValueAsync(pictureId);
-        _picture_id = pictureId;
-    }      
-    async Task<int> GetProfilePictureId()
-    {
-        var task = await dbReference.Child(user.UserId).Child("picture_id").GetValueAsync();
-        if (task.ChildrenCount == 0)
+        if (!_registration)
         {
-            Debug.LogWarning(message: $"No data was found on given user");
+            if (_user == null) // If user is null then user is trying to register
+            {
+                _user = await _auth.SignInAnonymouslyAsync();
+                _registration = true;
+            } 
+            await _user.UpdateEmailAsync(email);
+            await _user.SendEmailVerificationAsync();
+            //TODO: Add info to user
         }
         else
         {
-            return Convert.ToInt32(task.Value);
-        }
-        return 0;
+            if (!_user.IsEmailVerified || _user.Email != email) //TODO: Add timeout for sending verifying email
+            {
+                if (_user == null) _user = await _auth.SignInAnonymouslyAsync(); 
+                await _user.UpdateEmailAsync(email);
+                await _user.SendEmailVerificationAsync(); 
+            }
+            //TODO: Add info to user
+        } 
+            
+    }    
+    public string GetUserToken()
+    {
+        return _user.UserId;
+    }
+    public async Task ChangeProfilePicture(int pictureId)
+    {
+        //TODO: Add error messege here
+        await dbReference.Child(_user.UserId).Child("picture_id").SetValueAsync(pictureId);
+        _picture_id = pictureId;
+    }      
+    public async Task<int> GetProfilePictureId()
+    {
+        var task = await dbReference.Child(_user.UserId).Child("picture_id").GetValueAsync();
+        //TODO: Add error message
+        return Convert.ToInt32(task.Value);
            
     }
-#endif
+    public async Task DeleteCurrentUser()
+    {
+        if (_user != null) await _user.DeleteAsync(); //TODO: Add error message
+    }
+    public async Task DeleteCurrentUserFromDB()
+    {
+        await dbReference.Child(_user.UserId).RemoveValueAsync(); //TODO: Add error message
+    }
+    public bool IsEmailVerified()
+    {
+        return _user.IsEmailVerified;
+    }
+    #endif
 }

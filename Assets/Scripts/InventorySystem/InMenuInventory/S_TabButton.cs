@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 public class S_TabButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler, IPointerExitHandler
 {
-    public S_TabGroupInventory tabGroup;
+    public S_TabGroup tabGroup;
+
+    public GameObject linkedPanel;
 
     public Image background;
 
@@ -16,6 +18,7 @@ public class S_TabButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHan
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (tabGroup.selectedTab != this)
         tabGroup.OnTabSelected(this);
     }
 
