@@ -6,6 +6,8 @@ public class S_GameManager : MonoBehaviour
 {
     public static S_GameManager singleton { get; private set; }
 
+    [SerializeField] public S_ShowDialogWindow showDialogWindowPrefab;
+
     private enum MatchEndingState
     {
         Nothing,
@@ -49,5 +51,11 @@ public class S_GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
         Debug.Log("Match ended, result is " + _matchEndState);
+    }
+
+    public void ShowDialog(string message)
+    {
+        S_ShowDialogWindow showDialogWindow = Instantiate(showDialogWindowPrefab); 
+        showDialogWindow.ShowDialog(message);
     }
 }

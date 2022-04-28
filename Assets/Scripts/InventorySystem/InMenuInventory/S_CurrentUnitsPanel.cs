@@ -19,6 +19,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
     [SerializeField] public int MaxRosterWeight = 30;
     [SerializeField] public bool OverWeight = false;
     [SerializeField] public Color addedColor;
+    [SerializeField] public GameObject TextRosterSize;
 
     private int slotscount = 0;
 
@@ -82,40 +83,7 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         await Task.Yield();
     }
 
-    public async void ReverseSlots()
-    {
-
-        await RemoveUnitsFromPanel();
-        
-        // NEED FINE ARRANGEMENT OF PREVIOUS SLOTS IN A STRING
-
-        for (int i = 0; i < previousSlots.Count; i++)
-        {
-            //previousSlots[i].name = i.ToString(); // PSB
-            AddingSlotPreviewStart(previousSlots[previousSlots.Count - 1 - i]); 
-            AddUnitSLot(previousSlots[i]);
-            previousSlots[i].GetComponent<Image>().color = addedColor;
-        }
-
-        slots = previousSlots.ToList();
-
-        RosterWeight = 0;
-        foreach (S_InventoryUnitSlot slot in slots)
-        {
-            RosterWeight += slot.GetUnitWeight();
-        }
-        UpdateRosterWeight();
-
-        int k = 0;
-        foreach (Transform child in transform)
-        {
-            child.name = k.ToString();
-            child.GetComponent<S_InventoryUnitSlot>().SetCanDrag(true);
-            k++;
-        }
-    }
-
-    public void LoadSlotsFromString(string unitsString)
+    public async Task AddLoadedUnitsToPanel(string unitsString)
     {
         Debug.Log("CurrentUnits to load = " + unitsString);
         int curLength = unitsString.Length - 1;
@@ -135,21 +103,12 @@ public class S_CurrentUnitsPanel : MonoBehaviour
             curUnitsInventoryIDList.Add(System.Convert.ToInt32(tempStr));
         }
 
-        foreach (Transform child in transform)
-        {
-            AddingSlotPreviewEnd(child.GetComponent<S_InventoryUnitSlot>());
-            RemoveUnitFromPanel(child.GetComponent<S_InventoryUnitSlot>());
-        }
-
-       
-
         for (int i = 0; i < curUnitsList.Count; i++)
         {
             AddingSlotPreviewStart(_inventoryUnitsParent.GetChild(curUnitsInventoryIDList[curUnitsList.Count - 1 - i]).GetComponent<S_InventoryUnitSlot>());
             AddUnitSLot(_inventoryUnitsParent.GetChild(curUnitsInventoryIDList[i]).GetComponent<S_InventoryUnitSlot>());
             _inventoryUnitsParent.GetChild(curUnitsInventoryIDList[i]).GetComponent<Image>().color = addedColor;
         }
-
         int j = 0;
 
         foreach (Transform child in transform)
@@ -170,17 +129,59 @@ public class S_CurrentUnitsPanel : MonoBehaviour
         previousSlots = slots.ToList();
     }
 
+    public async void ReverseSlots()
+    {
+        if (SaveInventoryButton.activeSelf)
+        {
+            await RemoveUnitsFromPanel();
+
+            // NEED FINE ARRANGEMENT OF PREVIOUS SLOTS IN A STRING
+
+            for (int i = 0; i < previousSlots.Count; i++)
+            {
+                //previousSlots[i].name = i.ToString(); // PSB
+                AddingSlotPreviewStart(previousSlots[previousSlots.Count - 1 - i]);
+                AddUnitSLot(previousSlots[i]);
+                previousSlots[i].GetComponent<Image>().color = addedColor;
+            }
+
+            slots = previousSlots.ToList();
+
+            RosterWeight = 0;
+            foreach (S_InventoryUnitSlot slot in slots)
+            {
+                RosterWeight += slot.GetUnitWeight();
+            }
+            UpdateRosterWeight();
+
+            int k = 0;
+            foreach (Transform child in transform)
+            {
+                child.name = k.ToString();
+                child.GetComponent<S_InventoryUnitSlot>().SetCanDrag(true);
+                k++;
+            }
+        }
+    }
+
+    public async void LoadSlotsFromString(string unitsString)
+    {
+        await RemoveUnitsFromPanel();
+
+        await AddLoadedUnitsToPanel(unitsString);
+    }
+
     public void UpdateRosterWeight()
     {
-        GameObject.Find("TextRosterSize").GetComponent<TextMeshProUGUI>().text = RosterWeight.ToString() + "/30";  
+        TextRosterSize.GetComponent<TextMeshProUGUI>().text = RosterWeight.ToString() + "/30";  
         if (RosterWeight <= MaxRosterWeight)
         {
-            GameObject.Find("TextRosterSize").GetComponent<TextMeshProUGUI>().color = WeightUnderColor;
+            TextRosterSize.GetComponent<TextMeshProUGUI>().color = WeightUnderColor;
             OverWeight = false;
         }
         else
         {
-            GameObject.Find("TextRosterSize").GetComponent<TextMeshProUGUI>().color = WeightOverColor;
+            TextRosterSize.GetComponent<TextMeshProUGUI>().color = WeightOverColor;
             OverWeight = true;
         }
     }

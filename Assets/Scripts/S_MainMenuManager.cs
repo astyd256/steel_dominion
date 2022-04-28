@@ -101,9 +101,12 @@ public class S_MainMenuManager : MonoBehaviour
 
     public void CloseSettings()
     {
-        settingsManager.settingsPanel.SetActive(false);
-        interactive = true;
-        clickScreenButton.gameObject.SetActive(false);
+        if (settingsManager.settingsPanel.activeSelf)
+        {
+            settingsManager.settingsPanel.SetActive(false);
+            interactive = true;
+            clickScreenButton.gameObject.SetActive(false);
+        }
     }
 
     // Profile settings
@@ -116,9 +119,17 @@ public class S_MainMenuManager : MonoBehaviour
 
     public void CloseProfileSettings()
     {
-        profileSettingsManager.profileSettingsPanel.SetActive(false);
-        interactive = true;
-        clickScreenButton.gameObject.SetActive(false);
+        if (profileSettingsManager.profileSettingsPanel.activeSelf)
+        {
+
+            profileSettingsManager.profileSettingsPanel.SetActive(false);
+
+            if (profileSettingsManager.iconChoicePanel.activeSelf)
+                profileSettingsManager.iconChoicePanel.SetActive(false);
+
+            interactive = true;
+            clickScreenButton.gameObject.SetActive(false);
+        }
     }
 
     public void OpenNameChangeMenu()
@@ -134,5 +145,43 @@ public class S_MainMenuManager : MonoBehaviour
     {
         return inventoryActive;
     }
+
+    public void CloseInventory()
+    {
+        if (inventoryActive)
+        {
+            inventoryActive = false;
+            inventoryPanel.SetActive(false);
+        }
+    }
+
+    public void shutEverything()
+    {
+        CloseSettings();
+
+        CloseInventory();
+
+        CloseProfileSettings();
+    }
+
+    public void screenButtonOn()
+    {
+        interactive = false;
+        clickScreenButton.gameObject.SetActive(true);
+    }
+
+    public void screenButtonOff()
+    {
+        interactive = true;
+        clickScreenButton.gameObject.SetActive(false);
+    }
+
+    public void ClickScreenButtonLogic()
+    {
+        CloseSettings();
+
+        CloseProfileSettings();
+    }
+
 #endif
 }
