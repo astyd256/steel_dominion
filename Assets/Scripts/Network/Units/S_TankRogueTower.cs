@@ -231,6 +231,8 @@ namespace Mirror
 
             bulletTransform.GetComponent<S_TankProjectile>().SetData(0, tankMainScript.GetTeam(), shootDir, 100f);
 
+            Instantiate(S_GameAssets.i.pfRogueSmallShotMuzzlePS, AttackSpherePoint.position, AttackSpherePoint.rotation);
+
             weaponAnim.Play("GunShot");
         }
 

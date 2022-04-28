@@ -196,5 +196,15 @@ namespace Mirror
             if (weaponAnim != null) weaponAnim.Play("ArmsAttack");
 #endif
         }
+
+        [ClientRpc]
+        public override void SetHealthBarValue(float newVal, int damage, int particlesId)
+        {
+            healthBar.value = newVal;
+            S_DamageText.Create(this.transform.position, damage);
+
+            if(newVal == 0f) Instantiate(S_GameAssets.i.pfGreasleyDestroyPS, this.transform.position, Quaternion.identity);
+            else if (particlesId == 0) Instantiate(S_GameAssets.i.pfGreasleyHitPS, this.transform.position, Quaternion.identity);
+        }
     }
 }

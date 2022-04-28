@@ -14,10 +14,23 @@ public class S_GameAssets : MonoBehaviour
             return _i;
         }
     }
+    [Header("Attack effects")]
 
     public Transform pfDamagePopup;
 
     public Transform pfGreasleyHitPS;
+
+    public Transform pfRogueSmallShotMuzzlePS;
+
+    public Transform pfRogueSmallShotHitPS;
+
+    public Transform pfRogueBigShotMuzzlePS;
+
+    public Transform pfRogueBigShotHitPS;
+
+    [Header("Destroy effects")]
+
+    public Transform pfGreasleyDestroyPS;
 
 #if UNITY_SERVER
     public void Start()

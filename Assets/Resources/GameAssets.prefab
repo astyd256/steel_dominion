@@ -47,3 +47,13 @@ MonoBehaviour:
     type: 3}
   pfGreasleyHitPS: {fileID: 869102648512824997, guid: 8cf0feb7954693a458c7519f993ce2e6,
     type: 3}
+  pfRogueSmallShotMuzzlePS: {fileID: 1851634301213020964, guid: 01a0345224db06d46965cabb6eb51a85,
+    type: 3}
+  pfRogueSmallShotHitPS: {fileID: 756405622384386940, guid: c0d748d9aa953244fadd4efd46d3f20e,
+    type: 3}
+  pfRogueBigShotMuzzlePS: {fileID: 1971801443099152011, guid: 105e7b8dfac332b42a076a20c1af5b4f,
+    type: 3}
+  pfRogueBigShotHitPS: {fileID: 8028089543749084781, guid: d0bc118dac0bae04ab43cef91ea66aef,
+    type: 3}
+  pfGreasleyDestroyPS: {fileID: 4639526478866091707, guid: a1074e9ae71d01544af3dc06f5c97174,
+    type: 3}

@@ -1432,7 +1432,6 @@ MonoBehaviour:
   passButton: {fileID: 2781351959966013442}
   playercamera: {fileID: 3574963440571196500}
   playercameraUI: {fileID: 5379516946101195858}
-  spawnArea: {fileID: 0}
   DisplayName: Loading...
   IsReady: 0
   Level: 1

@@ -34,6 +34,8 @@ public class S_TankRogueArtilleryProjectile : MonoBehaviour
     {
 #if !UNITY_SERVER
         if (!_isAlive) return;
+
+        Instantiate(S_GameAssets.i.pfRogueBigShotHitPS, transform.position + new Vector3(0,1f,0), Quaternion.identity);
 #endif
         //#if UNITY_SERVER
         Collider[] colliders = Physics.OverlapSphere(transform.position, 10f, 1 << 7);

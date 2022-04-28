@@ -151,6 +151,8 @@ namespace Mirror
             float vy = ((enemyPosition.y - _AttackSpherePoint.position.y) - 0.5f * Physics.gravity.y * _flyTime * _flyTime) / _flyTime;
 
             bulletTransform.GetComponent<Rigidbody>().velocity = new Vector3(vx, vy, vz);
+
+            Instantiate(S_GameAssets.i.pfRogueBigShotMuzzlePS, _AttackSpherePoint.position, Quaternion.identity);
         }
     }
 }

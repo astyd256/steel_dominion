@@ -32,6 +32,8 @@ public class S_TankProjectile : MonoBehaviour
             dead = true;
             moveSpeed = 0.2f;
             transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+
+            Instantiate(S_GameAssets.i.pfRogueSmallShotHitPS, transform.position, Quaternion.identity);
 #endif
 #if UNITY_SERVER
             Destroy(this.gameObject);
@@ -47,6 +49,8 @@ public class S_TankProjectile : MonoBehaviour
             dead = true;
             moveSpeed = 0.2f;
             transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+
+            Instantiate(S_GameAssets.i.pfRogueSmallShotHitPS, transform.position, Quaternion.identity);
 #endif
 #if UNITY_SERVER
             Destroy(this.gameObject);

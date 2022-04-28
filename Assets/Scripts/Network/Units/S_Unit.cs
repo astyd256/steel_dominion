@@ -13,7 +13,7 @@ namespace Mirror
 
         //Components refs
         private Canvas canvasUI = null;
-        private Slider healthBar = null;
+        protected Slider healthBar = null;
         protected NavMeshAgent agent = null;
         protected Rigidbody unitRB = null;
         
@@ -183,6 +183,8 @@ namespace Mirror
             health = health - dmg;
             if (health < 0) health = 0;
 
+            SetHealthBarValue(health / maxHealth, Mathf.FloorToInt(dmg), particlesId);
+
             //Dead
             if (health <= 0)
             {
@@ -191,11 +193,11 @@ namespace Mirror
                 //Destroy(this.gameObject);
             }
 
-            SetHealthBarValue(health / maxHealth, Mathf.FloorToInt(dmg), particlesId);
+            
         }
 
         [ClientRpc]
-        public void SetHealthBarValue(float newVal, int damage, int particlesId)
+        public virtual void SetHealthBarValue(float newVal, int damage, int particlesId)
         {
             healthBar.value = newVal;
             S_DamageText.Create(this.transform.position, damage);
