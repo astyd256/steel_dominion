@@ -32,6 +32,10 @@ public class S_GameAssets : MonoBehaviour
 
     public Transform pfGreasleyDestroyPS;
 
+    public Transform pfDroneDestroyPS;
+
+    public Transform pfRogueDestroyPS;
+
 #if UNITY_SERVER
     public void Start()
     {

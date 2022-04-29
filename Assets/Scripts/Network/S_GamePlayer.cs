@@ -10,6 +10,8 @@ namespace Mirror
     {
         [Header("Inventory")]
         [SerializeField]
+        public SO_UnitsToPlay UnitsData;
+        [SerializeField]
         public List<SO_UnitItemData> Units = new List<SO_UnitItemData>();
         [SerializeField]
         public Transform ItemContent;
@@ -17,14 +19,16 @@ namespace Mirror
         public GameObject InventoryItem;
         [SerializeField]
         public SO_UnitsToPlay unitsData;
-        [SerializeField]
-        private TMP_Text weightText = null;
+        
 
         public int maxWeight = 0;
         public int currentWeight = 0;
+        public int _currentEnemyWeight = 0;
+        public int _allyUnitsHealth = 0;
+        public int _enemyUnitsHealth = 0;
         public float cameraMoveForward = 0f;
-        [SerializeField]
-        public float origZloc;
+        
+        private float origZloc;
 
         private List<GameObject> unitBtns = new List<GameObject>();
 
@@ -39,6 +43,13 @@ namespace Mirror
         [SerializeField] private TMP_Text timerText = null;
         [SerializeField] private GameObject unitsInventory = null;
         [SerializeField] private Button passButton = null;
+
+        [SerializeField] private TMP_Text _weightText = null;
+        [SerializeField] private TMP_Text _weightEnemyText = null;
+        [SerializeField] private TMP_Text _sumHealthText = null;
+        [SerializeField] private TMP_Text _enemySumHealthText = null;
+        [SerializeField] private Slider _roundHealthSlider = null;
+        [SerializeField] private RectTransform _roundStatsPanel = null;
 
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
@@ -272,19 +283,74 @@ namespace Mirror
             }
         }
 
+        [ClientCallback]
+        public void UpdateRoundHPSlider(float newVal)
+        {
+            _roundHealthSlider.value = newVal;
+
+            if (newVal > 0.95f) _roundHealthSlider.value = 0.95f;
+            else if (newVal < 0.05f) _roundHealthSlider.value = 0.05f;
+        }
+
+        public void UpdateHealthText(int toSubstract, bool isEnemy)
+        {
+            if(isEnemy)
+            {
+                _enemyUnitsHealth -= toSubstract;
+                if (_enemyUnitsHealth <= 0) _enemyUnitsHealth = 0;
+
+                _enemySumHealthText.text = _enemyUnitsHealth.ToString();
+            }
+            else
+            {
+                _allyUnitsHealth -= toSubstract;
+                if (_allyUnitsHealth <= 0) _allyUnitsHealth = 0;
+
+                _sumHealthText.text = _allyUnitsHealth.ToString();
+            }
+
+            float _newValForSlider = 0.5f;
+
+            if (_allyUnitsHealth != 0 || _enemyUnitsHealth != 0) _newValForSlider = (float)_allyUnitsHealth / (float)(_allyUnitsHealth + _enemyUnitsHealth);
+
+            UpdateRoundHPSlider(_newValForSlider);
+        }
+
         [TargetRpc]
         public void TargetRpcRemoveUnitFromHand(int idToRemove)
         {
 #if !UNITY_SERVER
             currentWeight += Units[idToRemove].GetWeight();
 
-            weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
+            _allyUnitsHealth += Units[idToRemove].GetMaxHealth();
+            _sumHealthText.text = _allyUnitsHealth.ToString();
+
+            _weightText.text = currentWeight.ToString() + "/" + maxWeight.ToString();
 
             Units.RemoveAt(idToRemove);
 
             ListUnits();
+
+            UpdateRoundHPSlider((float)_allyUnitsHealth / (float)(_allyUnitsHealth + _enemyUnitsHealth));
 #endif
         }
+
+
+        [TargetRpc]
+        public void TargetRpcAddEnemyWeight(int idToAdd)
+        {
+#if !UNITY_SERVER
+
+            _currentEnemyWeight += unitsData.UnitsData[idToAdd].GetWeight();
+            _enemyUnitsHealth += unitsData.UnitsData[idToAdd].GetMaxHealth();
+            _enemySumHealthText.text = _enemyUnitsHealth.ToString();
+
+            _weightEnemyText.text = _currentEnemyWeight.ToString() + "/" + maxWeight.ToString();
+
+            UpdateRoundHPSlider((float)_allyUnitsHealth / (float)(_allyUnitsHealth + _enemyUnitsHealth));
+#endif
+        }
+
         [TargetRpc]
         public void UpdateGameDisplayUI(float newValue, bool startTimer, bool showInventoryUI, bool hideEnemyArea)
         {
@@ -292,44 +358,49 @@ namespace Mirror
             timerState = startTimer;
 
             unitsInventory.SetActive(showInventoryUI);
-            weightText.gameObject.SetActive(showInventoryUI);
 
             if (currentWeight > 0) passButton.gameObject.SetActive(showInventoryUI);
             else passButton.gameObject.SetActive(false);
 
             _enemySpawnArea.SetActive(!hideEnemyArea);
 
+            if(showInventoryUI == false && hideEnemyArea == true)
+            {
+                _weightText.gameObject.SetActive(false);
+                _weightEnemyText.gameObject.SetActive(false);
+            }
+
         }
 
         [TargetRpc]
-        public void UpdateGameDisplayUIWinLose(float newValue, bool win)
+        public void UpdateGameDisplayUIWinLose(bool win)
         {
-            timerRemaining = newValue;
-            timerState = true;
+            timerState = false;
 
             unitsInventory.SetActive(false);
             _enemySpawnArea.SetActive(false);
             passButton.gameObject.SetActive(false);
 
-            weightText.gameObject.SetActive(true);
-            weightText.text = (win) ? "You win!" : "You lose!";
+            _roundStatsPanel.gameObject.SetActive(false);
+
+            timerText.text = (win) ? "You win!" : "You lose!";
 
             S_GameManager.singleton.SetEndingPopup((win) ? 2 : 1);
 
         }
 
         [TargetRpc]
-        public void UpdateGameDisplayUIDraw(float newValue)
+        public void UpdateGameDisplayUIDraw()
         {
-            timerRemaining = newValue;
-            timerState = true;
+            timerState = false;
 
             unitsInventory.SetActive(false);
             _enemySpawnArea.SetActive(false);
             passButton.gameObject.SetActive(false);
 
-            weightText.gameObject.SetActive(true);
-            weightText.text = "Draw !";
+            _roundStatsPanel.gameObject.SetActive(false);
+
+            timerText.text = "Draw!";
 
             S_GameManager.singleton.SetEndingPopup(0);
         }
@@ -346,12 +417,23 @@ namespace Mirror
             if (resetWeight)
             {
                 currentWeight = 0;
-                weightText.text = "0/" + maxWeight.ToString();
+                _currentEnemyWeight = 0;
+
+                _allyUnitsHealth = 0;
+                _enemyUnitsHealth = 0;
+
+                _weightText.text = "0/" + maxWeight.ToString();
+                _weightEnemyText.text = "0/" + maxWeight.ToString();
+                _sumHealthText.text = "0";
+                _enemySumHealthText.text = "0";
+                _roundHealthSlider.value = 0.5f;
+                _weightText.gameObject.SetActive(true);
+                _weightEnemyText.gameObject.SetActive(true);
+                _roundStatsPanel.gameObject.SetActive(true);
             }
 
             if (CanPlace)
             {
-                weightText.gameObject.SetActive(true);
                 spawnArea.SetActive(true);
                 _enemySpawnArea.SetActive(false);
                 unitsInventory.SetActive(true);
@@ -361,7 +443,6 @@ namespace Mirror
             }
             else
             {
-                weightText.gameObject.SetActive(false);
                 spawnArea.SetActive(false);
                 _enemySpawnArea.SetActive(true);
                 unitsInventory.SetActive(false);
@@ -414,7 +495,6 @@ namespace Mirror
         public void btnPass()
         {
             spawnArea.SetActive(false);
-            weightText.gameObject.SetActive(false);
             unitsInventory.SetActive(false);
             passButton.gameObject.SetActive(false);
             passTurns();

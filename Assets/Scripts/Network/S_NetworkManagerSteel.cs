@@ -202,6 +202,7 @@ namespace Mirror
                 unitObj.GetComponent<S_Unit>().SetData(0, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage(), unitsData.UnitsData[unitid].GetSizeType());
                 unitObj.name = "FirstPlayerUnit" + firstPlayerBattleUnits.Count;
                 InGamePlayers[0].TargetRpcRemoveUnitFromHand(Unitid);
+                InGamePlayers[1].TargetRpcAddEnemyWeight(unitid);
                 firstPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
                 firstPlayerUnits.RemoveAt(Unitid);
 
@@ -221,6 +222,7 @@ namespace Mirror
                 unitObj.GetComponent<S_Unit>().SetData(1, unitsData.UnitsData[unitid].GetMaxHealth(), unitsData.UnitsData[unitid].GetMinDamage(), unitsData.UnitsData[unitid].GetMaxDamage(), unitsData.UnitsData[unitid].GetSizeType());
                 unitObj.name = "SecondPlayerUnit" + secondPlayerBattleUnits.Count;
                 InGamePlayers[1].TargetRpcRemoveUnitFromHand(Unitid);
+                InGamePlayers[0].TargetRpcAddEnemyWeight(unitid);
                 SecondPlayerWeight += unitsData.UnitsData[unitid].GetWeight();
                 SecondPlayerUnits.RemoveAt(Unitid);
 
@@ -629,23 +631,23 @@ namespace Mirror
 
             if (firstPlayerWins == false && secondPlayerWins == false) //Draw
             {            
-                InGamePlayers[0].UpdateGameDisplayUIDraw(RemainingTime);
-                InGamePlayers[1].UpdateGameDisplayUIDraw(RemainingTime);
+                InGamePlayers[0].UpdateGameDisplayUIDraw();
+                InGamePlayers[1].UpdateGameDisplayUIDraw();
 
                 FirebaseManager.instance.AddExp(_playersTokens[0], 75);
                 FirebaseManager.instance.AddExp(_playersTokens[1], 75);
             }
             else if(firstPlayerWins == true && secondPlayerWins == false) //First player wins the match
             {
-                InGamePlayers[0].UpdateGameDisplayUIWinLose(RemainingTime, true);
-                InGamePlayers[1].UpdateGameDisplayUIWinLose(RemainingTime, false);
+                InGamePlayers[0].UpdateGameDisplayUIWinLose(true);
+                InGamePlayers[1].UpdateGameDisplayUIWinLose(false);
                 FirebaseManager.instance.AddExp(_playersTokens[0], 100);
                 FirebaseManager.instance.AddExp(_playersTokens[1], 50);
             }
             else if(firstPlayerWins == false && secondPlayerWins == true) //Second player wins the match
             {
-                InGamePlayers[0].UpdateGameDisplayUIWinLose(RemainingTime, false);
-                InGamePlayers[1].UpdateGameDisplayUIWinLose(RemainingTime, true);
+                InGamePlayers[0].UpdateGameDisplayUIWinLose(false);
+                InGamePlayers[1].UpdateGameDisplayUIWinLose(true);
                 FirebaseManager.instance.AddExp(_playersTokens[0], 50);
                 FirebaseManager.instance.AddExp(_playersTokens[1], 100);
             }

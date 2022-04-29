@@ -205,6 +205,21 @@ namespace Mirror
 
             if(newVal == 0f) Instantiate(S_GameAssets.i.pfGreasleyDestroyPS, this.transform.position, Quaternion.identity);
             else if (particlesId == 0) Instantiate(S_GameAssets.i.pfGreasleyHitPS, this.transform.position, Quaternion.identity);
+
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+            foreach (GameObject p in players)
+            {
+                uint _playerNetID = p.GetComponent<S_GamePlayer>().netId;
+                if (_playerNetID == 1 && p.GetComponent<S_GamePlayer>().hasAuthority)
+                {
+                    p.GetComponent<S_GamePlayer>().UpdateHealthText(damage, (Teamid == 0) ? false : true);
+                }
+                else if (_playerNetID == 2 && p.GetComponent<S_GamePlayer>().hasAuthority)
+                {
+                    p.GetComponent<S_GamePlayer>().UpdateHealthText(damage, (Teamid == 1) ? false : true);
+                }
+            }
         }
     }
 }
