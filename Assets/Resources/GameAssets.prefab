@@ -57,3 +57,7 @@ MonoBehaviour:
     type: 3}
   pfGreasleyDestroyPS: {fileID: 4639526478866091707, guid: a1074e9ae71d01544af3dc06f5c97174,
     type: 3}
+  pfDroneDestroyPS: {fileID: 4186984649815739392, guid: 6bf6b1ae05d5398458c657252038eeab,
+    type: 3}
+  pfRogueDestroyPS: {fileID: 3964528989916132892, guid: 4831f19d6bdf10847a14bca31e172651,
+    type: 3}

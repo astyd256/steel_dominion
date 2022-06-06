@@ -308,5 +308,32 @@ namespace Mirror
             _lineRenderer.SetPosition(1,laserEnd);
             if (weaponAnim != null) weaponAnim.Play("LaserAttack");
         }
+
+        [ClientRpc]
+        public override void SetHealthBarValue(float newVal, int damage, int particlesId)
+        {
+            healthBar.value = newVal;
+            S_DamageText.Create(this.transform.position, damage);
+
+            if (newVal == 0f) Instantiate(S_GameAssets.i.pfDroneDestroyPS, this.transform.position, Quaternion.identity);
+            else if (particlesId == 0) Instantiate(S_GameAssets.i.pfGreasleyHitPS, this.transform.position, Quaternion.identity);
+
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+            foreach (GameObject p in players)
+            {
+                uint _playerNetID = p.GetComponent<S_GamePlayer>().netId;
+                if (_playerNetID == 1 && p.GetComponent<S_GamePlayer>().hasAuthority)
+                {
+                    p.GetComponent<S_GamePlayer>().UpdateHealthText(damage, (Teamid == 0) ? false : true);
+                    break;
+                }
+                else if (_playerNetID == 2 && p.GetComponent<S_GamePlayer>().hasAuthority)
+                {
+                    p.GetComponent<S_GamePlayer>().UpdateHealthText(damage, (Teamid == 1) ? false : true);
+                    break;
+                }
+            }
+        }
     }
 }
