@@ -50,6 +50,12 @@ namespace Mirror
         [SerializeField] private TMP_Text _enemySumHealthText = null;
         [SerializeField] private Slider _roundHealthSlider = null;
         [SerializeField] private RectTransform _roundStatsPanel = null;
+        //HP slider
+        private float _oldSliderValue = 0.5f;
+        private float _newSliderValue = 0.5f;
+        private float _actualSliderValue = 0.5f;
+        private float _sliderTransitionDuration = 0.8f;
+        private float _sliderTransitionStartTime = 0f;
 
         [Header("Scene")]
         [SerializeField] private Camera playercamera = null;
@@ -281,15 +287,24 @@ namespace Mirror
                 // camera
 
             }
+
+            float t = (Time.time - _sliderTransitionStartTime) / _sliderTransitionDuration;
+            _actualSliderValue = Mathf.SmoothStep(_oldSliderValue, _newSliderValue, t);
+            _roundHealthSlider.value = _actualSliderValue;
         }
 
         [ClientCallback]
         public void UpdateRoundHPSlider(float newVal)
         {
-            _roundHealthSlider.value = newVal;
+            _oldSliderValue = _roundHealthSlider.value;
+            _actualSliderValue = _oldSliderValue;
 
-            if (newVal > 0.95f) _roundHealthSlider.value = 0.95f;
-            else if (newVal < 0.05f) _roundHealthSlider.value = 0.05f;
+            _newSliderValue = newVal;
+
+            if (newVal > 0.95f) _newSliderValue = 0.95f;
+            else if (newVal < 0.05f) _newSliderValue = 0.05f;
+
+            _sliderTransitionStartTime = Time.time;          
         }
 
         public void UpdateHealthText(int toSubstract, bool isEnemy)
@@ -426,7 +441,7 @@ namespace Mirror
                 _weightEnemyText.text = "0/" + maxWeight.ToString();
                 _sumHealthText.text = "0";
                 _enemySumHealthText.text = "0";
-                _roundHealthSlider.value = 0.5f;
+                UpdateRoundHPSlider(0.5f);
                 _weightText.gameObject.SetActive(true);
                 _weightEnemyText.gameObject.SetActive(true);
                 _roundStatsPanel.gameObject.SetActive(true);

@@ -214,10 +214,12 @@ namespace Mirror
                 if (_playerNetID == 1 && p.GetComponent<S_GamePlayer>().hasAuthority)
                 {
                     p.GetComponent<S_GamePlayer>().UpdateHealthText(damage, (Teamid == 0) ? false : true);
+                    break;
                 }
                 else if (_playerNetID == 2 && p.GetComponent<S_GamePlayer>().hasAuthority)
                 {
                     p.GetComponent<S_GamePlayer>().UpdateHealthText(damage, (Teamid == 1) ? false : true);
+                    break;
                 }
             }
         }
