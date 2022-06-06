@@ -18,6 +18,8 @@ public class LoginInterfaceManager : MonoBehaviour
     [SerializeField] private Slider userXPBar;
     [SerializeField] private GameObject MainMenuManager;
 
+    [SerializeField] public GameObject background;
+
     private bool IsEmailVerified;
     public static LoginInterfaceManager instance;
 
@@ -44,7 +46,7 @@ public class LoginInterfaceManager : MonoBehaviour
         MainMenuManager.GetComponent<S_InventoryMenuManager>().LoadUnitsFromString(FirebaseManager.instance.GetInventory());
         MainMenuManager.GetComponent<S_MainMenuManager>().GetUnitsPanel().LoadSlotsFromString(FirebaseManager.instance.GetCurInventory());
 
-        S_GameManager.singleton.ShowDialog("Bce HopMaJIHo");
+        //S_GameManager.singleton.ShowDialog("Bce HopMaJIHo");
     }
     public void toLobby()
     {
@@ -52,6 +54,8 @@ public class LoginInterfaceManager : MonoBehaviour
         LoginMenu.SetActive(false);
         Menu.SetActive(false);
         MainMenuManager.SetActive(false);
+
+        background.SetActive(true);
     }
 
     public void toMainMenu()
@@ -62,7 +66,9 @@ public class LoginInterfaceManager : MonoBehaviour
         Lobby.SetActive(false);
         LoginMenu.SetActive(false);
         Menu.SetActive(true);
+        background.SetActive(false);
         setPlayerProfileValues();
+
     }
     public void toRegisterMenu()
     {

@@ -10,7 +10,7 @@ public class S_CameraResolution : MonoBehaviour
     void Awake()
     {
         Screen.SetResolution(x, y, false);
-        cam.aspect = 16f / 9f;
+        //cam.aspect = 16f / 9f;
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = Screen.currentResolution.refreshRate;
     }
