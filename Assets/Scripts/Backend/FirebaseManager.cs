@@ -207,7 +207,6 @@ public class FirebaseManager : MonoBehaviour
     {
         return _cur_inventory;
     }
-#endif
     public string GetInventory()
     {
         return _inventory;
@@ -253,8 +252,7 @@ public class FirebaseManager : MonoBehaviour
                 await _user.SendEmailVerificationAsync(); 
             }
             //TODO: Add info to user
-        } 
-            
+        }             
     }    
     public string GetUserToken()
     {
@@ -285,5 +283,5 @@ public class FirebaseManager : MonoBehaviour
     {
         return _user.IsEmailVerified;
     }
-    #endif
+#endif
 }
